@@ -1,34 +1,122 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './hooks/useAuth'
+import {
+  LoginPage,
+  AgoraPage,
+  ThreadPage,
+  ClubsPage,
+  ClubViewPage,
+  HomePage,
+  ProfilePage,
+  ServicesPage,
+  AboutPage
+} from './pages'
 
-function App() {
-  const [count, setCount] = useState(0)
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  return <>{children}</>
+}
+
+function AppRoutes() {
+  const { isAuthenticated } = useAuth()
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Routes>
+      {/* Public routes */}
+      <Route
+        path="/"
+        element={isAuthenticated ? <Navigate to="/agora" replace /> : <LoginPage />}
+      />
+
+      {/* Protected routes */}
+      <Route
+        path="/agora"
+        element={
+          <ProtectedRoute>
+            <AgoraPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/agora/thread/:threadId"
+        element={
+          <ProtectedRoute>
+            <ThreadPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/clubs"
+        element={
+          <ProtectedRoute>
+            <ClubsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clubs/:clubId"
+        element={
+          <ProtectedRoute>
+            <ClubViewPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/services"
+        element={
+          <ProtectedRoute>
+            <ServicesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/about"
+        element={
+          <ProtectedRoute>
+            <AboutPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 

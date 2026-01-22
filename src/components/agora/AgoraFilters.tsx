@@ -1,0 +1,82 @@
+import { Filter, MapPin, Map, Globe, X } from 'lucide-react'
+import type { Scope } from '../../types'
+
+interface AgoraFiltersProps {
+  selectedScope: Scope | 'all'
+  onScopeChange: (scope: Scope | 'all') => void
+  selectedTags: string[]
+  availableTags: string[]
+  onTagToggle: (tag: string) => void
+  onClearFilters: () => void
+}
+
+const scopeOptions: { value: Scope | 'all'; label: string; icon: React.ElementType }[] = [
+  { value: 'all', label: 'All', icon: Filter },
+  { value: 'municipal', label: 'My municipality', icon: MapPin },
+  { value: 'regional', label: 'Regional', icon: Map },
+  { value: 'national', label: 'National', icon: Globe }
+]
+
+export function AgoraFilters({
+  selectedScope,
+  onScopeChange,
+  selectedTags,
+  availableTags,
+  onTagToggle,
+  onClearFilters
+}: AgoraFiltersProps) {
+  const hasActiveFilters = selectedScope !== 'all' || selectedTags.length > 0
+
+  return (
+    <div className="bg-white border-b border-gray-200 sticky top-14 z-40">
+      <div className="px-4 py-3">
+        {/* Scope filters */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {scopeOptions.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              onClick={() => onScopeChange(value)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                selectedScope === value
+                  ? 'bg-blue-800 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Topic tags */}
+        <div className="flex items-center gap-2 overflow-x-auto pt-2 scrollbar-hide">
+          <span className="text-xs text-gray-500 flex-shrink-0">Topics:</span>
+          {availableTags.slice(0, 8).map(tag => (
+            <button
+              key={tag}
+              onClick={() => onTagToggle(tag)}
+              className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                selectedTags.includes(tag)
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {tag.replace('-', ' ')}
+            </button>
+          ))}
+        </div>
+
+        {/* Clear filters */}
+        {hasActiveFilters && (
+          <button
+            onClick={onClearFilters}
+            className="mt-2 flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-3 h-3" />
+            Clear filters
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}

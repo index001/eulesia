@@ -1,0 +1,59 @@
+import { Building2, Shield } from 'lucide-react'
+import type { User } from '../../types'
+
+interface ActorBadgeProps {
+  user: User
+  showName?: boolean
+  size?: 'sm' | 'md' | 'lg'
+}
+
+export function ActorBadge({ user, showName = true, size = 'md' }: ActorBadgeProps) {
+  const isInstitution = user.role === 'institution'
+
+  const sizeClasses = {
+    sm: 'w-6 h-6 text-xs',
+    md: 'w-8 h-8 text-sm',
+    lg: 'w-10 h-10 text-base'
+  }
+
+  const avatarColor = isInstitution ? 'bg-violet-600' : 'bg-teal-600'
+
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className={`${sizeClasses[size]} ${avatarColor} rounded-full flex items-center justify-center text-white font-medium`}
+      >
+        {user.avatarInitials}
+      </div>
+
+      {showName && (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1.5">
+            <span className={`font-medium text-gray-900 ${size === 'sm' ? 'text-sm' : ''}`}>
+              {user.name}
+            </span>
+
+            {/* Role indicator */}
+            {isInstitution ? (
+              <span className="inline-flex items-center gap-1 text-xs text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded">
+                <Building2 className="w-3 h-3" />
+                <span>Official</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-0.5 text-xs text-green-700">
+                <Shield className="w-3 h-3" />
+              </span>
+            )}
+          </div>
+
+          {/* Institution type */}
+          {isInstitution && user.institutionType && (
+            <span className="text-xs text-gray-500 capitalize">
+              {user.institutionType}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
