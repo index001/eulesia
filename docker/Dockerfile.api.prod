@@ -1,0 +1,35 @@
+# Production Dockerfile for API
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+COPY apps/api/package*.json ./apps/api/
+
+RUN npm ci --workspace=@eulesia/api
+
+# Copy source and build
+COPY apps/api ./apps/api
+
+WORKDIR /app/apps/api
+RUN npm run build
+
+# Production image
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy built files
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+# Security: run as non-root
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+USER nodejs
+
+EXPOSE 3001
+
+CMD ["node", "dist/index.js"]

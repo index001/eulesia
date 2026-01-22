@@ -1,0 +1,107 @@
+import { Resend } from 'resend'
+import { env } from '../utils/env.js'
+
+interface EmailOptions {
+  to: string
+  subject: string
+  html: string
+  text?: string
+}
+
+class EmailService {
+  private resend: Resend | null = null
+
+  constructor() {
+    if (env.EMAIL_PROVIDER === 'resend' && env.EMAIL_API_KEY) {
+      this.resend = new Resend(env.EMAIL_API_KEY)
+    }
+  }
+
+  async send(options: EmailOptions): Promise<boolean> {
+    if (env.EMAIL_PROVIDER === 'console' || !this.resend) {
+      // Development: log to console
+      console.log('\n📧 Email (console mode):')
+      console.log(`To: ${options.to}`)
+      console.log(`Subject: ${options.subject}`)
+      console.log(`Content:\n${options.text || options.html}\n`)
+      return true
+    }
+
+    try {
+      await this.resend.emails.send({
+        from: env.EMAIL_FROM,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+        text: options.text
+      })
+      return true
+    } catch (error) {
+      console.error('Failed to send email:', error)
+      return false
+    }
+  }
+
+  async sendMagicLink(email: string, token: string): Promise<boolean> {
+    const loginUrl = `${env.APP_URL}/auth/verify?token=${token}`
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Sign in to Eulesia</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <div style="display: inline-block; width: 48px; height: 48px; background: #1e40af; border-radius: 12px; line-height: 48px; color: white; font-weight: bold; font-size: 24px;">E</div>
+            <h1 style="margin: 16px 0 0; font-size: 24px; color: #111827;">Eulesia</h1>
+          </div>
+
+          <h2 style="font-size: 20px; margin-bottom: 16px;">Sign in to your account</h2>
+
+          <p>Click the button below to sign in to Eulesia. This link will expire in 15 minutes.</p>
+
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${loginUrl}" style="display: inline-block; background: #1e40af; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 500;">
+              Sign in to Eulesia
+            </a>
+          </div>
+
+          <p style="color: #6b7280; font-size: 14px;">
+            Or copy and paste this URL into your browser:<br>
+            <a href="${loginUrl}" style="color: #1e40af; word-break: break-all;">${loginUrl}</a>
+          </p>
+
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0;">
+
+          <p style="color: #9ca3af; font-size: 12px;">
+            If you didn't request this email, you can safely ignore it.<br>
+            Eulesia — European Civic Digital Infrastructure
+          </p>
+        </body>
+      </html>
+    `
+
+    const text = `
+Sign in to Eulesia
+
+Click this link to sign in (expires in 15 minutes):
+${loginUrl}
+
+If you didn't request this email, you can safely ignore it.
+
+Eulesia — European Civic Digital Infrastructure
+    `.trim()
+
+    return this.send({
+      to: email,
+      subject: 'Sign in to Eulesia',
+      html,
+      text
+    })
+  }
+}
+
+export const emailService = new EmailService()

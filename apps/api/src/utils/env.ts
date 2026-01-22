@@ -1,0 +1,21 @@
+import { z } from 'zod'
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  PORT: z.string().default('3001'),
+  DATABASE_URL: z.string().default('postgresql://postgres:postgres@localhost:5432/eulesia'),
+  SESSION_SECRET: z.string().min(32).default('development-secret-key-change-in-production-32chars'),
+  COOKIE_DOMAIN: z.string().optional(),
+  APP_URL: z.string().url().default('http://localhost:5173'),
+  API_URL: z.string().url().default('http://localhost:3001'),
+
+  // Email
+  EMAIL_PROVIDER: z.enum(['resend', 'console']).default('console'),
+  EMAIL_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().email().default('auth@eulesia.local'),
+
+  // eIDAS (future)
+  EIDAS_ENABLED: z.string().transform(v => v === 'true').default('false')
+})
+
+export const env = envSchema.parse(process.env)
