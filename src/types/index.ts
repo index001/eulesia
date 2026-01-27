@@ -77,6 +77,7 @@ export interface Service {
   provider: string
   description: string
   integrationDemoType: 'booking' | 'events' | 'volunteering' | 'media'
+  url?: string
 }
 
 export interface Message {
