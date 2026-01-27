@@ -25,7 +25,7 @@ async function createInvites(count: number) {
   const codes: string[] = []
 
   for (let i = 0; i < count; i++) {
-    let code: string
+    let code: string = ''
     let attempts = 0
 
     // Generate unique code
@@ -41,19 +41,19 @@ async function createInvites(count: number) {
       attempts++
     }
 
-    if (attempts >= 10) {
+    if (attempts >= 10 || !code) {
       console.error('Failed to generate unique code')
       continue
     }
 
     // Create invite code (no createdBy = admin created)
     await db.insert(inviteCodes).values({
-      code: code!,
+      code,
       createdBy: null, // Admin created
       status: 'available'
     })
 
-    codes.push(code!)
+    codes.push(code)
     console.log(`  ✓ ${code}`)
   }
 

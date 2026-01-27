@@ -229,7 +229,7 @@ async function seed() {
   const [tampereMunicipality, _helsinkiMunicipality, _traficom, ministryEnv, matti, anna, liisa, juha, maria] = await db.insert(users).values([
     // Institutions
     {
-      email: 'kaupunki@tampere.fi',
+      username: 'tampere_city',
       name: 'City of Tampere',
       role: 'institution',
       institutionType: 'municipality',
@@ -240,7 +240,7 @@ async function seed() {
       identityLevel: 'high'
     },
     {
-      email: 'kaupunki@hel.fi',
+      username: 'helsinki_city',
       name: 'City of Helsinki',
       role: 'institution',
       institutionType: 'municipality',
@@ -251,7 +251,7 @@ async function seed() {
       identityLevel: 'high'
     },
     {
-      email: 'info@traficom.fi',
+      username: 'traficom',
       name: 'Finnish Transport and Communications Agency',
       role: 'institution',
       institutionType: 'agency',
@@ -261,7 +261,7 @@ async function seed() {
       identityLevel: 'high'
     },
     {
-      email: 'kirjaamo@gov.fi',
+      username: 'ministry_env',
       name: 'Ministry of the Environment',
       role: 'institution',
       institutionType: 'ministry',
@@ -272,48 +272,48 @@ async function seed() {
     },
     // Citizens
     {
-      email: 'matti.virtanen@example.com',
+      username: 'matti_v',
       name: 'Matti Virtanen',
       role: 'citizen',
       municipalityId: tampere.id,
       identityVerified: true,
-      identityProvider: 'magic_link',
+      identityProvider: 'password',
       identityLevel: 'basic'
     },
     {
-      email: 'anna.korhonen@example.com',
+      username: 'anna_k',
       name: 'Anna Korhonen',
       role: 'citizen',
       municipalityId: tampere.id,
       identityVerified: true,
-      identityProvider: 'magic_link',
+      identityProvider: 'password',
       identityLevel: 'basic'
     },
     {
-      email: 'liisa.makinen@example.com',
+      username: 'liisa_m',
       name: 'Liisa Mäkinen',
       role: 'citizen',
       municipalityId: tampere.id,
       identityVerified: true,
-      identityProvider: 'magic_link',
+      identityProvider: 'password',
       identityLevel: 'basic'
     },
     {
-      email: 'juha.nieminen@example.com',
+      username: 'juha_n',
       name: 'Juha Nieminen',
       role: 'citizen',
       municipalityId: helsinki.id,
       identityVerified: true,
-      identityProvider: 'magic_link',
+      identityProvider: 'password',
       identityLevel: 'basic'
     },
     {
-      email: 'maria.lahtinen@example.com',
+      username: 'maria_l',
       name: 'Maria Lahtinen',
       role: 'citizen',
       municipalityId: tampere.id,
       identityVerified: true,
-      identityProvider: 'magic_link',
+      identityProvider: 'password',
       identityLevel: 'basic'
     }
   ]).returning()
@@ -651,12 +651,12 @@ These details are covered in Section 4.3 of the Environmental Impact Assessment 
 
   console.log('✅ Seeding complete!')
   console.log('')
-  console.log('Test accounts (use magic link to login):')
-  console.log('  - matti.virtanen@example.com (citizen, Tampere)')
-  console.log('  - anna.korhonen@example.com (citizen, Tampere)')
-  console.log('  - kaupunki@tampere.fi (institution, Tampere)')
+  console.log('Test accounts created (no password set - use invite codes to create users with passwords):')
+  console.log('  - matti_v (citizen, Tampere)')
+  console.log('  - anna_k (citizen, Tampere)')
+  console.log('  - tampere_city (institution, Tampere)')
   console.log('')
-  console.log('In development mode, magic links are printed to console.')
+  console.log('Run `npm run create-invites -- 10` to create invite codes for registration.')
 }
 
 seed()

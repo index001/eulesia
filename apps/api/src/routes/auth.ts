@@ -264,11 +264,14 @@ router.get('/verify/:token', asyncHandler(async (req, res: Response) => {
     .limit(1)
 
   if (!user) {
-    // Create new user
+    // Create new user with generated username from email
+    const baseUsername = magicLink.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase()
+    const uniqueSuffix = Date.now().toString(36).slice(-4)
     const [newUser] = await db
       .insert(users)
       .values({
         email: magicLink.email,
+        username: `${baseUsername}_${uniqueSuffix}`,
         name: magicLink.email.split('@')[0], // Temporary name
         identityProvider: 'magic_link',
         identityVerified: false,
