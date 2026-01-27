@@ -56,7 +56,7 @@ const limiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isDev ? 100 : 10, // 100 in dev, 10 in prod
+  max: 100, // 100 for testing, lower for production later
   message: { success: false, error: 'Too many authentication attempts' },
   standardHeaders: true,
   legacyHeaders: false
