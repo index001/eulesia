@@ -324,6 +324,14 @@ export function useDeclineInvitation() {
   })
 }
 
+// Municipality hooks
+export function useMunicipalities() {
+  return useQuery({
+    queryKey: ['municipalities'],
+    queryFn: () => api.getMunicipalities()
+  })
+}
+
 // User hooks
 export function useUpdateProfile() {
   const queryClient = useQueryClient()

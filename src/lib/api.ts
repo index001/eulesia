@@ -519,7 +519,7 @@ export interface CreateCommentData {
 
 export interface CreateClubData {
   name: string
-  slug: string
+  slug?: string
   description?: string
   rules?: string[]
   category?: string

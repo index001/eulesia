@@ -6,7 +6,7 @@ import { ThreadCard, AgoraFilters } from '../components/agora'
 import { ContentEndMarker } from '../components/common'
 import { useThreads, useTags, useCreateThread, useMunicipalities } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
-import type { Thread as ApiThread, UserSummary } from '../lib/api'
+import type { Thread as ApiThread, UserSummary, Municipality } from '../lib/api'
 
 type Scope = 'municipal' | 'regional' | 'national'
 
@@ -182,7 +182,7 @@ export function AgoraPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select municipality</option>
-                    {municipalitiesData.map(m => (
+                    {municipalitiesData.map((m: Municipality) => (
                       <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
                   </select>
