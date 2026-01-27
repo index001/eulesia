@@ -45,9 +45,11 @@ services:
       - "traefik.http.routers.eulesia-api.rule=Host(`api.${DOMAIN}`)"
       - "traefik.http.routers.eulesia-api.entrypoints=websecure"
       - "traefik.http.routers.eulesia-api.tls.certresolver=le"
+      - "traefik.http.routers.eulesia-api.service=eulesia-api"
       # HTTP router (for ACME challenge and redirect)
       - "traefik.http.routers.eulesia-api-http.rule=Host(`api.${DOMAIN}`)"
       - "traefik.http.routers.eulesia-api-http.entrypoints=web"
+      - "traefik.http.routers.eulesia-api-http.service=eulesia-api"
       # Service
       - "traefik.http.services.eulesia-api.loadbalancer.server.port=3001"
     networks:
@@ -71,9 +73,11 @@ services:
       - "traefik.http.routers.eulesia-web.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.eulesia-web.entrypoints=websecure"
       - "traefik.http.routers.eulesia-web.tls.certresolver=le"
+      - "traefik.http.routers.eulesia-web.service=eulesia-web"
       # HTTP router (for ACME challenge and redirect)
       - "traefik.http.routers.eulesia-web-http.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.eulesia-web-http.entrypoints=web"
+      - "traefik.http.routers.eulesia-web-http.service=eulesia-web"
       # Service
       - "traefik.http.services.eulesia-web.loadbalancer.server.port=80"
     networks:
