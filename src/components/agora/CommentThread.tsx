@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { ChevronUp, ChevronDown, MessageSquare, Minus, Plus } from 'lucide-react'
 import { ActorBadge } from '../common/ActorBadge'
+import type { UserRole } from '../../types'
 
 interface CommentAuthor {
   id: string
   name: string
-  role: string
-  verified?: boolean
-  avatarInitials?: string
+  role: UserRole
+  verified: boolean
+  avatarInitials: string
   institutionType?: 'municipality' | 'agency' | 'ministry'
   institutionName?: string
 }
@@ -59,7 +60,7 @@ function formatCommentDate(dateString: string): string {
 
 function CommentItem({
   comment,
-  replies,
+  replies: _replies,
   allComments,
   depth,
   onVote,
