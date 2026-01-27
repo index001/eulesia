@@ -13,7 +13,9 @@ import {
   RoomPage,
   ProfilePage,
   ServicesPage,
-  AboutPage
+  AboutPage,
+  MunicipalitiesPage,
+  MunicipalityPage
 } from './pages'
 
 function LoadingScreen() {
@@ -80,6 +82,23 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ThreadPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/kunnat"
+        element={
+          <ProtectedRoute>
+            <MunicipalitiesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/kunnat/:municipalityId"
+        element={
+          <ProtectedRoute>
+            <MunicipalityPage />
           </ProtectedRoute>
         }
       />

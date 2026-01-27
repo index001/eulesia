@@ -28,6 +28,7 @@ export interface Thread {
   title: string
   scope: Scope
   municipalityId?: string
+  municipalityName?: string
   tags: string[]
   authorId: string
   institutionalContext?: InstitutionalContext

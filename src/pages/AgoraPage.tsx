@@ -17,6 +17,7 @@ function transformThread(thread: ApiThread) {
     title: thread.title,
     scope: thread.scope,
     municipalityId: thread.municipality?.id,
+    municipalityName: thread.municipality?.name,
     tags: thread.tags,
     authorId: thread.author.id,
     content: thread.content,

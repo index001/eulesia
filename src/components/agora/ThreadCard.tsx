@@ -55,7 +55,8 @@ export function ThreadCard({ thread, author }: ThreadCardProps) {
       <div className="flex items-center justify-between mb-2">
         <ScopeBadge
           scope={thread.scope}
-          municipalityName={thread.municipalityId ? `${thread.municipalityId.charAt(0).toUpperCase()}${thread.municipalityId.slice(1)}` : undefined}
+          municipalityId={thread.municipalityId}
+          municipalityName={thread.municipalityName}
         />
         <div className="flex items-center gap-3 text-xs text-gray-500">
           <span className="flex items-center gap-1">
