@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus } from 'lucide-react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ActorBadge } from '../components/common'
-import { useRoom, useSendRoomMessage } from '../hooks/useApi'
+import { useRoom, useSendRoomMessage, useUpdateRoom, useDeleteRoom, useInviteToRoom } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import type { RoomMessage, UserSummary } from '../lib/api'
 
@@ -38,11 +38,22 @@ function formatMessageTime(dateString: string): string {
 
 export function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>()
+  const navigate = useNavigate()
   const { currentUser } = useAuth()
   const { data: roomData, isLoading, error } = useRoom(roomId || '')
   const sendMessageMutation = useSendRoomMessage(roomId || '')
+  const updateRoomMutation = useUpdateRoom(roomId || '')
+  const deleteRoomMutation = useDeleteRoom()
+  const inviteToRoomMutation = useInviteToRoom(roomId || '')
+
   const [newMessage, setNewMessage] = useState('')
+  const [showSettings, setShowSettings] = useState(false)
+  const [showInvite, setShowInvite] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [inviteUsername, setInviteUsername] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const settingsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -57,6 +68,48 @@ export function RoomPage() {
       setNewMessage('')
     } catch (err) {
       console.error('Failed to send message:', err)
+    }
+  }
+
+  const handleOpenSettings = () => {
+    if (roomData) {
+      setEditName(roomData.name)
+      setEditDescription(roomData.description || '')
+    }
+    setShowSettings(true)
+  }
+
+  const handleSaveSettings = async () => {
+    if (!editName.trim()) return
+    try {
+      await updateRoomMutation.mutateAsync({
+        name: editName.trim(),
+        description: editDescription.trim() || undefined
+      })
+      setShowSettings(false)
+    } catch (err) {
+      console.error('Failed to update room:', err)
+    }
+  }
+
+  const handleDeleteRoom = async () => {
+    if (!roomId || !confirm('Are you sure you want to delete this room?')) return
+    try {
+      await deleteRoomMutation.mutateAsync(roomId)
+      navigate('/home')
+    } catch (err) {
+      console.error('Failed to delete room:', err)
+    }
+  }
+
+  const handleInvite = async () => {
+    if (!inviteUsername.trim()) return
+    try {
+      await inviteToRoomMutation.mutateAsync(inviteUsername.trim())
+      setInviteUsername('')
+      setShowInvite(false)
+    } catch (err) {
+      console.error('Failed to send invitation:', err)
     }
   }
 
@@ -107,9 +160,14 @@ export function RoomPage() {
             </p>
           </div>
           {isOwner && (
-            <button className="p-2 hover:bg-white/10 rounded-lg">
-              <Settings className="w-5 h-5 text-white" />
-            </button>
+            <div className="relative" ref={settingsRef}>
+              <button
+                onClick={handleOpenSettings}
+                className="p-2 hover:bg-white/10 rounded-lg"
+              >
+                <Settings className="w-5 h-5 text-white" />
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -129,7 +187,10 @@ export function RoomPage() {
             <span className="text-sm text-gray-600">{members.length + 1} members</span>
           </div>
           {isOwner && (
-            <button className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1">
+            <button
+              onClick={() => setShowInvite(true)}
+              className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1"
+            >
               <UserPlus className="w-4 h-4" />
               Invite
             </button>
@@ -181,6 +242,109 @@ export function RoomPage() {
           <p className="text-sm text-gray-600">
             {currentUser ? 'You need an invitation to post here' : 'Sign in to participate'}
           </p>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">Room Settings</h3>
+              <button onClick={() => setShowSettings(false)} className="p-1 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Room Name</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 resize-none"
+                />
+              </div>
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+              <button
+                onClick={handleDeleteRoom}
+                disabled={deleteRoomMutation.isPending}
+                className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Room
+              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={updateRoomMutation.isPending || !editName.trim()}
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  {updateRoomMutation.isPending ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Modal */}
+      {showInvite && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">Invite to Room</h3>
+              <button onClick={() => setShowInvite(false)} className="p-1 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <input
+                type="text"
+                value={inviteUsername}
+                onChange={(e) => setInviteUsername(e.target.value)}
+                placeholder="Enter username to invite"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                The user will receive an invitation they can accept or decline.
+              </p>
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
+              <button
+                onClick={() => setShowInvite(false)}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleInvite}
+                disabled={inviteToRoomMutation.isPending || !inviteUsername.trim()}
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
+              >
+                <UserPlus className="w-4 h-4" />
+                {inviteToRoomMutation.isPending ? 'Sending...' : 'Send Invitation'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </Layout>

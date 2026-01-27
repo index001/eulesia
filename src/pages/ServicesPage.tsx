@@ -1,4 +1,5 @@
-import { Store, Calendar, BookOpen, Bus, Newspaper, Heart, ChevronRight, Info } from 'lucide-react'
+import { useState } from 'react'
+import { Store, Calendar, BookOpen, Bus, Newspaper, Heart, ChevronRight, Info, X, ExternalLink } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ContentEndMarker } from '../components/common'
 import { services, getServiceCategories } from '../data'
@@ -12,11 +13,14 @@ const categoryIcons: Record<string, React.ElementType> = {
   'Media': Newspaper
 }
 
-function ServiceCard({ service }: { service: Service }) {
+function ServiceCard({ service, onClick }: { service: Service; onClick: () => void }) {
   const Icon = categoryIcons[service.category] || Store
 
   return (
-    <button className="w-full text-left bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
+    <button
+      onClick={onClick}
+      className="w-full text-left bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow"
+    >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
           <Icon className="w-5 h-5 text-gray-600" />
@@ -34,6 +38,7 @@ function ServiceCard({ service }: { service: Service }) {
 
 export function ServicesPage() {
   const categories = getServiceCategories()
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
 
   const servicesByCategory = categories.reduce((acc, category) => {
     acc[category] = services.filter(s => s.category === category)
@@ -74,7 +79,7 @@ export function ServicesPage() {
             </h2>
             <div className="space-y-3">
               {servicesByCategory[category].map(service => (
-                <ServiceCard key={service.id} service={service} />
+                <ServiceCard key={service.id} service={service} onClick={() => setSelectedService(service)} />
               ))}
             </div>
           </div>
@@ -92,6 +97,45 @@ export function ServicesPage() {
 
         <ContentEndMarker message="All services shown" />
       </div>
+
+      {/* Service Detail Modal */}
+      {selectedService && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">{selectedService.name}</h3>
+              <button onClick={() => setSelectedService(null)} className="p-1 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Provider</p>
+                <p className="text-sm text-gray-900">{selectedService.provider}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Category</p>
+                <p className="text-sm text-gray-900">{selectedService.category}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Description</p>
+                <p className="text-sm text-gray-700">{selectedService.description}</p>
+              </div>
+              {selectedService.url && (
+                <a
+                  href={selectedService.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Visit Service
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   )
 }

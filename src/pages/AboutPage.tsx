@@ -147,9 +147,14 @@ export function AboutPage() {
               Eulesia's code is open source. Anyone can inspect, audit, and contribute to the platform.
               Transparency is a core principle.
             </p>
-            <button className="text-sm text-blue-600 hover:underline">
+            <a
+              href="https://github.com/markussjoberg/eulesia"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-blue-600 hover:underline"
+            >
               View on GitHub →
-            </button>
+            </a>
           </div>
         </div>
 

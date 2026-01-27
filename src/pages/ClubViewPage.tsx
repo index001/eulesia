@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Users, Shield, MessageSquare, Pin, ScrollText } from 'lucide-react'
+import { ArrowLeft, Users, Shield, MessageSquare, Pin, ScrollText, X, Send } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ActorBadge, ContentEndMarker } from '../components/common'
-import { useClub, useJoinClub, useLeaveClub } from '../hooks/useApi'
+import { useClub, useJoinClub, useLeaveClub, useCreateClubThread } from '../hooks/useApi'
 import type { UserSummary, ClubThread } from '../lib/api'
 
 function formatDate(dateString: string): string {
@@ -28,6 +29,26 @@ export function ClubViewPage() {
   const { data: club, isLoading, error } = useClub(clubId || '')
   const joinClubMutation = useJoinClub()
   const leaveClubMutation = useLeaveClub()
+  const createThreadMutation = useCreateClubThread(clubId || '')
+
+  const [showNewThreadForm, setShowNewThreadForm] = useState(false)
+  const [newThreadTitle, setNewThreadTitle] = useState('')
+  const [newThreadContent, setNewThreadContent] = useState('')
+
+  const handleCreateThread = async () => {
+    if (!newThreadTitle.trim() || !newThreadContent.trim()) return
+    try {
+      await createThreadMutation.mutateAsync({
+        title: newThreadTitle.trim(),
+        content: newThreadContent.trim()
+      })
+      setNewThreadTitle('')
+      setNewThreadContent('')
+      setShowNewThreadForm(false)
+    } catch (err) {
+      console.error('Failed to create thread:', err)
+    }
+  }
 
   const handleJoin = async () => {
     if (!clubId) return
@@ -228,11 +249,60 @@ export function ClubViewPage() {
             </div>
           )}
 
-          {/* Start new thread button */}
+          {/* Start new thread */}
           {club.isMember && (
-            <button className="mt-4 w-full bg-gray-100 text-gray-700 px-4 py-3 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors">
-              Start a new discussion
-            </button>
+            <>
+              {showNewThreadForm ? (
+                <div className="mt-4 bg-white rounded-xl border border-gray-200 p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-900">New Discussion</h3>
+                    <button
+                      onClick={() => setShowNewThreadForm(false)}
+                      className="p-1 hover:bg-gray-100 rounded"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Discussion title"
+                    value={newThreadTitle}
+                    onChange={(e) => setNewThreadTitle(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <textarea
+                    placeholder="What do you want to discuss?"
+                    value={newThreadContent}
+                    onChange={(e) => setNewThreadContent(e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowNewThreadForm(false)}
+                      className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreateThread}
+                      disabled={!newThreadTitle.trim() || !newThreadContent.trim() || createThreadMutation.isPending}
+                      className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Send className="w-4 h-4" />
+                      {createThreadMutation.isPending ? 'Posting...' : 'Post Discussion'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowNewThreadForm(true)}
+                  className="mt-4 w-full bg-gray-100 text-gray-700 px-4 py-3 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Start a new discussion
+                </button>
+              )}
+            </>
           )}
 
           <ContentEndMarker message="All discussions shown" />

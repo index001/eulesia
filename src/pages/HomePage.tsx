@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Home, Plus, Lock, Globe, MessageSquare, Users, Settings, ChevronRight, BookOpen, Activity } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ContentEndMarker } from '../components/common'
-import { useHome, useCreateRoom, useInvitations } from '../hooks/useApi'
+import { useHome, useCreateRoom, useInvitations, useAcceptInvitation, useDeclineInvitation } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import type { Room, RoomInvitationWithDetails } from '../lib/api'
 
@@ -12,6 +12,8 @@ export function HomePage() {
   const { data: homeData, isLoading, error } = useHome(currentUser?.id || '')
   const { data: invitations } = useInvitations()
   const createRoomMutation = useCreateRoom()
+  const acceptInvitationMutation = useAcceptInvitation()
+  const declineInvitationMutation = useDeclineInvitation()
   const [showCreateRoom, setShowCreateRoom] = useState(false)
   const [newRoomName, setNewRoomName] = useState('')
   const [newRoomDescription, setNewRoomDescription] = useState('')
@@ -91,11 +93,19 @@ export function HomePage() {
                     <p className="text-xs text-gray-500">From {inv.inviter.name}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button className="text-xs bg-teal-600 text-white px-3 py-1 rounded-full hover:bg-teal-700">
-                      Accept
+                    <button
+                      onClick={() => acceptInvitationMutation.mutate(inv.id)}
+                      disabled={acceptInvitationMutation.isPending}
+                      className="text-xs bg-teal-600 text-white px-3 py-1 rounded-full hover:bg-teal-700 disabled:opacity-50"
+                    >
+                      {acceptInvitationMutation.isPending ? '...' : 'Accept'}
                     </button>
-                    <button className="text-xs text-gray-600 px-3 py-1 rounded-full hover:bg-gray-100">
-                      Decline
+                    <button
+                      onClick={() => declineInvitationMutation.mutate(inv.id)}
+                      disabled={declineInvitationMutation.isPending}
+                      className="text-xs text-gray-600 px-3 py-1 rounded-full hover:bg-gray-100 disabled:opacity-50"
+                    >
+                      {declineInvitationMutation.isPending ? '...' : 'Decline'}
                     </button>
                   </div>
                 </div>
