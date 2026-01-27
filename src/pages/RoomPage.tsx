@@ -179,8 +179,8 @@ export function RoomPage() {
         </div>
       )}
 
-      {/* Members (for private rooms) */}
-      {visibility === 'private' && members.length > 0 && (
+      {/* Members and invite (for private rooms) */}
+      {visibility === 'private' && (
         <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-gray-500" />

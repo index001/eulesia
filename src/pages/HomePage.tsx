@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Home, Plus, Lock, Globe, MessageSquare, Users, Settings, ChevronRight, BookOpen, Activity } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ContentEndMarker } from '../components/common'
@@ -8,6 +8,7 @@ import { useAuth } from '../hooks/useAuth'
 import type { Room, RoomInvitationWithDetails } from '../lib/api'
 
 export function HomePage() {
+  const navigate = useNavigate()
   const { currentUser } = useAuth()
   const { data: homeData, isLoading, error } = useHome(currentUser?.id || '')
   const { data: invitations } = useInvitations()
@@ -39,7 +40,7 @@ export function HomePage() {
     if (!newRoomName.trim()) return
 
     try {
-      await createRoomMutation.mutateAsync({
+      const room = await createRoomMutation.mutateAsync({
         name: newRoomName.trim(),
         description: newRoomDescription.trim() || undefined,
         visibility: newRoomVisibility
@@ -48,6 +49,8 @@ export function HomePage() {
       setNewRoomDescription('')
       setNewRoomVisibility('public')
       setShowCreateRoom(false)
+      // Navigate to the new room so user can invite people
+      navigate(`/home/room/${room.id}`)
     } catch (err) {
       console.error('Failed to create room:', err)
     }
