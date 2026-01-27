@@ -54,16 +54,17 @@ const limiter = rateLimit({
   skip: () => isDev // Skip rate limiting entirely in development
 })
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 for testing, lower for production later
-  message: { success: false, error: 'Too many authentication attempts' },
-  standardHeaders: true,
-  legacyHeaders: false
-})
+// Auth rate limiter disabled for testing
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 10,
+//   message: { success: false, error: 'Too many authentication attempts' },
+//   standardHeaders: true,
+//   legacyHeaders: false
+// })
 
 app.use(limiter)
-app.use('/api/v1/auth', authLimiter)
+// app.use('/api/v1/auth', authLimiter)
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }))
