@@ -385,8 +385,8 @@ ${summary.keyPoints.map(p => `- ${p}`).join('\n')}
             })
             .returning({ id: threads.id })
 
-          // Add tags
-          const allTags = [...summary.tags, 'pöytäkirja', source.municipality.toLowerCase()]
+          // Add tags (no municipality name - it's linked via municipality_id)
+          const allTags = [...summary.tags, 'pöytäkirja']
           const uniqueTags = [...new Set(allTags)].slice(0, 10)
 
           for (const tag of uniqueTags) {
