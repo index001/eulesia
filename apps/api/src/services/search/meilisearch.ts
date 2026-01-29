@@ -5,7 +5,7 @@
  * Scales to millions of documents with <50ms response times.
  */
 
-import { MeiliSearch, Index } from 'meilisearch'
+import { MeiliSearch } from 'meilisearch'
 
 // Initialize client
 const client = new MeiliSearch({

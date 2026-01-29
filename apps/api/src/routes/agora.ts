@@ -78,7 +78,6 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
   let followedAuthors: string[] = []
   let followedMunicipalities: string[] = []
   let followedTags: string[] = []
-  let hasAnySubscriptions = false
 
   // Get subscriptions for any feedScope (except when not logged in)
   if (userId && (filters.feedScope === 'following' || filters.feedScope === 'local' ||
@@ -97,10 +96,6 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
     followedTags = subscriptions
       .filter(s => s.entityType === 'tag')
       .map(s => s.entityId)
-
-    hasAnySubscriptions = followedAuthors.length > 0 ||
-                          followedMunicipalities.length > 0 ||
-                          followedTags.length > 0
 
     // Build subscription filter - always applied for logged-in users
     const followConditions = []

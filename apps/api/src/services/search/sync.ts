@@ -94,15 +94,17 @@ async function syncUsers(): Promise<number> {
     })
     .from(users)
 
-  const docs: UserDocument[] = allUsers.map(u => ({
-    id: u.id,
-    name: u.name,
-    username: u.username,
-    role: u.role,
-    institutionType: u.institutionType || undefined,
-    institutionName: u.institutionName || undefined,
-    createdAt: u.createdAt.toISOString()
-  }))
+  const docs: UserDocument[] = allUsers
+    .filter(u => u.role !== null) // Skip users with null role
+    .map(u => ({
+      id: u.id,
+      name: u.name,
+      username: u.username,
+      role: u.role as 'citizen' | 'institution' | 'admin',
+      institutionType: u.institutionType || undefined,
+      institutionName: u.institutionName || undefined,
+      createdAt: u.createdAt?.toISOString() || new Date().toISOString()
+    }))
 
   await indexUsers(docs)
   return docs.length
@@ -143,8 +145,8 @@ async function syncThreads(): Promise<number> {
     tags: tagsByThread[t.thread.id] || [],
     score: t.thread.score || 0,
     replyCount: t.thread.replyCount || 0,
-    createdAt: t.thread.createdAt.toISOString(),
-    updatedAt: t.thread.updatedAt.toISOString()
+    createdAt: t.thread.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: t.thread.updatedAt?.toISOString() || new Date().toISOString()
   }))
 
   await indexThreads(docs)
@@ -189,7 +191,7 @@ async function syncMunicipalities(): Promise<number> {
     name: m.name,
     nameFi: m.nameFi || m.name,
     region: m.region || undefined,
-    country: m.country
+    country: m.country || 'FI'
   }))
 
   await indexMunicipalities(docs)
