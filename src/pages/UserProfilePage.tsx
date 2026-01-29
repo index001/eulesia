@@ -3,7 +3,6 @@ import { ArrowLeft, Shield, Building2, Calendar, MessageSquare } from 'lucide-re
 import { useQuery } from '@tanstack/react-query'
 import { Layout } from '../components/layout'
 import { FollowButton } from '../components/common'
-import { api } from '../lib/api'
 import { useAuth } from '../hooks/useAuth'
 
 interface UserThread {
