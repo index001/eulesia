@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express'
 import { z } from 'zod'
-import { eq } from 'drizzle-orm'
-import { db, users, municipalities } from '../db/index.js'
+import { eq, desc, inArray } from 'drizzle-orm'
+import { db, users, municipalities, threads, threadTags } from '../db/index.js'
 import { authMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
@@ -20,7 +20,7 @@ const updateUserSchema = z.object({
   notificationOfficial: z.boolean().optional()
 })
 
-// GET /users/:id - Get user profile
+// GET /users/:id - Get user public profile with their public threads
 router.get('/:id', asyncHandler(async (req, res: Response) => {
   const { id } = req.params
 
@@ -43,7 +43,52 @@ router.get('/:id', asyncHandler(async (req, res: Response) => {
     throw new AppError(404, 'User not found')
   }
 
-  res.json({ success: true, data: user })
+  // Get user's public Agora threads (not club threads or private content)
+  const userThreads = await db
+    .select({
+      id: threads.id,
+      title: threads.title,
+      content: threads.content,
+      scope: threads.scope,
+      replyCount: threads.replyCount,
+      score: threads.score,
+      createdAt: threads.createdAt,
+      updatedAt: threads.updatedAt,
+      municipalityId: threads.municipalityId,
+      municipalityName: municipalities.name
+    })
+    .from(threads)
+    .leftJoin(municipalities, eq(threads.municipalityId, municipalities.id))
+    .where(eq(threads.authorId, id))
+    .orderBy(desc(threads.createdAt))
+    .limit(20)
+
+  // Get tags for threads
+  const threadIds = userThreads.map(t => t.id)
+  const allTags = threadIds.length > 0
+    ? await db
+        .select()
+        .from(threadTags)
+        .where(inArray(threadTags.threadId, threadIds))
+    : []
+
+  // Build tags map
+  const tagsByThread: Record<string, string[]> = {}
+  for (const tag of allTags) {
+    if (!tagsByThread[tag.threadId]) tagsByThread[tag.threadId] = []
+    tagsByThread[tag.threadId].push(tag.tag)
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...user,
+      threads: userThreads.map(t => ({
+        ...t,
+        tags: tagsByThread[t.id] || []
+      }))
+    }
+  })
 }))
 
 // PATCH /users/me - Update own profile

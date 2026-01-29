@@ -15,7 +15,8 @@ import {
   ServicesPage,
   AboutPage,
   MunicipalitiesPage,
-  MunicipalityPage
+  MunicipalityPage,
+  UserProfilePage
 } from './pages'
 
 function LoadingScreen() {
@@ -169,6 +170,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AboutPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/user/:userId"
+        element={
+          <ProtectedRoute>
+            <UserProfilePage />
           </ProtectedRoute>
         }
       />

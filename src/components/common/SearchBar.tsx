@@ -128,7 +128,7 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
           {results.users.map(user => (
             <Link
               key={user.id}
-              to={`/home/${user.id}`}
+              to={`/user/${user.id}`}
               onClick={onResultClick}
               className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors"
             >
