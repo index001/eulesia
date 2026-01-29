@@ -8,6 +8,7 @@ import homeRoutes from './home.js'
 import mapRoutes from './map.js'
 import invitesRoutes from './invites.js'
 import subscriptionsRoutes from './subscriptions.js'
+import searchRoutes from './search.js'
 
 const router = Router()
 
@@ -20,6 +21,7 @@ router.use('/home', homeRoutes)
 router.use('/map', mapRoutes)
 router.use('/invites', invitesRoutes)
 router.use('/subscriptions', subscriptionsRoutes)
+router.use('/search', searchRoutes)
 
 // Health check
 router.get('/health', (_req, res) => {

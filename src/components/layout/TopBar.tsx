@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bell, Shield, X } from 'lucide-react'
+import { Bell, Shield, X, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { SearchBar } from '../common/SearchBar'
 
 export function TopBar() {
   const { currentUser } = useAuth()
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showMobileSearch, setShowMobileSearch] = useState(false)
   const notificationRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
@@ -27,15 +29,28 @@ export function TopBar() {
     <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Brand */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
           <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">E</span>
           </div>
-          <span className="font-semibold text-gray-900 text-lg">Eulesia</span>
+          <span className="font-semibold text-gray-900 text-lg hidden sm:block">Eulesia</span>
         </Link>
 
+        {/* Search bar - desktop */}
+        <div className="hidden md:block flex-1 max-w-md mx-4">
+          <SearchBar placeholder="Hae kayttajia, keskusteluja, paikkoja..." />
+        </div>
+
         {/* Right section */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Search button - mobile */}
+          <button
+            onClick={() => setShowMobileSearch(true)}
+            className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>
             <button
@@ -88,6 +103,29 @@ export function TopBar() {
           </Link>
         </div>
       </div>
+
+      {/* Mobile search overlay */}
+      {showMobileSearch && (
+        <div className="fixed inset-0 bg-white z-50 md:hidden">
+          <div className="p-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowMobileSearch(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+              <div className="flex-1">
+                <SearchBar
+                  autoFocus
+                  placeholder="Hae..."
+                  onClose={() => setShowMobileSearch(false)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

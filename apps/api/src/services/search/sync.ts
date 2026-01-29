@@ -1,0 +1,233 @@
+/**
+ * Search Index Sync Service
+ *
+ * Syncs data from PostgreSQL to Meilisearch.
+ * Run on startup and periodically to keep indexes fresh.
+ */
+
+import { db, users, threads, threadTags, places, municipalities } from '../../db/index.js'
+import { sql } from 'drizzle-orm'
+import {
+  initializeIndexes,
+  indexUsers,
+  indexThreads,
+  indexPlaces,
+  indexMunicipalities,
+  indexTags,
+  healthCheck,
+  type UserDocument,
+  type ThreadDocument,
+  type PlaceDocument,
+  type MunicipalityDocument,
+  type TagDocument
+} from './meilisearch.js'
+
+/**
+ * Full sync of all data to Meilisearch
+ */
+export async function fullSync(): Promise<{
+  users: number
+  threads: number
+  places: number
+  municipalities: number
+  tags: number
+  durationMs: number
+}> {
+  const startTime = Date.now()
+  console.log('Starting full search index sync...')
+
+  // Check Meilisearch is available
+  const isHealthy = await healthCheck()
+  if (!isHealthy) {
+    throw new Error('Meilisearch is not available')
+  }
+
+  // Initialize indexes (idempotent)
+  await initializeIndexes()
+
+  // Sync users
+  const userDocs = await syncUsers()
+  console.log(`  Indexed ${userDocs} users`)
+
+  // Sync threads
+  const threadDocs = await syncThreads()
+  console.log(`  Indexed ${threadDocs} threads`)
+
+  // Sync places
+  const placeDocs = await syncPlaces()
+  console.log(`  Indexed ${placeDocs} places`)
+
+  // Sync municipalities
+  const municipalityDocs = await syncMunicipalities()
+  console.log(`  Indexed ${municipalityDocs} municipalities`)
+
+  // Sync tags
+  const tagDocs = await syncTags()
+  console.log(`  Indexed ${tagDocs} tags`)
+
+  const durationMs = Date.now() - startTime
+  console.log(`Full sync completed in ${durationMs}ms`)
+
+  return {
+    users: userDocs,
+    threads: threadDocs,
+    places: placeDocs,
+    municipalities: municipalityDocs,
+    tags: tagDocs,
+    durationMs
+  }
+}
+
+/**
+ * Sync all users to Meilisearch
+ */
+async function syncUsers(): Promise<number> {
+  const allUsers = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      username: users.username,
+      role: users.role,
+      institutionType: users.institutionType,
+      institutionName: users.institutionName,
+      createdAt: users.createdAt
+    })
+    .from(users)
+
+  const docs: UserDocument[] = allUsers.map(u => ({
+    id: u.id,
+    name: u.name,
+    username: u.username,
+    role: u.role,
+    institutionType: u.institutionType || undefined,
+    institutionName: u.institutionName || undefined,
+    createdAt: u.createdAt.toISOString()
+  }))
+
+  await indexUsers(docs)
+  return docs.length
+}
+
+/**
+ * Sync all threads to Meilisearch
+ */
+async function syncThreads(): Promise<number> {
+  // Get threads with author and municipality
+  const allThreads = await db
+    .select({
+      thread: threads,
+      authorName: users.name,
+      municipalityName: municipalities.name
+    })
+    .from(threads)
+    .leftJoin(users, sql`${threads.authorId} = ${users.id}`)
+    .leftJoin(municipalities, sql`${threads.municipalityId} = ${municipalities.id}`)
+
+  // Get tags for all threads
+  const allTags = await db.select().from(threadTags)
+  const tagsByThread: Record<string, string[]> = {}
+  for (const tag of allTags) {
+    if (!tagsByThread[tag.threadId]) tagsByThread[tag.threadId] = []
+    tagsByThread[tag.threadId].push(tag.tag)
+  }
+
+  const docs: ThreadDocument[] = allThreads.map(t => ({
+    id: t.thread.id,
+    title: t.thread.title,
+    content: t.thread.content.substring(0, 10000), // Limit content size
+    scope: t.thread.scope,
+    authorName: t.authorName || 'Unknown',
+    authorId: t.thread.authorId,
+    municipalityName: t.municipalityName || undefined,
+    municipalityId: t.thread.municipalityId || undefined,
+    tags: tagsByThread[t.thread.id] || [],
+    score: t.thread.score || 0,
+    replyCount: t.thread.replyCount || 0,
+    createdAt: t.thread.createdAt.toISOString(),
+    updatedAt: t.thread.updatedAt.toISOString()
+  }))
+
+  await indexThreads(docs)
+  return docs.length
+}
+
+/**
+ * Sync all places to Meilisearch
+ */
+async function syncPlaces(): Promise<number> {
+  const allPlaces = await db
+    .select({
+      place: places,
+      municipalityName: municipalities.name
+    })
+    .from(places)
+    .leftJoin(municipalities, sql`${places.municipalityId} = ${municipalities.id}`)
+
+  const docs: PlaceDocument[] = allPlaces.map(p => ({
+    id: p.place.id,
+    name: p.place.name,
+    description: p.place.description || undefined,
+    category: p.place.category || undefined,
+    municipalityName: p.municipalityName || undefined,
+    municipalityId: p.place.municipalityId || undefined,
+    latitude: p.place.latitude ? Number(p.place.latitude) : undefined,
+    longitude: p.place.longitude ? Number(p.place.longitude) : undefined
+  }))
+
+  await indexPlaces(docs)
+  return docs.length
+}
+
+/**
+ * Sync all municipalities to Meilisearch
+ */
+async function syncMunicipalities(): Promise<number> {
+  const allMunicipalities = await db.select().from(municipalities)
+
+  const docs: MunicipalityDocument[] = allMunicipalities.map(m => ({
+    id: m.id,
+    name: m.name,
+    nameFi: m.nameFi || m.name,
+    region: m.region || undefined,
+    country: m.country
+  }))
+
+  await indexMunicipalities(docs)
+  return docs.length
+}
+
+/**
+ * Sync all tags to Meilisearch
+ */
+async function syncTags(): Promise<number> {
+  const tagCounts = await db
+    .select({
+      tag: threadTags.tag,
+      count: sql<number>`count(*)::int`
+    })
+    .from(threadTags)
+    .groupBy(threadTags.tag)
+
+  const docs: TagDocument[] = tagCounts.map(t => ({
+    tag: t.tag,
+    count: t.count
+  }))
+
+  await indexTags(docs)
+  return docs.length
+}
+
+/**
+ * Start periodic sync (run every N minutes)
+ */
+export function startPeriodicSync(intervalMinutes = 5): NodeJS.Timeout {
+  console.log(`Starting periodic search sync every ${intervalMinutes} minutes`)
+
+  return setInterval(async () => {
+    try {
+      await fullSync()
+    } catch (error) {
+      console.error('Periodic search sync failed:', error)
+    }
+  }, intervalMinutes * 60 * 1000)
+}

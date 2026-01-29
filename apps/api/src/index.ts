@@ -10,6 +10,7 @@ import { env } from './utils/env.js'
 import routes from './routes/index.js'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
 import { initScheduler } from './services/scheduler.js'
+import { fullSync, startPeriodicSync, healthCheck as meiliHealthCheck } from './services/search/index.js'
 
 const app = express()
 const httpServer = createServer(app)
@@ -76,8 +77,15 @@ app.use(cookieParser())
 app.set('trust proxy', 1)
 
 // Health check endpoint
-app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() })
+app.get('/health', async (_req, res) => {
+  const meiliOk = await meiliHealthCheck()
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    services: {
+      meilisearch: meiliOk ? 'ok' : 'unavailable'
+    }
+  })
 })
 
 // API routes
@@ -139,4 +147,17 @@ httpServer.listen(PORT, () => {
 
   // Initialize background scheduler
   initScheduler()
+
+  // Initialize search index (async, don't block startup)
+  setTimeout(async () => {
+    try {
+      console.log('Initializing search indexes...')
+      await fullSync()
+      startPeriodicSync(5) // Sync every 5 minutes
+      console.log('Search indexes ready')
+    } catch (error) {
+      console.error('Failed to initialize search:', error)
+      // Continue running - search is optional
+    }
+  }, 2000) // Wait 2s for Meilisearch to be ready
 })

@@ -349,6 +349,34 @@ class ApiClient {
   async checkSubscription(entityType: EntityType, entityId: string): Promise<SubscriptionCheck> {
     return this.request(`/subscriptions/check/${entityType}/${entityId}`)
   }
+
+  // Search
+  async search(query: string, limit = 5): Promise<SearchResults> {
+    return this.request(`/search?q=${encodeURIComponent(query)}&limit=${limit}`)
+  }
+
+  async searchUsers(query: string, limit = 10): Promise<SearchUserResult[]> {
+    return this.request(`/search/users?q=${encodeURIComponent(query)}&limit=${limit}`)
+  }
+
+  async searchThreads(query: string, options?: {
+    limit?: number
+    scope?: 'municipal' | 'regional' | 'national'
+    municipalityId?: string
+    tags?: string[]
+  }): Promise<SearchThreadResult[]> {
+    const params = new URLSearchParams()
+    params.set('q', query)
+    if (options?.limit) params.set('limit', options.limit.toString())
+    if (options?.scope) params.set('scope', options.scope)
+    if (options?.municipalityId) params.set('municipalityId', options.municipalityId)
+    if (options?.tags?.length) params.set('tags', options.tags.join(','))
+    return this.request(`/search/threads?${params}`)
+  }
+
+  async searchPlaces(query: string, limit = 10): Promise<SearchPlaceResult[]> {
+    return this.request(`/search/places?q=${encodeURIComponent(query)}&limit=${limit}`)
+  }
 }
 
 // Types
@@ -703,6 +731,60 @@ export interface SubscribeData {
 export interface SubscriptionCheck {
   subscribed: boolean
   notify: NotifyLevel | null
+}
+
+// Search types
+export interface SearchUserResult {
+  id: string
+  name: string
+  username: string
+  role: 'citizen' | 'institution' | 'admin'
+  institutionType?: string
+  institutionName?: string
+  municipalityName?: string
+}
+
+export interface SearchThreadResult {
+  id: string
+  title: string
+  content: string
+  scope: 'municipal' | 'regional' | 'national'
+  authorName: string
+  municipalityName?: string
+  tags: string[]
+  score: number
+  replyCount: number
+  createdAt: string
+}
+
+export interface SearchPlaceResult {
+  id: string
+  name: string
+  description?: string
+  category?: string
+  municipalityName?: string
+}
+
+export interface SearchMunicipalityResult {
+  id: string
+  name: string
+  nameFi: string
+  region?: string
+}
+
+export interface SearchTagResult {
+  tag: string
+  count: number
+}
+
+export interface SearchResults {
+  users: SearchUserResult[]
+  threads: SearchThreadResult[]
+  places: SearchPlaceResult[]
+  municipalities: SearchMunicipalityResult[]
+  tags: SearchTagResult[]
+  query: string
+  processingTimeMs: number
 }
 
 // Export singleton instance

@@ -1,0 +1,327 @@
+/**
+ * Meilisearch Search Service
+ *
+ * Provides fast, typo-tolerant search across users, threads, places, and tags.
+ * Scales to millions of documents with <50ms response times.
+ */
+
+import { MeiliSearch, Index } from 'meilisearch'
+
+// Initialize client
+const client = new MeiliSearch({
+  host: process.env.MEILI_URL || 'http://localhost:7700',
+  apiKey: process.env.MEILI_MASTER_KEY
+})
+
+// Index names
+export const INDEXES = {
+  USERS: 'users',
+  THREADS: 'threads',
+  PLACES: 'places',
+  MUNICIPALITIES: 'municipalities',
+  TAGS: 'tags'
+} as const
+
+// Document types for each index
+export interface UserDocument {
+  id: string
+  name: string
+  username: string
+  role: 'citizen' | 'institution' | 'admin'
+  institutionType?: string
+  institutionName?: string
+  municipalityName?: string
+  createdAt: string
+}
+
+export interface ThreadDocument {
+  id: string
+  title: string
+  content: string
+  scope: 'municipal' | 'regional' | 'national'
+  authorName: string
+  authorId: string
+  municipalityName?: string
+  municipalityId?: string
+  tags: string[]
+  score: number
+  replyCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PlaceDocument {
+  id: string
+  name: string
+  description?: string
+  category?: string
+  municipalityName?: string
+  municipalityId?: string
+  latitude?: number
+  longitude?: number
+}
+
+export interface MunicipalityDocument {
+  id: string
+  name: string
+  nameFi: string
+  region?: string
+  country: string
+}
+
+export interface TagDocument {
+  tag: string
+  count: number
+}
+
+// Search result types
+export interface SearchResults {
+  users: UserDocument[]
+  threads: ThreadDocument[]
+  places: PlaceDocument[]
+  municipalities: MunicipalityDocument[]
+  tags: TagDocument[]
+  query: string
+  processingTimeMs: number
+}
+
+/**
+ * Initialize indexes with proper settings
+ */
+export async function initializeIndexes(): Promise<void> {
+  console.log('Initializing Meilisearch indexes...')
+
+  // Users index
+  const usersIndex = client.index(INDEXES.USERS)
+  await usersIndex.updateSettings({
+    searchableAttributes: ['name', 'username', 'institutionName', 'municipalityName'],
+    filterableAttributes: ['role', 'institutionType'],
+    sortableAttributes: ['createdAt', 'name'],
+    rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
+  })
+
+  // Threads index
+  const threadsIndex = client.index(INDEXES.THREADS)
+  await threadsIndex.updateSettings({
+    searchableAttributes: ['title', 'content', 'tags', 'authorName', 'municipalityName'],
+    filterableAttributes: ['scope', 'municipalityId', 'authorId', 'tags'],
+    sortableAttributes: ['createdAt', 'updatedAt', 'score', 'replyCount'],
+    rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
+  })
+
+  // Places index
+  const placesIndex = client.index(INDEXES.PLACES)
+  await placesIndex.updateSettings({
+    searchableAttributes: ['name', 'description', 'category', 'municipalityName'],
+    filterableAttributes: ['category', 'municipalityId'],
+    sortableAttributes: ['name'],
+    rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
+  })
+
+  // Municipalities index
+  const municipalitiesIndex = client.index(INDEXES.MUNICIPALITIES)
+  await municipalitiesIndex.updateSettings({
+    searchableAttributes: ['name', 'nameFi', 'region'],
+    filterableAttributes: ['country', 'region'],
+    sortableAttributes: ['name'],
+    rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
+  })
+
+  // Tags index
+  const tagsIndex = client.index(INDEXES.TAGS)
+  await tagsIndex.updateSettings({
+    searchableAttributes: ['tag'],
+    sortableAttributes: ['count'],
+    rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
+  })
+
+  console.log('Meilisearch indexes initialized')
+}
+
+/**
+ * Index a single user
+ */
+export async function indexUser(user: UserDocument): Promise<void> {
+  await client.index(INDEXES.USERS).addDocuments([user])
+}
+
+/**
+ * Index multiple users
+ */
+export async function indexUsers(users: UserDocument[]): Promise<void> {
+  if (users.length === 0) return
+  await client.index(INDEXES.USERS).addDocuments(users)
+}
+
+/**
+ * Index a single thread
+ */
+export async function indexThread(thread: ThreadDocument): Promise<void> {
+  await client.index(INDEXES.THREADS).addDocuments([thread])
+}
+
+/**
+ * Index multiple threads
+ */
+export async function indexThreads(threads: ThreadDocument[]): Promise<void> {
+  if (threads.length === 0) return
+  await client.index(INDEXES.THREADS).addDocuments(threads)
+}
+
+/**
+ * Index a single place
+ */
+export async function indexPlace(place: PlaceDocument): Promise<void> {
+  await client.index(INDEXES.PLACES).addDocuments([place])
+}
+
+/**
+ * Index multiple places
+ */
+export async function indexPlaces(places: PlaceDocument[]): Promise<void> {
+  if (places.length === 0) return
+  await client.index(INDEXES.PLACES).addDocuments(places)
+}
+
+/**
+ * Index municipalities
+ */
+export async function indexMunicipalities(municipalities: MunicipalityDocument[]): Promise<void> {
+  if (municipalities.length === 0) return
+  await client.index(INDEXES.MUNICIPALITIES).addDocuments(municipalities)
+}
+
+/**
+ * Index tags
+ */
+export async function indexTags(tags: TagDocument[]): Promise<void> {
+  if (tags.length === 0) return
+  // Use tag as id since it's unique
+  const docsWithId = tags.map(t => ({ id: t.tag, ...t }))
+  await client.index(INDEXES.TAGS).addDocuments(docsWithId)
+}
+
+/**
+ * Delete a document from an index
+ */
+export async function deleteDocument(indexName: string, documentId: string): Promise<void> {
+  await client.index(indexName).deleteDocument(documentId)
+}
+
+/**
+ * Federated search across all indexes
+ */
+export async function search(query: string, options?: {
+  limit?: number
+  userId?: string // For personalization
+}): Promise<SearchResults> {
+  const limit = options?.limit || 5
+  const startTime = Date.now()
+
+  const results = await client.multiSearch({
+    queries: [
+      {
+        indexUid: INDEXES.USERS,
+        q: query,
+        limit,
+        attributesToRetrieve: ['id', 'name', 'username', 'role', 'institutionType', 'institutionName', 'municipalityName']
+      },
+      {
+        indexUid: INDEXES.THREADS,
+        q: query,
+        limit: limit * 2, // More threads
+        attributesToRetrieve: ['id', 'title', 'content', 'scope', 'authorName', 'municipalityName', 'tags', 'score', 'replyCount', 'createdAt']
+      },
+      {
+        indexUid: INDEXES.PLACES,
+        q: query,
+        limit,
+        attributesToRetrieve: ['id', 'name', 'description', 'category', 'municipalityName']
+      },
+      {
+        indexUid: INDEXES.MUNICIPALITIES,
+        q: query,
+        limit,
+        attributesToRetrieve: ['id', 'name', 'nameFi', 'region', 'country']
+      },
+      {
+        indexUid: INDEXES.TAGS,
+        q: query,
+        limit,
+        attributesToRetrieve: ['tag', 'count']
+      }
+    ]
+  })
+
+  const processingTimeMs = Date.now() - startTime
+
+  return {
+    users: results.results[0]?.hits as UserDocument[] || [],
+    threads: results.results[1]?.hits as ThreadDocument[] || [],
+    places: results.results[2]?.hits as PlaceDocument[] || [],
+    municipalities: results.results[3]?.hits as MunicipalityDocument[] || [],
+    tags: results.results[4]?.hits as TagDocument[] || [],
+    query,
+    processingTimeMs
+  }
+}
+
+/**
+ * Search only users
+ */
+export async function searchUsers(query: string, limit = 10): Promise<UserDocument[]> {
+  const results = await client.index(INDEXES.USERS).search(query, { limit })
+  return results.hits as UserDocument[]
+}
+
+/**
+ * Search only threads
+ */
+export async function searchThreads(query: string, options?: {
+  limit?: number
+  scope?: 'municipal' | 'regional' | 'national'
+  municipalityId?: string
+  tags?: string[]
+}): Promise<ThreadDocument[]> {
+  const filter: string[] = []
+  if (options?.scope) filter.push(`scope = "${options.scope}"`)
+  if (options?.municipalityId) filter.push(`municipalityId = "${options.municipalityId}"`)
+  if (options?.tags?.length) {
+    const tagFilters = options.tags.map(t => `tags = "${t}"`).join(' OR ')
+    filter.push(`(${tagFilters})`)
+  }
+
+  const results = await client.index(INDEXES.THREADS).search(query, {
+    limit: options?.limit || 20,
+    filter: filter.length > 0 ? filter.join(' AND ') : undefined,
+    sort: ['score:desc', 'updatedAt:desc']
+  })
+  return results.hits as ThreadDocument[]
+}
+
+/**
+ * Search only places
+ */
+export async function searchPlaces(query: string, limit = 10): Promise<PlaceDocument[]> {
+  const results = await client.index(INDEXES.PLACES).search(query, { limit })
+  return results.hits as PlaceDocument[]
+}
+
+/**
+ * Get Meilisearch client for direct access
+ */
+export function getClient(): MeiliSearch {
+  return client
+}
+
+/**
+ * Health check
+ */
+export async function healthCheck(): Promise<boolean> {
+  try {
+    const health = await client.health()
+    return health.status === 'available'
+  } catch {
+    return false
+  }
+}

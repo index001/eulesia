@@ -438,3 +438,40 @@ export function useExportData() {
     mutationFn: () => api.exportData()
   })
 }
+
+// Search hooks
+export function useSearch(query: string, limit = 5) {
+  return useQuery({
+    queryKey: ['search', query, limit],
+    queryFn: () => api.search(query, limit),
+    enabled: query.length >= 2, // Only search with 2+ characters
+    staleTime: 1000 * 60 // 1 minute
+  })
+}
+
+export function useSearchUsers(query: string, limit = 10) {
+  return useQuery({
+    queryKey: ['searchUsers', query, limit],
+    queryFn: () => api.searchUsers(query, limit),
+    enabled: query.length >= 2,
+    staleTime: 1000 * 60
+  })
+}
+
+export function useSearchThreads(query: string, options?: Parameters<typeof api.searchThreads>[1]) {
+  return useQuery({
+    queryKey: ['searchThreads', query, options],
+    queryFn: () => api.searchThreads(query, options),
+    enabled: query.length >= 2,
+    staleTime: 1000 * 60
+  })
+}
+
+export function useSearchPlaces(query: string, limit = 10) {
+  return useQuery({
+    queryKey: ['searchPlaces', query, limit],
+    queryFn: () => api.searchPlaces(query, limit),
+    enabled: query.length >= 2,
+    staleTime: 1000 * 60
+  })
+}

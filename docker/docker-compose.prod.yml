@@ -28,6 +28,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      meilisearch:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -40,6 +42,8 @@ services:
       EMAIL_API_KEY: ${RESEND_API_KEY:-}
       EMAIL_FROM: auth@${DOMAIN}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+      MEILI_URL: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=wp_web"
@@ -57,6 +61,24 @@ services:
     networks:
       - internal
       - wp_web
+
+  # Meilisearch (search engine)
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: eulesia-search
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_ENV: production
+    volumes:
+      - meili_data:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
 
   # Frontend (static files served by nginx)
   web:
@@ -87,6 +109,7 @@ services:
 
 volumes:
   postgres_data:
+  meili_data:
 
 networks:
   internal:

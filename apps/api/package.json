@@ -17,6 +17,7 @@
     "create-invites": "tsx src/scripts/create-invites.ts"
   },
   "dependencies": {
+    "meilisearch": "^0.37.0",
     "argon2": "^0.40.0",
     "node-cron": "^3.0.3",
     "cookie-parser": "^1.4.6",
