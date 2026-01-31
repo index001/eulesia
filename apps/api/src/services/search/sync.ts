@@ -5,7 +5,7 @@
  * Run on startup and periodically to keep indexes fresh.
  */
 
-import { db, users, threads, threadTags, places, municipalities } from '../../db/index.js'
+import { db, users, threads, threadTags, places, municipalities, locations } from '../../db/index.js'
 import { sql } from 'drizzle-orm'
 import {
   initializeIndexes,
@@ -13,12 +13,14 @@ import {
   indexThreads,
   indexPlaces,
   indexMunicipalities,
+  indexLocations,
   indexTags,
   healthCheck,
   type UserDocument,
   type ThreadDocument,
   type PlaceDocument,
   type MunicipalityDocument,
+  type LocationDocument,
   type TagDocument
 } from './meilisearch.js'
 
@@ -30,6 +32,7 @@ export async function fullSync(): Promise<{
   threads: number
   places: number
   municipalities: number
+  locations: number
   tags: number
   durationMs: number
 }> {
@@ -61,6 +64,10 @@ export async function fullSync(): Promise<{
   const municipalityDocs = await syncMunicipalities()
   console.log(`  Indexed ${municipalityDocs} municipalities`)
 
+  // Sync locations (dynamic locations from Nominatim)
+  const locationDocs = await syncLocations()
+  console.log(`  Indexed ${locationDocs} locations`)
+
   // Sync tags
   const tagDocs = await syncTags()
   console.log(`  Indexed ${tagDocs} tags`)
@@ -73,6 +80,7 @@ export async function fullSync(): Promise<{
     threads: threadDocs,
     places: placeDocs,
     municipalities: municipalityDocs,
+    locations: locationDocs,
     tags: tagDocs,
     durationMs
   }
@@ -195,6 +203,35 @@ async function syncMunicipalities(): Promise<number> {
   }))
 
   await indexMunicipalities(docs)
+  return docs.length
+}
+
+/**
+ * Sync all locations (dynamic Nominatim locations) to Meilisearch
+ */
+async function syncLocations(): Promise<number> {
+  const allLocations = await db.select().from(locations)
+
+  const docs: LocationDocument[] = allLocations.map(loc => ({
+    id: loc.id,
+    osmId: loc.osmId || 0,
+    osmType: loc.osmType || 'relation',
+    name: loc.name,
+    nameFi: loc.nameFi || undefined,
+    nameSv: loc.nameSv || undefined,
+    nameEn: loc.nameEn || undefined,
+    displayName: loc.nameLocal || loc.name,
+    type: loc.type || 'municipality',
+    adminLevel: loc.adminLevel || undefined,
+    country: loc.country || 'FI',
+    latitude: loc.latitude ? Number(loc.latitude) : 0,
+    longitude: loc.longitude ? Number(loc.longitude) : 0,
+    population: loc.population || undefined,
+    contentCount: loc.contentCount || 0,
+    parentName: undefined // Could be resolved but adds complexity
+  }))
+
+  await indexLocations(docs)
   return docs.length
 }
 

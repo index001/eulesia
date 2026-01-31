@@ -7,6 +7,7 @@
 
 import { db, locations, type Location } from '../db/index.js'
 import { eq, ilike, or, sql, and, inArray } from 'drizzle-orm'
+import { indexLocation, type LocationDocument } from './search/meilisearch.js'
 import {
   searchNominatim,
   lookupNominatim,
@@ -433,6 +434,32 @@ async function createLocationFromNominatim(result: NominatimResult): Promise<Loc
       nominatimUpdatedAt: new Date()
     })
     .returning()
+
+  // Index in Meilisearch for global search
+  try {
+    const locationDoc: LocationDocument = {
+      id: newLocation.id,
+      osmId: newLocation.osmId || 0,
+      osmType: newLocation.osmType || 'relation',
+      name: newLocation.name,
+      nameFi: newLocation.nameFi || undefined,
+      nameSv: newLocation.nameSv || undefined,
+      nameEn: newLocation.nameEn || undefined,
+      displayName: result.display_name,
+      type: newLocation.type || 'municipality',
+      adminLevel: newLocation.adminLevel || undefined,
+      country: newLocation.country || 'FI',
+      latitude: parseFloat(newLocation.latitude?.toString() || '0'),
+      longitude: parseFloat(newLocation.longitude?.toString() || '0'),
+      population: newLocation.population || undefined,
+      contentCount: 0,
+      parentName: parentInfo?.name
+    }
+    await indexLocation(locationDoc)
+  } catch (error) {
+    // Don't fail if indexing fails - location is still in DB
+    console.error('Failed to index location in Meilisearch:', error)
+  }
 
   return newLocation
 }

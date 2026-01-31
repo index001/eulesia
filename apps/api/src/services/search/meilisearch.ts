@@ -19,6 +19,7 @@ export const INDEXES = {
   THREADS: 'threads',
   PLACES: 'places',
   MUNICIPALITIES: 'municipalities',
+  LOCATIONS: 'locations',
   TAGS: 'tags'
 } as const
 
@@ -69,6 +70,25 @@ export interface MunicipalityDocument {
   country: string
 }
 
+export interface LocationDocument {
+  id: string
+  osmId: number
+  osmType: string
+  name: string
+  nameFi?: string
+  nameSv?: string
+  nameEn?: string
+  displayName: string
+  type: string
+  adminLevel?: number
+  country: string
+  latitude: number
+  longitude: number
+  population?: number
+  contentCount: number
+  parentName?: string
+}
+
 export interface TagDocument {
   tag: string
   count: number
@@ -80,6 +100,7 @@ export interface SearchResults {
   threads: ThreadDocument[]
   places: PlaceDocument[]
   municipalities: MunicipalityDocument[]
+  locations: LocationDocument[]
   tags: TagDocument[]
   query: string
   processingTimeMs: number
@@ -124,6 +145,15 @@ export async function initializeIndexes(): Promise<void> {
     searchableAttributes: ['name', 'nameFi', 'region'],
     filterableAttributes: ['country', 'region'],
     sortableAttributes: ['name'],
+    rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
+  })
+
+  // Locations index (dynamic locations from Nominatim)
+  const locationsIndex = client.index(INDEXES.LOCATIONS)
+  await locationsIndex.updateSettings({
+    searchableAttributes: ['name', 'nameFi', 'nameSv', 'nameEn', 'displayName', 'parentName'],
+    filterableAttributes: ['country', 'type', 'adminLevel'],
+    sortableAttributes: ['name', 'contentCount', 'population'],
     rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
   })
 
@@ -192,6 +222,21 @@ export async function indexMunicipalities(municipalities: MunicipalityDocument[]
 }
 
 /**
+ * Index a single location
+ */
+export async function indexLocation(location: LocationDocument): Promise<void> {
+  await client.index(INDEXES.LOCATIONS).addDocuments([location])
+}
+
+/**
+ * Index multiple locations
+ */
+export async function indexLocations(locations: LocationDocument[]): Promise<void> {
+  if (locations.length === 0) return
+  await client.index(INDEXES.LOCATIONS).addDocuments(locations)
+}
+
+/**
  * Index tags
  */
 export async function indexTags(tags: TagDocument[]): Promise<void> {
@@ -245,6 +290,12 @@ export async function search(query: string, options?: {
         attributesToRetrieve: ['id', 'name', 'nameFi', 'region', 'country']
       },
       {
+        indexUid: INDEXES.LOCATIONS,
+        q: query,
+        limit,
+        attributesToRetrieve: ['id', 'osmId', 'osmType', 'name', 'nameFi', 'displayName', 'type', 'country', 'contentCount', 'parentName']
+      },
+      {
         indexUid: INDEXES.TAGS,
         q: query,
         limit,
@@ -260,7 +311,8 @@ export async function search(query: string, options?: {
     threads: results.results[1]?.hits as ThreadDocument[] || [],
     places: results.results[2]?.hits as PlaceDocument[] || [],
     municipalities: results.results[3]?.hits as MunicipalityDocument[] || [],
-    tags: results.results[4]?.hits as TagDocument[] || [],
+    locations: results.results[4]?.hits as LocationDocument[] || [],
+    tags: results.results[5]?.hits as TagDocument[] || [],
     query,
     processingTimeMs
   }

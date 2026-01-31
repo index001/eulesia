@@ -849,11 +849,25 @@ export interface SearchTagResult {
   count: number
 }
 
+export interface SearchLocationResult {
+  id: string
+  osmId: number
+  osmType: string
+  name: string
+  nameFi?: string
+  displayName: string
+  type: string
+  country: string
+  contentCount: number
+  parentName?: string
+}
+
 export interface SearchResults {
   users: SearchUserResult[]
   threads: SearchThreadResult[]
   places: SearchPlaceResult[]
   municipalities: SearchMunicipalityResult[]
+  locations: SearchLocationResult[]
   tags: SearchTagResult[]
   query: string
   processingTimeMs: number
