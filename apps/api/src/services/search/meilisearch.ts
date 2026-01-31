@@ -187,7 +187,7 @@ export async function indexUsers(users: UserDocument[]): Promise<void> {
  * Index a single thread
  */
 export async function indexThread(thread: ThreadDocument): Promise<void> {
-  await client.index(INDEXES.THREADS).addDocuments([thread])
+  await client.index(INDEXES.THREADS).addDocuments([thread], { primaryKey: 'id' })
 }
 
 /**
@@ -195,14 +195,14 @@ export async function indexThread(thread: ThreadDocument): Promise<void> {
  */
 export async function indexThreads(threads: ThreadDocument[]): Promise<void> {
   if (threads.length === 0) return
-  await client.index(INDEXES.THREADS).addDocuments(threads)
+  await client.index(INDEXES.THREADS).addDocuments(threads, { primaryKey: 'id' })
 }
 
 /**
  * Index a single place
  */
 export async function indexPlace(place: PlaceDocument): Promise<void> {
-  await client.index(INDEXES.PLACES).addDocuments([place])
+  await client.index(INDEXES.PLACES).addDocuments([place], { primaryKey: 'id' })
 }
 
 /**
@@ -210,7 +210,7 @@ export async function indexPlace(place: PlaceDocument): Promise<void> {
  */
 export async function indexPlaces(places: PlaceDocument[]): Promise<void> {
   if (places.length === 0) return
-  await client.index(INDEXES.PLACES).addDocuments(places)
+  await client.index(INDEXES.PLACES).addDocuments(places, { primaryKey: 'id' })
 }
 
 /**
@@ -225,7 +225,7 @@ export async function indexMunicipalities(municipalities: MunicipalityDocument[]
  * Index a single location
  */
 export async function indexLocation(location: LocationDocument): Promise<void> {
-  await client.index(INDEXES.LOCATIONS).addDocuments([location])
+  await client.index(INDEXES.LOCATIONS).addDocuments([location], { primaryKey: 'id' })
 }
 
 /**
@@ -233,7 +233,7 @@ export async function indexLocation(location: LocationDocument): Promise<void> {
  */
 export async function indexLocations(locations: LocationDocument[]): Promise<void> {
   if (locations.length === 0) return
-  await client.index(INDEXES.LOCATIONS).addDocuments(locations)
+  await client.index(INDEXES.LOCATIONS).addDocuments(locations, { primaryKey: 'id' })
 }
 
 /**
@@ -241,9 +241,12 @@ export async function indexLocations(locations: LocationDocument[]): Promise<voi
  */
 export async function indexTags(tags: TagDocument[]): Promise<void> {
   if (tags.length === 0) return
-  // Use tag as id since it's unique
-  const docsWithId = tags.map(t => ({ id: t.tag, ...t }))
-  await client.index(INDEXES.TAGS).addDocuments(docsWithId)
+  // Use sanitized tag as id (replace non-alphanumeric with underscore)
+  const docsWithId = tags.map(t => ({
+    id: t.tag.replace(/[^a-zA-Z0-9-_]/g, '_'),
+    ...t
+  }))
+  await client.index(INDEXES.TAGS).addDocuments(docsWithId, { primaryKey: 'id' })
 }
 
 /**
