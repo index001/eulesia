@@ -22,7 +22,7 @@ const searchSchema = z.object({
 const threadSearchSchema = z.object({
   q: z.string().min(1).max(200),
   limit: z.coerce.number().min(1).max(50).default(20),
-  scope: z.enum(['municipal', 'regional', 'national']).optional(),
+  scope: z.enum(['local', 'national', 'european']).optional(),
   municipalityId: z.string().uuid().optional(),
   tags: z.string().optional() // Comma-separated
 })

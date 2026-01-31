@@ -29,7 +29,7 @@ export interface PaginatedResponse<T> {
 
 // Thread filters
 export interface ThreadFilters {
-  scope?: 'municipal' | 'regional' | 'national'
+  scope?: 'local' | 'national' | 'european'
   municipalityId?: string
   tags?: string[]
   authorId?: string

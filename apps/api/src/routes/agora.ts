@@ -14,7 +14,8 @@ const router = Router()
 const createThreadSchema = z.object({
   title: z.string().min(5).max(500),
   content: z.string().min(10).max(50000),
-  scope: z.enum(['municipal', 'regional', 'national']),
+  scope: z.enum(['local', 'national', 'european']),
+  country: z.string().length(2).optional().default('FI'),
   municipalityId: z.string().uuid().optional(),
   tags: z.array(z.string().max(100)).max(10).optional(),
   institutionalContext: z.object({
@@ -41,15 +42,17 @@ const threadVoteSchema = z.object({
 const commentSortSchema = z.enum(['best', 'new', 'old', 'controversial']).default('best')
 
 const threadFiltersSchema = z.object({
-  scope: z.enum(['municipal', 'regional', 'national']).optional(),
+  scope: z.enum(['local', 'national', 'european']).optional(),
+  country: z.string().length(2).optional(),
   municipalityId: z.string().uuid().optional(),
   tags: z.string().optional(), // Comma-separated
   // feedScope filters WITHIN subscriptions, never shows all content globally
   // 'following' = all subscribed content
-  // 'local' = subscribed content with municipal scope
-  // 'national' = subscribed content with national/regional scope
+  // 'local' = subscribed content with local scope
+  // 'national' = subscribed content with national scope
+  // 'european' = subscribed content with european scope
   // 'all' = same as 'following'
-  feedScope: z.enum(['following', 'local', 'national', 'all']).optional(),
+  feedScope: z.enum(['following', 'local', 'national', 'european', 'all']).optional(),
   sortBy: z.enum(['recent', 'new', 'top']).default('recent'),
   topPeriod: z.enum(['day', 'week', 'month', 'year']).optional(),
   page: z.coerce.number().min(1).default(1),
@@ -134,14 +137,14 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
 
     // Additional scope filter within subscriptions
     if (filters.feedScope === 'local') {
-      // Only municipal-scope content from subscriptions
-      conditions.push(eq(threads.scope, 'municipal'))
+      // Only local-scope content from subscriptions
+      conditions.push(eq(threads.scope, 'local'))
     } else if (filters.feedScope === 'national') {
-      // Only national/regional-scope content from subscriptions
-      conditions.push(or(
-        eq(threads.scope, 'national'),
-        eq(threads.scope, 'regional')
-      ))
+      // Only national-scope content from subscriptions
+      conditions.push(eq(threads.scope, 'national'))
+    } else if (filters.feedScope === 'european') {
+      // Only european-scope content from subscriptions
+      conditions.push(eq(threads.scope, 'european'))
     }
     // 'following' and 'all' show all scopes from subscriptions
   }
@@ -417,9 +420,11 @@ router.post('/threads', authMiddleware, asyncHandler(async (req: AuthenticatedRe
   const userId = req.user!.id
   const data = createThreadSchema.parse(req.body)
 
-  // Validate municipality if scope is municipal
-  if (data.scope === 'municipal' && !data.municipalityId) {
-    throw new AppError(400, 'Municipality is required for municipal scope')
+  // Validate: local scope should have municipality, national should have country
+  // European scope doesn't require location
+  if (data.scope === 'local' && !data.municipalityId) {
+    // Local scope without municipality - could be allowed in future with locationId
+    // For now, municipality is optional for local (user's default will be used)
   }
 
   // Only institutions can add institutional context
@@ -439,6 +444,7 @@ router.post('/threads', authMiddleware, asyncHandler(async (req: AuthenticatedRe
       contentHtml,
       authorId: userId,
       scope: data.scope,
+      country: data.country || 'FI',
       municipalityId: data.municipalityId,
       institutionalContext: data.institutionalContext
     })

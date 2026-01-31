@@ -38,7 +38,7 @@ export interface ThreadDocument {
   id: string
   title: string
   content: string
-  scope: 'municipal' | 'regional' | 'national'
+  scope: 'local' | 'national' | 'european'
   authorName: string
   authorId: string
   municipalityName?: string
@@ -279,7 +279,7 @@ export async function searchUsers(query: string, limit = 10): Promise<UserDocume
  */
 export async function searchThreads(query: string, options?: {
   limit?: number
-  scope?: 'municipal' | 'regional' | 'national'
+  scope?: 'local' | 'national' | 'european'
   municipalityId?: string
   tags?: string[]
 }): Promise<ThreadDocument[]> {

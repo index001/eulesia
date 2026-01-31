@@ -361,7 +361,7 @@ class ApiClient {
 
   async searchThreads(query: string, options?: {
     limit?: number
-    scope?: 'municipal' | 'regional' | 'national'
+    scope?: 'local' | 'national' | 'european'
     municipalityId?: string
     tags?: string[]
   }): Promise<SearchThreadResult[]> {
@@ -413,7 +413,7 @@ export interface Thread {
   title: string
   content: string
   contentHtml?: string
-  scope: 'municipal' | 'regional' | 'national'
+  scope: 'local' | 'national' | 'european'
   tags: string[]
   author: UserSummary
   municipality?: Municipality
@@ -554,12 +554,12 @@ export interface HomeData {
 }
 
 // Filter types - all scopes filter WITHIN subscriptions, never shows all content globally
-export type FeedScope = 'following' | 'local' | 'national' | 'all'
+export type FeedScope = 'following' | 'local' | 'national' | 'european' | 'all'
 export type SortBy = 'recent' | 'new' | 'top'
 export type TopPeriod = 'day' | 'week' | 'month' | 'year'
 
 export interface ThreadFilters {
-  scope?: 'municipal' | 'regional' | 'national'
+  scope?: 'local' | 'national' | 'european'
   municipalityId?: string
   tags?: string[]
   feedScope?: FeedScope
@@ -585,7 +585,8 @@ export interface ClubFilters {
 export interface CreateThreadData {
   title: string
   content: string
-  scope: 'municipal' | 'regional' | 'national'
+  scope: 'local' | 'national' | 'european'
+  country?: string
   municipalityId?: string
   tags?: string[]
   institutionalContext?: InstitutionalContext
@@ -748,7 +749,7 @@ export interface SearchThreadResult {
   id: string
   title: string
   content: string
-  scope: 'municipal' | 'regional' | 'national'
+  scope: 'local' | 'national' | 'european'
   authorName: string
   municipalityName?: string
   tags: string[]

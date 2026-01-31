@@ -3,7 +3,7 @@
 
 export type UserRole = 'citizen' | 'institution' | 'admin'
 export type InstitutionType = 'municipality' | 'agency' | 'ministry'
-export type Scope = 'municipal' | 'regional' | 'national'
+export type Scope = 'local' | 'national' | 'european'
 
 export interface User {
   id: string

@@ -1,4 +1,4 @@
-import { Users, MapPin, Layers, ChevronDown, Clock, TrendingUp, Sparkles } from 'lucide-react'
+import { Users, MapPin, Building2, Globe, ChevronDown, Clock, TrendingUp, Sparkles } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import type { FeedScope, SortBy, TopPeriod, Municipality } from '../../lib/api'
 
@@ -20,9 +20,10 @@ interface FeedFiltersProps {
 
 // All scopes filter within subscriptions - never shows all content globally
 const feedScopeOptions: { value: FeedScope; label: string; icon: React.ElementType }[] = [
-  { value: 'following', label: 'Kaikki', icon: Users },      // All from subscriptions
-  { value: 'local', label: 'Paikalliset', icon: MapPin },    // Municipal scope from subscriptions
-  { value: 'national', label: 'Valtakunnalliset', icon: Layers } // National scope from subscriptions
+  { value: 'following', label: 'Kaikki', icon: Users },           // All from subscriptions
+  { value: 'local', label: 'Paikalliset', icon: MapPin },         // Local scope from subscriptions
+  { value: 'national', label: 'Valtakunnalliset', icon: Building2 }, // National scope from subscriptions
+  { value: 'european', label: 'EU', icon: Globe }                 // European scope from subscriptions
 ]
 
 const sortByOptions: { value: SortBy; label: string; icon: React.ElementType }[] = [

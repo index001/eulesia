@@ -367,7 +367,7 @@ ${summary.keyPoints.map(p => `- ${p}`).join('\n')}
               content,
               contentHtml,
               authorId: botUserId,
-              scope: 'municipal',
+              scope: 'local',
               municipalityId,
               source: 'minutes_import',
               sourceUrl: pdfUrl,

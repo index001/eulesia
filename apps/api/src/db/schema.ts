@@ -5,7 +5,7 @@ import { relations } from 'drizzle-orm'
 export const userRoleEnum = pgEnum('user_role', ['citizen', 'institution', 'admin'])
 export const institutionTypeEnum = pgEnum('institution_type', ['municipality', 'agency', 'ministry'])
 export const identityLevelEnum = pgEnum('identity_level', ['basic', 'substantial', 'high'])
-export const scopeEnum = pgEnum('scope', ['municipal', 'regional', 'national'])
+export const scopeEnum = pgEnum('scope', ['local', 'national', 'european'])
 export const clubMemberRoleEnum = pgEnum('club_member_role', ['member', 'moderator', 'admin'])
 export const roomVisibilityEnum = pgEnum('room_visibility', ['public', 'private'])
 export const placeTypeEnum = pgEnum('place_type', ['poi', 'area', 'route', 'landmark', 'building'])
@@ -203,6 +203,7 @@ export const threads = pgTable('threads', {
   contentHtml: text('content_html'),
   authorId: uuid('author_id').notNull().references(() => users.id),
   scope: scopeEnum('scope').notNull(),
+  country: varchar('country', { length: 2 }).default('FI'),
   municipalityId: uuid('municipality_id').references(() => municipalities.id),
   institutionalContext: jsonb('institutional_context'),
   isPinned: boolean('is_pinned').default(false),

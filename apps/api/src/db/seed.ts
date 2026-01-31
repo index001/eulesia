@@ -340,7 +340,7 @@ The consultation period runs from January 15 to February 28, 2025.`
       content: thread1Content,
       contentHtml: renderMarkdown(thread1Content),
       authorId: tampereMunicipality.id,
-      scope: 'municipal',
+      scope: 'local',
       municipalityId: tampere.id,
       latitude: '61.4978',
       longitude: '23.7610',
@@ -377,7 +377,7 @@ The consultation period runs from January 15 to February 28, 2025.`
 Please share your thoughts on which location would best serve your needs and why.`,
       contentHtml: renderMarkdown(`The City of Tampere is planning a new library branch...`),
       authorId: tampereMunicipality.id,
-      scope: 'municipal',
+      scope: 'local',
       municipalityId: tampere.id,
       institutionalContext: {
         docs: [{ title: 'Location Options Analysis', url: '#' }],
@@ -403,7 +403,7 @@ I've created this thread to collect feedback about winter maintenance in our nei
 Has anyone else noticed similar patterns? I'm thinking we could compile feedback and present it constructively to the city.`,
       contentHtml: renderMarkdown(`Fellow Tampere residents...`),
       authorId: matti.id,
-      scope: 'municipal',
+      scope: 'local',
       municipalityId: tampere.id,
       replyCount: 2
     },
