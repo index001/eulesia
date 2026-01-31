@@ -75,14 +75,11 @@ export function NewThreadModal({
         name: prefilledMunicipalityName
       } as Municipality)
       setScope('local')
-    } else if (currentUser?.municipalityId && municipalities) {
+    } else if (currentUser?.municipality) {
       // Use user's default municipality
-      const userMuni = municipalities.find(m => m.id === currentUser.municipalityId)
-      if (userMuni) {
-        setSelectedMunicipality(userMuni)
-      }
+      setSelectedMunicipality(currentUser.municipality)
     }
-  }, [prefilledMunicipalityId, prefilledMunicipalityName, currentUser, municipalities])
+  }, [prefilledMunicipalityId, prefilledMunicipalityName, currentUser])
 
   // Close dropdown when clicking outside
   useEffect(() => {

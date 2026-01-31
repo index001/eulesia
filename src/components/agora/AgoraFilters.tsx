@@ -1,4 +1,4 @@
-import { Filter, MapPin, Map, Globe, X } from 'lucide-react'
+import { Filter, MapPin, Building2, Globe, X } from 'lucide-react'
 import type { Scope } from '../../types'
 import type { Municipality } from '../../lib/api'
 
@@ -15,10 +15,10 @@ interface AgoraFiltersProps {
 }
 
 const scopeOptions: { value: Scope | 'all'; label: string; icon: React.ElementType }[] = [
-  { value: 'all', label: 'All', icon: Filter },
-  { value: 'municipal', label: 'Municipal', icon: MapPin },
-  { value: 'regional', label: 'Regional', icon: Map },
-  { value: 'national', label: 'National', icon: Globe }
+  { value: 'all', label: 'Kaikki', icon: Filter },
+  { value: 'local', label: 'Paikallinen', icon: MapPin },
+  { value: 'national', label: 'Valtakunnallinen', icon: Building2 },
+  { value: 'european', label: 'EU', icon: Globe }
 ]
 
 export function AgoraFilters({
@@ -44,8 +44,8 @@ export function AgoraFilters({
               key={value}
               onClick={() => {
                 onScopeChange(value)
-                // Clear municipality when switching away from municipal
-                if (value !== 'municipal' && selectedMunicipality) {
+                // Clear municipality when switching away from local
+                if (value !== 'local' && selectedMunicipality) {
                   onMunicipalityChange?.(undefined)
                 }
               }}
@@ -61,8 +61,8 @@ export function AgoraFilters({
           ))}
         </div>
 
-        {/* Municipality chips - show when Municipal scope is selected */}
-        {selectedScope === 'municipal' && municipalities && municipalities.length > 0 && (
+        {/* Municipality chips - show when Local scope is selected */}
+        {selectedScope === 'local' && municipalities && municipalities.length > 0 && (
           <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide">
             <span className="text-xs text-gray-500 flex-shrink-0">Kunta:</span>
             <button
@@ -93,7 +93,7 @@ export function AgoraFilters({
 
         {/* Topic tags */}
         <div className="flex items-center gap-2 overflow-x-auto pt-2 scrollbar-hide">
-          <span className="text-xs text-gray-500 flex-shrink-0">Topics:</span>
+          <span className="text-xs text-gray-500 flex-shrink-0">Aiheet:</span>
           {availableTags.slice(0, 8).map(tag => (
             <button
               key={tag}
@@ -116,7 +116,7 @@ export function AgoraFilters({
             className="mt-2 flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
           >
             <X className="w-3 h-3" />
-            Clear filters
+            Tyhjennä suodattimet
           </button>
         )}
       </div>
