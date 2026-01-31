@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, MapPin, Building2, Globe, Loader2, Hash, Plus } from 'lucide-react'
 import { useCreateThread } from '../../hooks/useApi'
-import { useAuth } from '../../hooks/useAuth'
 import { LocationSearch } from '../common/LocationSearch'
 import type { Scope } from '../../types'
 import type { LocationResult } from '../../lib/api'
@@ -51,7 +50,6 @@ export function NewThreadModal({
   prefilledMunicipalityName,
   prefilledLocation
 }: NewThreadModalProps) {
-  const { currentUser } = useAuth()
   const createThreadMutation = useCreateThread()
 
   // Form state
