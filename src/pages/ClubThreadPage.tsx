@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Users, ChevronDown, Lock } from 'lucide-react'
 import { Layout } from '../components/layout'
-import { ActorBadge, TagList, ContentEndMarker } from '../components/common'
+import { ActorBadge, ContentEndMarker } from '../components/common'
 import { CommentThread } from '../components/agora/CommentThread'
 import { useClubThread, useAddClubComment } from '../hooks/useApi'
 import type { Comment as ApiComment, UserSummary } from '../lib/api'
@@ -148,13 +148,6 @@ export function ClubThreadPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
           {thread.title}
         </h1>
-
-        {/* Tags */}
-        {thread.tags && thread.tags.length > 0 && (
-          <div className="mb-4">
-            <TagList tags={thread.tags} size="md" />
-          </div>
-        )}
 
         {/* Meta */}
         <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
