@@ -8,6 +8,7 @@ import {
   ThreadPage,
   ClubsPage,
   ClubViewPage,
+  ClubThreadPage,
   MapPage,
   HomePage,
   RoomPage,
@@ -117,6 +118,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ClubViewPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clubs/:clubId/thread/:threadId"
+        element={
+          <ProtectedRoute>
+            <ClubThreadPage />
           </ProtectedRoute>
         }
       />

@@ -74,14 +74,21 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
   }
 
   // Handle feedScope filtering (personalized feed)
-  // ALL feedScopes filter within subscriptions - never show all content globally
+  // Subscription filtering ONLY applies when:
+  // 1. User is logged in AND
+  // 2. feedScope is explicitly set AND
+  // 3. No specific municipalityId is provided (viewing general feed)
+  //
+  // When municipalityId is provided, show ALL content from that municipality
+  const isViewingSpecificMunicipality = !!filters.municipalityId
+  const shouldApplySubscriptionFilter = userId && filters.feedScope && !isViewingSpecificMunicipality
+
+  // Declare subscription arrays at outer scope for later use in tag filtering
   let followedAuthors: string[] = []
   let followedMunicipalities: string[] = []
   let followedTags: string[] = []
 
-  // Get subscriptions for any feedScope (except when not logged in)
-  if (userId && (filters.feedScope === 'following' || filters.feedScope === 'local' ||
-      filters.feedScope === 'national' || filters.feedScope === 'all' || !filters.feedScope)) {
+  if (shouldApplySubscriptionFilter) {
     const subscriptions = await db
       .select()
       .from(userSubscriptions)
@@ -97,7 +104,7 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
       .filter(s => s.entityType === 'tag')
       .map(s => s.entityId)
 
-    // Build subscription filter - always applied for logged-in users
+    // Build subscription filter
     const followConditions = []
     if (followedAuthors.length > 0) {
       followConditions.push(inArray(threads.authorId, followedAuthors))
@@ -118,7 +125,7 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
           page: filters.page,
           limit: filters.limit,
           hasMore: false,
-          feedScope: filters.feedScope || 'following',
+          feedScope: filters.feedScope,
           hasSubscriptions: false
         }
       })
