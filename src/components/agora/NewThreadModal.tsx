@@ -1,17 +1,19 @@
-import { useState, useEffect, useRef } from 'react'
-import { X, MapPin, Building2, Globe, Search, Loader2, Hash, Plus } from 'lucide-react'
-import { useMunicipalities, useCreateThread } from '../../hooks/useApi'
+import { useState, useEffect } from 'react'
+import { X, MapPin, Building2, Globe, Loader2, Hash, Plus } from 'lucide-react'
+import { useCreateThread } from '../../hooks/useApi'
 import { useAuth } from '../../hooks/useAuth'
+import { LocationSearch } from '../common/LocationSearch'
 import type { Scope } from '../../types'
-import type { Municipality } from '../../lib/api'
+import type { LocationResult } from '../../lib/api'
 
 interface NewThreadModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: (threadId: string) => void
-  // Pre-filled context (e.g., from municipality page)
+  // Pre-filled context (e.g., from municipality/location page)
   prefilledMunicipalityId?: string
   prefilledMunicipalityName?: string
+  prefilledLocation?: LocationResult
 }
 
 const scopeOptions: { value: Scope; icon: React.ElementType; label: string; description: string }[] = [
@@ -46,69 +48,59 @@ export function NewThreadModal({
   onClose,
   onSuccess,
   prefilledMunicipalityId,
-  prefilledMunicipalityName
+  prefilledMunicipalityName,
+  prefilledLocation
 }: NewThreadModalProps) {
   const { currentUser } = useAuth()
-  const { data: municipalities } = useMunicipalities()
   const createThreadMutation = useCreateThread()
 
   // Form state
   const [scope, setScope] = useState<Scope>('local')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [selectedMunicipality, setSelectedMunicipality] = useState<Municipality | null>(null)
-  const [municipalitySearch, setMunicipalitySearch] = useState('')
-  const [showMunicipalityDropdown, setShowMunicipalityDropdown] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [customTag, setCustomTag] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const municipalityInputRef = useRef<HTMLInputElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
   // Set prefilled values
   useEffect(() => {
-    if (prefilledMunicipalityId && prefilledMunicipalityName) {
-      setSelectedMunicipality({
-        id: prefilledMunicipalityId,
-        name: prefilledMunicipalityName
-      } as Municipality)
+    if (prefilledLocation) {
+      setSelectedLocation(prefilledLocation)
       setScope('local')
-    } else if (currentUser?.municipality) {
-      // Use user's default municipality
-      setSelectedMunicipality(currentUser.municipality)
+    } else if (prefilledMunicipalityId && prefilledMunicipalityName) {
+      // Legacy municipality support - convert to LocationResult format
+      setSelectedLocation({
+        id: prefilledMunicipalityId,
+        osmId: 0,
+        osmType: 'relation',
+        name: prefilledMunicipalityName,
+        nameFi: null,
+        nameSv: null,
+        nameEn: null,
+        displayName: prefilledMunicipalityName,
+        type: 'municipality',
+        adminLevel: 7,
+        country: 'FI',
+        latitude: 0,
+        longitude: 0,
+        bounds: null,
+        population: null,
+        status: 'active',
+        contentCount: 0,
+        parent: null
+      })
+      setScope('local')
     }
-  }, [prefilledMunicipalityId, prefilledMunicipalityName, currentUser])
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowMunicipalityDropdown(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // Filter municipalities by search
-  const filteredMunicipalities = municipalities?.filter(m =>
-    m.name.toLowerCase().includes(municipalitySearch.toLowerCase())
-  ).slice(0, 8) || []
+  }, [prefilledLocation, prefilledMunicipalityId, prefilledMunicipalityName])
 
   const handleScopeChange = (newScope: Scope) => {
     setScope(newScope)
-    // Clear municipality if switching to european
+    // Clear location if switching to european
     if (newScope === 'european') {
-      setSelectedMunicipality(null)
+      setSelectedLocation(null)
     }
-  }
-
-  const handleMunicipalitySelect = (municipality: Municipality) => {
-    setSelectedMunicipality(municipality)
-    setMunicipalitySearch('')
-    setShowMunicipalityDropdown(false)
   }
 
   const handleTagToggle = (tag: string) => {
@@ -137,12 +129,19 @@ export function NewThreadModal({
     setError(null)
 
     try {
+      // Build location data based on selected location status
+      const locationData = scope === 'local' && selectedLocation
+        ? selectedLocation.status === 'active' && selectedLocation.id
+          ? { locationId: selectedLocation.id }
+          : { locationOsmId: selectedLocation.osmId, locationOsmType: selectedLocation.osmType }
+        : {}
+
       const result = await createThreadMutation.mutateAsync({
         title: title.trim(),
         content: content.trim(),
         scope,
         country: 'FI', // TODO: Make dynamic based on user's country
-        municipalityId: scope === 'local' ? selectedMunicipality?.id : undefined,
+        ...locationData,
         tags: selectedTags.length > 0 ? selectedTags : undefined
       })
 
@@ -163,15 +162,15 @@ export function NewThreadModal({
     setSelectedTags([])
     setCustomTag('')
     setError(null)
-    if (!prefilledMunicipalityId) {
-      setSelectedMunicipality(null)
+    if (!prefilledMunicipalityId && !prefilledLocation) {
+      setSelectedLocation(null)
     }
     onClose()
   }
 
   if (!isOpen) return null
 
-  const isPrefilled = !!prefilledMunicipalityId
+  const isPrefilled = !!(prefilledMunicipalityId || prefilledLocation)
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -219,7 +218,7 @@ export function NewThreadModal({
 
           {/* Location field (for local and national) */}
           {scope !== 'european' && (
-            <div ref={dropdownRef}>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {scope === 'local' ? 'Sijainti' : 'Maa'}
               </label>
@@ -228,44 +227,16 @@ export function NewThreadModal({
                   {isPrefilled ? (
                     <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg">
                       <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">{selectedMunicipality?.name}</span>
+                      <span className="text-gray-700">{selectedLocation?.name}</span>
                     </div>
                   ) : (
-                    <>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                          ref={municipalityInputRef}
-                          type="text"
-                          value={selectedMunicipality ? selectedMunicipality.name : municipalitySearch}
-                          onChange={(e) => {
-                            setMunicipalitySearch(e.target.value)
-                            setSelectedMunicipality(null)
-                            setShowMunicipalityDropdown(true)
-                          }}
-                          onFocus={() => setShowMunicipalityDropdown(true)}
-                          placeholder="Hae kuntaa tai aluetta..."
-                          className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                      {showMunicipalityDropdown && filteredMunicipalities.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto">
-                          {filteredMunicipalities.map(m => (
-                            <button
-                              key={m.id}
-                              onClick={() => handleMunicipalitySelect(m)}
-                              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 text-sm"
-                            >
-                              <MapPin className="w-4 h-4 text-gray-400" />
-                              <span>{m.name}</span>
-                              {m.region && (
-                                <span className="text-gray-400 text-xs">{m.region}</span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </>
+                    <LocationSearch
+                      value={selectedLocation}
+                      onChange={setSelectedLocation}
+                      country="FI"
+                      types={['municipality', 'village', 'city']}
+                      placeholder="Hae kuntaa, kaupunkia tai kylää..."
+                    />
                   )}
                 </div>
               ) : (

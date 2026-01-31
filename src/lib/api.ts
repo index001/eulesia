@@ -328,6 +328,30 @@ class ApiClient {
     return this.request('/map/municipalities')
   }
 
+  // Locations (dynamic with Nominatim)
+  async searchLocations(query: string, options?: {
+    country?: string
+    types?: string[]
+    limit?: number
+    includeNominatim?: boolean
+  }): Promise<LocationSearchResponse> {
+    const params = new URLSearchParams()
+    params.set('q', query)
+    if (options?.country) params.set('country', options.country)
+    if (options?.types?.length) params.set('types', options.types.join(','))
+    if (options?.limit) params.set('limit', options.limit.toString())
+    if (options?.includeNominatim !== undefined) params.set('includeNominatim', options.includeNominatim.toString())
+    return this.request(`/locations/search?${params}`)
+  }
+
+  async getLocationByOsm(osmType: OsmType, osmId: number): Promise<LocationWithHierarchy> {
+    return this.request(`/locations/osm/${osmType}/${osmId}`)
+  }
+
+  async getLocation(id: string): Promise<LocationWithHierarchy> {
+    return this.request(`/locations/${id}`)
+  }
+
   // Subscriptions
   async subscribe(data: SubscribeData): Promise<Subscription> {
     return this.request('/subscriptions', {
@@ -588,6 +612,10 @@ export interface CreateThreadData {
   scope: 'local' | 'national' | 'european'
   country?: string
   municipalityId?: string
+  // Location support: either locationId (existing) or locationOsmId (to be activated)
+  locationId?: string
+  locationOsmId?: number
+  locationOsmType?: OsmType
   tags?: string[]
   institutionalContext?: InstitutionalContext
 }
@@ -681,6 +709,49 @@ export interface LocationDetails {
   clubs?: Club[]
   municipality?: Municipality
   place?: Place
+}
+
+// Dynamic Location types (Nominatim integration)
+export type OsmType = 'node' | 'way' | 'relation'
+export type LocationStatus = 'active' | 'available'
+
+export interface LocationResult {
+  id: string | null           // DB ID (null if from Nominatim only)
+  osmId: number
+  osmType: OsmType
+  name: string
+  nameFi: string | null
+  nameSv: string | null
+  nameEn: string | null
+  displayName: string
+  type: string                // 'municipality', 'village', 'region', etc.
+  adminLevel: number | null
+  country: string
+  latitude: number
+  longitude: number
+  bounds: { south: number; north: number; west: number; east: number } | null
+  population: number | null
+  status: LocationStatus      // 'active' = in DB, 'available' = from Nominatim
+  contentCount: number
+  parent: {
+    name: string
+    type: string
+  } | null
+}
+
+export interface LocationSearchResponse {
+  results: LocationResult[]
+  source: 'cache' | 'nominatim' | 'mixed'
+}
+
+export interface LocationHierarchyItem {
+  name: string
+  type: string
+  adminLevel: number | null
+}
+
+export interface LocationWithHierarchy extends LocationResult {
+  hierarchy: LocationHierarchyItem[]
 }
 
 // Invite types

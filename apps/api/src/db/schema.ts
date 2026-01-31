@@ -20,22 +20,32 @@ export const subscriptionNotifyEnum = pgEnum('subscription_notify', ['all', 'non
 export const locations = pgTable('locations', {
   id: uuid('id').primaryKey().defaultRandom(),
   osmId: integer('osm_id').unique(),
+  osmType: varchar('osm_type', { length: 20 }).default('relation'), // 'node', 'way', 'relation'
   name: varchar('name', { length: 255 }).notNull(),
   nameLocal: varchar('name_local', { length: 255 }),
-  adminLevel: integer('admin_level'), // OSM admin_level: 4=region, 7=municipality, 8=village
+  nameFi: varchar('name_fi', { length: 255 }),
+  nameSv: varchar('name_sv', { length: 255 }),
+  nameEn: varchar('name_en', { length: 255 }),
+  adminLevel: integer('admin_level'), // OSM admin_level: 2=country, 4=region, 7=municipality, 8=village
   type: varchar('type', { length: 50 }), // 'country', 'region', 'municipality', 'village', 'district'
   parentId: uuid('parent_id'),
   country: varchar('country', { length: 2 }).default('FI'),
   latitude: decimal('latitude', { precision: 10, scale: 7 }),
   longitude: decimal('longitude', { precision: 10, scale: 7 }),
-  bounds: jsonb('bounds'), // GeoJSON polygon
+  bounds: jsonb('bounds'), // GeoJSON bounding box
+  population: integer('population'),
+  status: varchar('status', { length: 20 }).default('active'), // 'active' = has content, 'cached' = no content
+  contentCount: integer('content_count').default(0),
+  nominatimUpdatedAt: timestamp('nominatim_updated_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
   parentIdx: index('locations_parent_idx').on(table.parentId),
   adminLevelIdx: index('locations_admin_level_idx').on(table.adminLevel),
   osmIdx: index('locations_osm_idx').on(table.osmId),
   countryIdx: index('locations_country_idx').on(table.country),
-  coordsIdx: index('locations_coords_idx').on(table.latitude, table.longitude)
+  coordsIdx: index('locations_coords_idx').on(table.latitude, table.longitude),
+  statusIdx: index('locations_status_idx').on(table.status),
+  contentCountIdx: index('locations_content_count_idx').on(table.contentCount)
 }))
 
 // Municipalities

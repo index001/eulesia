@@ -17,6 +17,10 @@ const createThreadSchema = z.object({
   scope: z.enum(['local', 'national', 'european']),
   country: z.string().length(2).optional().default('FI'),
   municipalityId: z.string().uuid().optional(),
+  // Location support: either locationId (existing) or locationOsmId (to be activated)
+  locationId: z.string().uuid().optional(),
+  locationOsmId: z.number().int().positive().optional(),
+  locationOsmType: z.enum(['node', 'way', 'relation']).optional(),
   tags: z.array(z.string().max(100)).max(10).optional(),
   institutionalContext: z.object({
     docs: z.array(z.object({ title: z.string(), url: z.string().url() })).optional(),
@@ -420,16 +424,25 @@ router.post('/threads', authMiddleware, asyncHandler(async (req: AuthenticatedRe
   const userId = req.user!.id
   const data = createThreadSchema.parse(req.body)
 
-  // Validate: local scope should have municipality, national should have country
+  // Validate: local scope should have municipality or location
   // European scope doesn't require location
-  if (data.scope === 'local' && !data.municipalityId) {
-    // Local scope without municipality - could be allowed in future with locationId
-    // For now, municipality is optional for local (user's default will be used)
+  if (data.scope === 'local' && !data.municipalityId && !data.locationId && !data.locationOsmId) {
+    // Local scope without any location - allowed, user's default will be used
   }
 
   // Only institutions can add institutional context
   if (data.institutionalContext && req.user!.role !== 'institution') {
     throw new AppError(403, 'Only institutions can add institutional context')
+  }
+
+  // Resolve location if OSM ID is provided (activates location if needed)
+  let resolvedLocationId: string | null = data.locationId || null
+  if (!resolvedLocationId && data.locationOsmId && data.locationOsmType) {
+    const { resolveLocation } = await import('../services/locations.js')
+    resolvedLocationId = await resolveLocation({
+      locationOsmId: data.locationOsmId,
+      locationOsmType: data.locationOsmType
+    })
   }
 
   // Render markdown
@@ -446,9 +459,16 @@ router.post('/threads', authMiddleware, asyncHandler(async (req: AuthenticatedRe
       scope: data.scope,
       country: data.country || 'FI',
       municipalityId: data.municipalityId,
+      locationId: resolvedLocationId,
       institutionalContext: data.institutionalContext
     })
     .returning()
+
+  // Increment content count for location if one was resolved
+  if (resolvedLocationId) {
+    const { incrementContentCount } = await import('../services/locations.js')
+    await incrementContentCount(resolvedLocationId)
+  }
 
   // Add tags
   if (data.tags && data.tags.length > 0) {

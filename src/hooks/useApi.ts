@@ -9,7 +9,8 @@ import type {
   CreateClubThreadData,
   CreateRoomData,
   EntityType,
-  SubscribeData
+  SubscribeData,
+  OsmType
 } from '../lib/api'
 
 export type CommentSort = 'best' | 'new' | 'old' | 'controversial'
@@ -418,6 +419,42 @@ export function useMunicipalities() {
   return useQuery({
     queryKey: ['municipalities'],
     queryFn: () => api.getMunicipalities()
+  })
+}
+
+// Location hooks (dynamic with Nominatim)
+export function useLocationSearch(
+  query: string,
+  options?: {
+    country?: string
+    types?: string[]
+    limit?: number
+    includeNominatim?: boolean
+  }
+) {
+  return useQuery({
+    queryKey: ['locationSearch', query, options],
+    queryFn: () => api.searchLocations(query, options),
+    enabled: query.length >= 2, // Only search with 2+ characters
+    staleTime: 1000 * 60 * 30 // 30 minutes - locations rarely change
+  })
+}
+
+export function useLocation(id: string) {
+  return useQuery({
+    queryKey: ['location', id],
+    queryFn: () => api.getLocation(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 60 // 1 hour
+  })
+}
+
+export function useLocationByOsm(osmType: OsmType | null, osmId: number | null) {
+  return useQuery({
+    queryKey: ['locationOsm', osmType, osmId],
+    queryFn: () => api.getLocationByOsm(osmType!, osmId!),
+    enabled: !!osmType && !!osmId,
+    staleTime: 1000 * 60 * 60 // 1 hour
   })
 }
 

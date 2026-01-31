@@ -1,6 +1,7 @@
 export { ActorBadge } from './ActorBadge'
 export { ContentEndMarker } from './ContentEndMarker'
 export { FollowButton } from './FollowButton'
+export { LocationSearch } from './LocationSearch'
 export { ScopeBadge } from './ScopeBadge'
 export { SearchBar } from './SearchBar'
 export { TagList } from './TagList'
