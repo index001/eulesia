@@ -1,10 +1,11 @@
-import { useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Plus } from 'lucide-react'
 import { Layout } from '../components/layout'
-import { ThreadCard } from '../components/agora'
+import { ThreadCard, NewThreadModal } from '../components/agora'
 import { ContentEndMarker, FollowButton } from '../components/common'
 import { useThreads, useMunicipalities } from '../hooks/useApi'
+import { useAuth } from '../hooks/useAuth'
 import type { Thread as ApiThread, UserSummary, Municipality } from '../lib/api'
 
 // Transform API thread to component format
@@ -43,6 +44,10 @@ function transformAuthor(author: UserSummary) {
 
 export function MunicipalityPage() {
   const { municipalityId } = useParams<{ municipalityId: string }>()
+  const navigate = useNavigate()
+  const { currentUser } = useAuth()
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
   const { data: municipalitiesData } = useMunicipalities()
   const { data: threadsData, isLoading, error } = useThreads({ municipalityId })
 
@@ -56,6 +61,10 @@ export function MunicipalityPage() {
       .map(transformThread)
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
   }, [threadsData])
+
+  const handleThreadCreated = (threadId: string) => {
+    navigate(`/agora/thread/${threadId}`)
+  }
 
   return (
     <Layout>
@@ -78,14 +87,34 @@ export function MunicipalityPage() {
               )}
             </div>
           </div>
-          {municipalityId && (
-            <FollowButton entityType="municipality" entityId={municipalityId} />
-          )}
+          <div className="flex items-center gap-2">
+            {currentUser && municipality && (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Uusi
+              </button>
+            )}
+            {municipalityId && (
+              <FollowButton entityType="municipality" entityId={municipalityId} />
+            )}
+          </div>
         </div>
         <p className="text-sm text-gray-600">
           {threads.length} keskustelua
         </p>
       </div>
+
+      {/* New Thread Modal */}
+      <NewThreadModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={handleThreadCreated}
+        prefilledMunicipalityId={municipalityId}
+        prefilledMunicipalityName={municipality?.name}
+      />
 
       {/* Thread list */}
       <div className="px-4 py-4">

@@ -124,7 +124,7 @@ export function AgoraPage() {
   }
 
   const handleThreadCreated = (threadId: string) => {
-    navigate(`/agora/${threadId}`)
+    navigate(`/agora/thread/${threadId}`)
   }
 
   const handleOnboardingComplete = () => {
