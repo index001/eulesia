@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout'
-import { ThreadCard, FeedFilters, FeedOnboarding, NewThreadModal } from '../components/agora'
+import { ThreadCard, FeedFilters, FeedOnboarding, InlineThreadForm } from '../components/agora'
 import { ContentEndMarker } from '../components/common'
 import { useThreads, useTags, useMunicipalities, useVoteThread, useSubscriptions } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
@@ -55,7 +54,6 @@ export function AgoraPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [selectedMunicipality, setSelectedMunicipality] = useState<string | undefined>()
   const [showOnboarding, setShowOnboarding] = useState(false)
-  const [showCreateModal, setShowCreateModal] = useState(false)
 
   const { data: tagsData } = useTags()
   const { data: municipalitiesData } = useMunicipalities()
@@ -135,31 +133,11 @@ export function AgoraPage() {
     <Layout>
       {/* Page header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Agora</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Julkiset kansalaiskeskustelut
-            </p>
-          </div>
-          {currentUser && (
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Uusi keskustelu
-            </button>
-          )}
-        </div>
+        <h1 className="text-xl font-bold text-gray-900">Agora</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Julkiset kansalaiskeskustelut
+        </p>
       </div>
-
-      {/* New Thread Modal */}
-      <NewThreadModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSuccess={handleThreadCreated}
-      />
 
       {/* Filters */}
       <FeedFilters
@@ -179,7 +157,12 @@ export function AgoraPage() {
       />
 
       {/* Thread list */}
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 space-y-4">
+        {/* Inline thread creation */}
+        {currentUser && (
+          <InlineThreadForm onSuccess={handleThreadCreated} />
+        )}
+
         {isLoading && (
           <div className="flex justify-center py-12">
             <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />

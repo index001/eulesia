@@ -1,10 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
-import { MapPin, Hash, Plus, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+import { MapPin, Building2, Globe, Hash, Plus, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
 import { useCreateThread } from '../../hooks/useApi'
+import { LocationSearch } from '../common/LocationSearch'
+import type { Scope } from '../../types'
+import type { LocationResult } from '../../lib/api'
 
 interface InlineThreadFormProps {
-  locationId: string
-  locationName: string
+  // For municipality pages - prefilled location
+  locationId?: string
+  locationName?: string
+  // Callback when thread is created
   onSuccess: (threadId: string) => void
 }
 
@@ -14,13 +19,24 @@ const suggestedTags = [
   'kulttuuri', 'talous', 'turvallisuus', 'sosiaalipalvelut', 'infrastruktuuri'
 ]
 
+const scopeOptions: { value: Scope; icon: React.ElementType; label: string }[] = [
+  { value: 'local', icon: MapPin, label: 'Paikallinen' },
+  { value: 'national', icon: Building2, label: 'Valtakunnallinen' },
+  { value: 'european', icon: Globe, label: 'EU' }
+]
+
 export function InlineThreadForm({ locationId, locationName, onSuccess }: InlineThreadFormProps) {
   const createThreadMutation = useCreateThread()
   const formRef = useRef<HTMLDivElement>(null)
   const titleInputRef = useRef<HTMLInputElement>(null)
 
+  // Is this a prefilled location context (municipality page)?
+  const isPrefilled = !!(locationId && locationName)
+
   // Form state
   const [isExpanded, setIsExpanded] = useState(false)
+  const [scope, setScope] = useState<Scope>(isPrefilled ? 'local' : 'national')
+  const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -31,9 +47,17 @@ export function InlineThreadForm({ locationId, locationName, onSuccess }: Inline
   // Focus title input when expanded
   useEffect(() => {
     if (isExpanded && titleInputRef.current) {
-      titleInputRef.current.focus()
+      // Small delay to ensure DOM is ready
+      setTimeout(() => titleInputRef.current?.focus(), 50)
     }
   }, [isExpanded])
+
+  // Clear location when switching away from local scope
+  useEffect(() => {
+    if (scope !== 'local') {
+      setSelectedLocation(null)
+    }
+  }, [scope])
 
   const handleTagToggle = (tag: string) => {
     setSelectedTags(prev =>
@@ -57,16 +81,31 @@ export function InlineThreadForm({ locationId, locationName, onSuccess }: Inline
       return
     }
 
+    if (scope === 'local' && !isPrefilled && !selectedLocation) {
+      setError('Valitse sijainti paikalliselle keskustelulle')
+      return
+    }
+
     setIsSubmitting(true)
     setError(null)
 
     try {
+      // Build location data
+      let locationData = {}
+      if (isPrefilled && locationId) {
+        locationData = { locationId }
+      } else if (scope === 'local' && selectedLocation) {
+        locationData = selectedLocation.status === 'active' && selectedLocation.id
+          ? { locationId: selectedLocation.id }
+          : { locationOsmId: selectedLocation.osmId, locationOsmType: selectedLocation.osmType }
+      }
+
       const result = await createThreadMutation.mutateAsync({
         title: title.trim(),
         content: content.trim(),
-        scope: 'local',
+        scope,
         country: 'FI',
-        locationId,
+        ...locationData,
         tags: selectedTags.length > 0 ? selectedTags : undefined
       })
 
@@ -74,6 +113,8 @@ export function InlineThreadForm({ locationId, locationName, onSuccess }: Inline
       setTitle('')
       setContent('')
       setSelectedTags([])
+      setSelectedLocation(null)
+      setScope(isPrefilled ? 'local' : 'national')
       setIsExpanded(false)
 
       onSuccess(result.id)
@@ -89,6 +130,8 @@ export function InlineThreadForm({ locationId, locationName, onSuccess }: Inline
     setTitle('')
     setContent('')
     setSelectedTags([])
+    setSelectedLocation(null)
+    setScope(isPrefilled ? 'local' : 'national')
     setError(null)
     setIsExpanded(false)
   }
@@ -110,12 +153,33 @@ export function InlineThreadForm({ locationId, locationName, onSuccess }: Inline
       ) : (
         /* Expanded state */
         <div className="p-4 space-y-4">
-          {/* Header with location */}
+          {/* Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="w-4 h-4 text-blue-600" />
-              <span className="font-medium text-blue-700">{locationName}</span>
-            </div>
+            {isPrefilled ? (
+              // Show location badge when prefilled
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                <span className="font-medium text-blue-700">{locationName}</span>
+              </div>
+            ) : (
+              // Show scope tabs when not prefilled
+              <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+                {scopeOptions.map(({ value, icon: Icon, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => setScope(value)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      scope === value
+                        ? 'bg-white text-blue-700 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
             <button
               onClick={handleCancel}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -123,6 +187,31 @@ export function InlineThreadForm({ locationId, locationName, onSuccess }: Inline
               <ChevronUp className="w-5 h-5 text-gray-400" />
             </button>
           </div>
+
+          {/* Location search for local scope (when not prefilled) */}
+          {!isPrefilled && scope === 'local' && (
+            <LocationSearch
+              value={selectedLocation}
+              onChange={setSelectedLocation}
+              country="FI"
+              types={['municipality', 'village', 'city']}
+              placeholder="Hae kuntaa, kaupunkia tai kylää..."
+            />
+          )}
+
+          {/* National/EU indicator */}
+          {!isPrefilled && scope === 'national' && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">
+              <span className="text-base">🇫🇮</span>
+              <span>Koko Suomi</span>
+            </div>
+          )}
+          {!isPrefilled && scope === 'european' && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">
+              <span className="text-base">🇪🇺</span>
+              <span>Euroopan laajuinen</span>
+            </div>
+          )}
 
           {/* Title */}
           <input
