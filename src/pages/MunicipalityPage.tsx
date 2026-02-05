@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Layout } from '../components/layout'
-import { ThreadCard, NewThreadModal } from '../components/agora'
+import { ThreadCard, InlineThreadForm } from '../components/agora'
 import { ContentEndMarker, FollowButton } from '../components/common'
 import { useThreads, useMunicipalities } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
@@ -46,7 +46,6 @@ export function MunicipalityPage() {
   const { municipalityId } = useParams<{ municipalityId: string }>()
   const navigate = useNavigate()
   const { currentUser } = useAuth()
-  const [showCreateModal, setShowCreateModal] = useState(false)
 
   const { data: municipalitiesData } = useMunicipalities()
   const { data: threadsData, isLoading, error } = useThreads({ municipalityId })
@@ -87,37 +86,25 @@ export function MunicipalityPage() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {currentUser && municipality && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Uusi
-              </button>
-            )}
-            {municipalityId && (
-              <FollowButton entityType="municipality" entityId={municipalityId} />
-            )}
-          </div>
+          {municipalityId && (
+            <FollowButton entityType="municipality" entityId={municipalityId} />
+          )}
         </div>
         <p className="text-sm text-gray-600">
           {threads.length} keskustelua
         </p>
       </div>
 
-      {/* New Thread Modal */}
-      <NewThreadModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSuccess={handleThreadCreated}
-        prefilledMunicipalityId={municipalityId}
-        prefilledMunicipalityName={municipality?.name}
-      />
-
       {/* Thread list */}
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 space-y-4">
+        {/* Inline thread creation form */}
+        {currentUser && municipality && municipalityId && (
+          <InlineThreadForm
+            locationId={municipalityId}
+            locationName={municipality.name}
+            onSuccess={handleThreadCreated}
+          />
+        )}
         {isLoading && (
           <div className="flex justify-center py-12">
             <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
