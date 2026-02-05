@@ -9,8 +9,8 @@ import multer from 'multer'
 import { db, users } from '../db/index.js'
 import { eq } from 'drizzle-orm'
 import { processAvatar, processContentImage, deleteUpload, getStorageStats } from '../services/uploads.js'
-import { requireAuth } from '../middleware/auth.js'
-import type { AuthRequest } from '../types.js'
+import { authMiddleware } from '../middleware/auth.js'
+import type { AuthenticatedRequest } from '../types/index.js'
 
 const router = Router()
 
@@ -34,9 +34,9 @@ const upload = multer({
  * Upload avatar image
  * POST /uploads/avatar
  */
-router.post('/avatar', requireAuth, upload.single('file'), async (req, res) => {
+router.post('/avatar', authMiddleware, upload.single('file'), async (req, res) => {
   try {
-    const authReq = req as AuthRequest
+    const authReq = req as AuthenticatedRequest
     const user = authReq.user
 
     if (!user) {
@@ -81,9 +81,9 @@ router.post('/avatar', requireAuth, upload.single('file'), async (req, res) => {
  * Upload content image (for threads, comments)
  * POST /uploads/image
  */
-router.post('/image', requireAuth, upload.single('file'), async (req, res) => {
+router.post('/image', authMiddleware, upload.single('file'), async (req, res) => {
   try {
-    const authReq = req as AuthRequest
+    const authReq = req as AuthenticatedRequest
     const user = authReq.user
 
     if (!user) {
@@ -114,9 +114,9 @@ router.post('/image', requireAuth, upload.single('file'), async (req, res) => {
  * Delete avatar
  * DELETE /uploads/avatar
  */
-router.delete('/avatar', requireAuth, async (req, res) => {
+router.delete('/avatar', authMiddleware, async (req, res) => {
   try {
-    const authReq = req as AuthRequest
+    const authReq = req as AuthenticatedRequest
     const user = authReq.user
 
     if (!user) {
@@ -150,9 +150,9 @@ router.delete('/avatar', requireAuth, async (req, res) => {
  * Get storage statistics (admin only)
  * GET /uploads/stats
  */
-router.get('/stats', requireAuth, async (req, res) => {
+router.get('/stats', authMiddleware, async (req, res) => {
   try {
-    const authReq = req as AuthRequest
+    const authReq = req as AuthenticatedRequest
     const user = authReq.user
 
     if (!user || user.role !== 'admin') {

@@ -55,7 +55,7 @@ export async function ensureUploadDirs(): Promise<void> {
 /**
  * Generate a unique filename
  */
-function generateFilename(originalName: string, userId: string): string {
+function generateFilename(userId: string): string {
   const ext = 'webp' // Always convert to WebP
   const hash = crypto.randomBytes(8).toString('hex')
   const timestamp = Date.now()
@@ -72,7 +72,7 @@ export async function processAvatar(
   await ensureUploadDirs()
 
   const preset = IMAGE_PRESETS.avatar
-  const filename = generateFilename('avatar', userId)
+  const filename = generateFilename(userId)
   const outputPath = path.join(UPLOAD_DIR, 'avatars', filename)
 
   // Process image: resize, convert to WebP
@@ -101,14 +101,11 @@ export async function processContentImage(
 
   const contentPreset = IMAGE_PRESETS.content
   const thumbPreset = IMAGE_PRESETS.thumbnail
-  const filename = generateFilename('img', userId)
+  const filename = generateFilename(userId)
   const thumbFilename = filename.replace('.webp', '_thumb.webp')
 
   const outputPath = path.join(UPLOAD_DIR, 'images', filename)
   const thumbPath = path.join(UPLOAD_DIR, 'thumbnails', thumbFilename)
-
-  // Get original image metadata
-  const metadata = await sharp(buffer).metadata()
 
   // Process main image
   const processedImage = await sharp(buffer)
