@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { MapPin, Building2, Globe, Hash, Plus, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+import { MapPin, Building2, Globe, Hash, Plus, X, Loader2, ChevronUp } from 'lucide-react'
 import { useCreateThread } from '../../hooks/useApi'
 import { LocationSearch } from '../common/LocationSearch'
 import type { Scope } from '../../types'
