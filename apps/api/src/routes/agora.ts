@@ -80,22 +80,28 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
     conditions.push(eq(threads.municipalityId, filters.municipalityId))
   }
 
-  // Handle feedScope filtering (personalized feed)
-  // Subscription filtering ONLY applies when:
-  // 1. User is logged in AND
-  // 2. feedScope is explicitly set AND
-  // 3. No specific municipalityId is provided (viewing general feed)
-  //
-  // When municipalityId is provided, show ALL content from that municipality
+  // Handle feedScope filtering
+  // - 'following' = content from subscriptions only (personalized feed)
+  // - 'local' = ALL local scope content
+  // - 'national' = ALL national scope content
+  // - 'european' = ALL european scope content
+  // - 'all' = all content (no filter)
   const isViewingSpecificMunicipality = !!filters.municipalityId
-  const shouldApplySubscriptionFilter = userId && filters.feedScope && !isViewingSpecificMunicipality
 
   // Declare subscription arrays at outer scope for later use in tag filtering
   let followedAuthors: string[] = []
   let followedMunicipalities: string[] = []
   let followedTags: string[] = []
 
-  if (shouldApplySubscriptionFilter) {
+  // Scope filters show ALL content of that scope (not just subscribed)
+  if (filters.feedScope === 'local') {
+    conditions.push(eq(threads.scope, 'local'))
+  } else if (filters.feedScope === 'national') {
+    conditions.push(eq(threads.scope, 'national'))
+  } else if (filters.feedScope === 'european') {
+    conditions.push(eq(threads.scope, 'european'))
+  } else if (filters.feedScope === 'following' && userId && !isViewingSpecificMunicipality) {
+    // 'following' shows only subscribed content
     const subscriptions = await db
       .select()
       .from(userSubscriptions)
@@ -138,20 +144,8 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
       })
       return
     }
-
-    // Additional scope filter within subscriptions
-    if (filters.feedScope === 'local') {
-      // Only local-scope content from subscriptions
-      conditions.push(eq(threads.scope, 'local'))
-    } else if (filters.feedScope === 'national') {
-      // Only national-scope content from subscriptions
-      conditions.push(eq(threads.scope, 'national'))
-    } else if (filters.feedScope === 'european') {
-      // Only european-scope content from subscriptions
-      conditions.push(eq(threads.scope, 'european'))
-    }
-    // 'following' and 'all' show all scopes from subscriptions
   }
+  // 'all' shows everything (no additional filter)
 
   // Time filter for 'top' sorting
   if (filters.sortBy === 'top' && filters.topPeriod) {
