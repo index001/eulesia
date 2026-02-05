@@ -137,8 +137,21 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
   }
 
   const handleSubmit = async () => {
-    if (!title.trim() || !content.trim()) {
+    const trimmedTitle = title.trim()
+    const trimmedContent = content.trim()
+
+    if (!trimmedTitle || !trimmedContent) {
       setError('Otsikko ja sisältö ovat pakollisia')
+      return
+    }
+
+    if (trimmedTitle.length < 5) {
+      setError('Otsikon pitää olla vähintään 5 merkkiä')
+      return
+    }
+
+    if (trimmedContent.length < 10) {
+      setError('Sisällön pitää olla vähintään 10 merkkiä')
       return
     }
 

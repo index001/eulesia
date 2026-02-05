@@ -97,7 +97,8 @@ export function useCreateThread() {
   return useMutation({
     mutationFn: (data: CreateThreadData) => api.createThread(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['threads'] })
+      // Invalidate all thread queries to refresh feeds
+      queryClient.invalidateQueries({ queryKey: ['threads'], refetchType: 'all' })
     }
   })
 }

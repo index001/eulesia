@@ -49,6 +49,7 @@ export function AgoraPage() {
 
   // Feed state
   const [feedScope, setFeedScope] = useState<FeedScope>('all')
+  const [feedScopeInitialized, setFeedScopeInitialized] = useState(false)
   const [sortBy, setSortBy] = useState<SortBy>('recent')
   const [topPeriod, setTopPeriod] = useState<TopPeriod>('week')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -77,16 +78,17 @@ export function AgoraPage() {
     return subscriptionsData.length > 0
   }, [subscriptionsData])
 
-  // Set default feed scope based on subscriptions
+  // Set default feed scope based on subscriptions (only once on initial load)
   useEffect(() => {
-    if (currentUser && subscriptionsData !== undefined) {
+    if (!feedScopeInitialized && currentUser && subscriptionsData !== undefined) {
       if (hasSubscriptions) {
         setFeedScope('following')
       } else {
         setFeedScope('all')
       }
+      setFeedScopeInitialized(true)
     }
-  }, [currentUser, subscriptionsData, hasSubscriptions])
+  }, [currentUser, subscriptionsData, hasSubscriptions, feedScopeInitialized])
 
   // Show onboarding when following feed is empty
   useEffect(() => {
