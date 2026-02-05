@@ -185,58 +185,58 @@ export function NewThreadModal({
         </div>
 
         <div className="p-4 space-y-5">
-          {/* Scope selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Minkä tason keskustelu?
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {scopeOptions.map(({ value, icon: Icon, label, description }) => (
-                <button
-                  key={value}
-                  onClick={() => handleScopeChange(value)}
-                  disabled={isPrefilled && value !== 'local'}
-                  className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
-                    scope === value
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  } ${isPrefilled && value !== 'local' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <Icon className={`w-6 h-6 mb-1 ${scope === value ? 'text-blue-600' : 'text-gray-500'}`} />
-                  <span className={`text-sm font-medium ${scope === value ? 'text-blue-700' : 'text-gray-700'}`}>
-                    {label}
-                  </span>
-                  <span className="text-xs text-gray-500 text-center mt-0.5">
-                    {description}
-                  </span>
-                </button>
-              ))}
+          {/* Show location badge when prefilled */}
+          {isPrefilled && selectedLocation && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <MapPin className="w-4 h-4 text-blue-600" />
+              <span className="text-blue-700 font-medium">{selectedLocation.name}</span>
             </div>
-          </div>
+          )}
 
-          {/* Location field (for local and national) */}
-          {scope !== 'european' && (
+          {/* Scope selection - only show when not prefilled */}
+          {!isPrefilled && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Minkä tason keskustelu?
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {scopeOptions.map(({ value, icon: Icon, label, description }) => (
+                  <button
+                    key={value}
+                    onClick={() => handleScopeChange(value)}
+                    className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
+                      scope === value
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <Icon className={`w-6 h-6 mb-1 ${scope === value ? 'text-blue-600' : 'text-gray-500'}`} />
+                    <span className={`text-sm font-medium ${scope === value ? 'text-blue-700' : 'text-gray-700'}`}>
+                      {label}
+                    </span>
+                    <span className="text-xs text-gray-500 text-center mt-0.5">
+                      {description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Location field (for local and national) - only show when not prefilled */}
+          {!isPrefilled && scope !== 'european' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {scope === 'local' ? 'Sijainti' : 'Maa'}
               </label>
               {scope === 'local' ? (
-                <div className="relative">
-                  {isPrefilled ? (
-                    <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">{selectedLocation?.name}</span>
-                    </div>
-                  ) : (
-                    <LocationSearch
-                      value={selectedLocation}
-                      onChange={setSelectedLocation}
-                      country="FI"
-                      types={['municipality', 'village', 'city']}
-                      placeholder="Hae kuntaa, kaupunkia tai kylää..."
-                    />
-                  )}
-                </div>
+                <LocationSearch
+                  value={selectedLocation}
+                  onChange={setSelectedLocation}
+                  country="FI"
+                  types={['municipality', 'village', 'city']}
+                  placeholder="Hae kuntaa, kaupunkia tai kylää..."
+                />
               ) : (
                 <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg">
                   <span className="text-lg">🇫🇮</span>
