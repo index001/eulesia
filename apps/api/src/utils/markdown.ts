@@ -37,12 +37,14 @@ const sanitizeOptions: sanitizeHtml.IOptions = {
       }
     }),
     img: (tagName, attribs) => {
-      // Only allow images from our uploads or API domain
+      // Only allow images from our uploads (relative or absolute API URL)
       const src = attribs.src || ''
+      const apiUrl = process.env.API_URL || 'http://localhost:3001'
       const isLocalUpload = src.startsWith('/uploads/')
+      const isApiUpload = src.startsWith(`${apiUrl}/uploads/`)
       const isApiDomain = src.startsWith('https://api.eulesia.eu/uploads/')
 
-      if (!isLocalUpload && !isApiDomain) {
+      if (!isLocalUpload && !isApiUpload && !isApiDomain) {
         // Return empty to strip external images
         return { tagName: '', attribs: {} }
       }

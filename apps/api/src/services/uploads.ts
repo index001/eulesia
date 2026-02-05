@@ -13,6 +13,9 @@ import crypto from 'crypto'
 // Upload directory (relative to project root)
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads'
 
+// API URL for generating full image URLs
+const API_URL = process.env.API_URL || 'http://localhost:3001'
+
 // Image size presets
 export const IMAGE_PRESETS = {
   avatar: {
@@ -84,8 +87,8 @@ export async function processAvatar(
     .webp({ quality: preset.quality })
     .toFile(outputPath)
 
-  // Return URL path (will be served by the API)
-  const url = `/uploads/avatars/${filename}`
+  // Return full URL (served by the API)
+  const url = `${API_URL}/uploads/avatars/${filename}`
 
   return { url, filename }
 }
@@ -126,8 +129,8 @@ export async function processContentImage(
     .toFile(thumbPath)
 
   return {
-    url: `/uploads/images/${filename}`,
-    thumbnailUrl: `/uploads/thumbnails/${thumbFilename}`,
+    url: `${API_URL}/uploads/images/${filename}`,
+    thumbnailUrl: `${API_URL}/uploads/thumbnails/${thumbFilename}`,
     filename,
     width: processedImage.width,
     height: processedImage.height
