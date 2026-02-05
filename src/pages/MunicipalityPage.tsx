@@ -100,8 +100,8 @@ export function MunicipalityPage() {
         {/* Inline thread creation form */}
         {currentUser && municipality && municipalityId && (
           <InlineThreadForm
-            locationId={municipalityId}
-            locationName={municipality.name}
+            municipalityId={municipalityId}
+            municipalityName={municipality.name}
             onSuccess={handleThreadCreated}
           />
         )}

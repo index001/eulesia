@@ -6,9 +6,9 @@ import type { Scope } from '../../types'
 import type { LocationResult } from '../../lib/api'
 
 interface InlineThreadFormProps {
-  // For municipality pages - prefilled location
-  locationId?: string
-  locationName?: string
+  // For municipality pages - prefilled municipality
+  municipalityId?: string
+  municipalityName?: string
   // Callback when thread is created
   onSuccess: (threadId: string) => void
 }
@@ -25,13 +25,13 @@ const scopeOptions: { value: Scope; icon: React.ElementType; label: string }[] =
   { value: 'european', icon: Globe, label: 'EU' }
 ]
 
-export function InlineThreadForm({ locationId, locationName, onSuccess }: InlineThreadFormProps) {
+export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }: InlineThreadFormProps) {
   const createThreadMutation = useCreateThread()
   const formRef = useRef<HTMLDivElement>(null)
   const titleInputRef = useRef<HTMLInputElement>(null)
 
-  // Is this a prefilled location context (municipality page)?
-  const isPrefilled = !!(locationId && locationName)
+  // Is this a prefilled municipality context (municipality page)?
+  const isPrefilled = !!(municipalityId && municipalityName)
 
   // Form state
   const [isExpanded, setIsExpanded] = useState(false)
@@ -92,9 +92,11 @@ export function InlineThreadForm({ locationId, locationName, onSuccess }: Inline
     try {
       // Build location data
       let locationData = {}
-      if (isPrefilled && locationId) {
-        locationData = { locationId }
+      if (isPrefilled && municipalityId) {
+        // From municipality page - use municipalityId
+        locationData = { municipalityId }
       } else if (scope === 'local' && selectedLocation) {
+        // From location search - use locationId or activate new location
         locationData = selectedLocation.status === 'active' && selectedLocation.id
           ? { locationId: selectedLocation.id }
           : { locationOsmId: selectedLocation.osmId, locationOsmType: selectedLocation.osmType }
@@ -155,10 +157,10 @@ export function InlineThreadForm({ locationId, locationName, onSuccess }: Inline
           {/* Header */}
           <div className="flex items-center justify-between">
             {isPrefilled ? (
-              // Show location badge when prefilled
+              // Show municipality badge when prefilled
               <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full">
                 <MapPin className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">{locationName}</span>
+                <span className="text-sm font-medium text-blue-700">{municipalityName}</span>
               </div>
             ) : (
               // Show scope tabs when not prefilled
