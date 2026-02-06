@@ -1,4 +1,5 @@
 import { Building2, Shield } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { User } from '../../types'
 
 interface ActorBadgeProps {
@@ -19,7 +20,7 @@ export function ActorBadge({ user, showName = true, size = 'md' }: ActorBadgePro
   const avatarColor = isInstitution ? 'bg-violet-600' : 'bg-teal-600'
 
   return (
-    <div className="flex items-center gap-2">
+    <Link to={`/user/${user.id}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity" onClick={(e) => e.stopPropagation()}>
       <div
         className={`${sizeClasses[size]} ${avatarColor} rounded-full flex items-center justify-center text-white font-medium`}
       >
@@ -29,7 +30,7 @@ export function ActorBadge({ user, showName = true, size = 'md' }: ActorBadgePro
       {showName && (
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
-            <span className={`font-medium text-gray-900 ${size === 'sm' ? 'text-sm' : ''}`}>
+            <span className={`font-medium text-gray-900 hover:underline ${size === 'sm' ? 'text-sm' : ''}`}>
               {user.name}
             </span>
 
@@ -54,6 +55,6 @@ export function ActorBadge({ user, showName = true, size = 'md' }: ActorBadgePro
           )}
         </div>
       )}
-    </div>
+    </Link>
   )
 }
