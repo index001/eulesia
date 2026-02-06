@@ -42,6 +42,8 @@ export interface Thread {
   source?: 'user' | 'minutes_import' | 'rss_import'
   sourceUrl?: string
   aiGenerated?: boolean
+  sourceInstitutionId?: string
+  sourceInstitutionName?: string // Resolved from API join
 }
 
 export interface Comment {

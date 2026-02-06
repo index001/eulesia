@@ -39,7 +39,12 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
   const isInstitutional = author.role === 'institution'
   const hasInstitutionalContext = !!thread.institutionalContext
   const isAiGenerated = thread.aiGenerated || thread.source === 'minutes_import'
+  const isBotSummary = isAiGenerated && thread.source === 'rss_import'
+  const isMinutesSummary = isAiGenerated && thread.source === 'minutes_import'
   const showVoting = typeof thread.score === 'number'
+  // Source institution name from the resolved join, or from institutionalContext
+  const sourceInstitutionName = thread.sourceInstitutionName
+    || (thread.institutionalContext as any)?.institution
 
   const handleVote = (value: number) => {
     if (onVote) {
@@ -73,8 +78,30 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
           to={`/agora/thread/${thread.id}`}
           className={`flex-grow p-4 ${showVoting ? 'pl-2' : ''}`}
         >
-          {/* AI/Minutes indicator */}
-          {isAiGenerated && (
+          {/* Bot RSS import summary indicator */}
+          {isBotSummary && (
+            <div className="flex items-center gap-1.5 text-xs text-purple-700 mb-2">
+              <Bot className="w-3.5 h-3.5" />
+              <span className="font-medium">
+                AI-tiivistelmä{sourceInstitutionName ? ` — lähde: ${sourceInstitutionName}` : ''}
+              </span>
+              {thread.sourceUrl && (
+                <a
+                  href={thread.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="ml-1 flex items-center gap-0.5 text-purple-500 hover:text-purple-700 underline"
+                >
+                  <FileText className="w-3 h-3" />
+                  Alkuperäinen
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Minutes import summary indicator */}
+          {isMinutesSummary && (
             <div className="flex items-center gap-1.5 text-xs text-purple-700 mb-2">
               <Bot className="w-3.5 h-3.5" />
               <span className="font-medium">Pöytäkirjayhteenveto</span>
@@ -93,11 +120,11 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
             </div>
           )}
 
-          {/* Institutional indicator */}
+          {/* Institutional own post indicator */}
           {isInstitutional && !isAiGenerated && (
             <div className="flex items-center gap-1.5 text-xs text-violet-700 mb-2">
               <Building2 className="w-3.5 h-3.5" />
-              <span className="font-medium">Official channel</span>
+              <span className="font-medium">Virallinen tieto — {author.institutionName || author.name}</span>
             </div>
           )}
 

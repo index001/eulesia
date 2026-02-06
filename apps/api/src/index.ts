@@ -128,6 +128,24 @@ io.on('connection', (socket) => {
     socket.leave(`thread:${threadId}`)
   })
 
+  // User-specific room (for notifications)
+  socket.on('join:user', (userId: string) => {
+    socket.join(`user:${userId}`)
+  })
+
+  socket.on('leave:user', (userId: string) => {
+    socket.leave(`user:${userId}`)
+  })
+
+  // Direct messages
+  socket.on('join:dm', (conversationId: string) => {
+    socket.join(`dm:${conversationId}`)
+  })
+
+  socket.on('leave:dm', (conversationId: string) => {
+    socket.leave(`dm:${conversationId}`)
+  })
+
   socket.on('disconnect', () => {
     console.log('Socket disconnected:', socket.id)
   })

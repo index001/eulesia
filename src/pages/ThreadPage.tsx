@@ -188,7 +188,12 @@ export function ThreadPage() {
       <div className="px-4 py-6 space-y-6">
         {/* Institutional context box - if applicable */}
         {thread.institutionalContext && (
-          <InstitutionalContextBox context={thread.institutionalContext} />
+          <InstitutionalContextBox
+            context={thread.institutionalContext}
+            isAiGenerated={thread.aiGenerated}
+            sourceInstitutionName={thread.sourceInstitutionName}
+            sourceUrl={thread.sourceUrl}
+          />
         )}
 
         {/* Thread content */}

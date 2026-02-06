@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express'
 import { z } from 'zod'
 import { eq, desc, asc, and, inArray, sql, or, gte } from 'drizzle-orm'
-import { db, threads, threadTags, threadVotes, comments, commentVotes, users, municipalities, userSubscriptions } from '../db/index.js'
+import { db, threads, threadTags, threadVotes, comments, commentVotes, users, municipalities, userSubscriptions, tagCategories, institutionTopics } from '../db/index.js'
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { renderMarkdown } from '../utils/markdown.js'
@@ -121,6 +121,8 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
     const followConditions = []
     if (followedAuthors.length > 0) {
       followConditions.push(inArray(threads.authorId, followedAuthors))
+      // Also include bot-imported threads for followed institutions
+      followConditions.push(inArray(threads.sourceInstitutionId, followedAuthors))
     }
     if (followedMunicipalities.length > 0) {
       followConditions.push(inArray(threads.municipalityId, followedMunicipalities))
@@ -214,6 +216,24 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
         .where(inArray(threadTags.threadId, threadIds))
     : []
 
+  // Resolve source institution names for bot-imported threads
+  const sourceInstitutionIds = [...new Set(
+    threadList
+      .map(t => t.thread.sourceInstitutionId)
+      .filter((id): id is string => !!id)
+  )]
+  let sourceInstitutionNames: Record<string, string> = {}
+  if (sourceInstitutionIds.length > 0) {
+    const institutions = await db
+      .select({ id: users.id, name: users.institutionName })
+      .from(users)
+      .where(inArray(users.id, sourceInstitutionIds))
+    sourceInstitutionNames = institutions.reduce((acc, inst) => {
+      if (inst.name) acc[inst.id] = inst.name
+      return acc
+    }, {} as Record<string, string>)
+  }
+
   // Group tags by thread
   const tagsByThread = allTags.reduce((acc, tag) => {
     if (!acc[tag.threadId]) acc[tag.threadId] = []
@@ -277,7 +297,10 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
         tags: tagsByThread[thread.id] || [],
         author,
         municipality,
-        userVote: userVotes[thread.id] || 0
+        userVote: userVotes[thread.id] || 0,
+        sourceInstitutionName: thread.sourceInstitutionId
+          ? sourceInstitutionNames[thread.sourceInstitutionId] || null
+          : null
       })),
       total: count,
       page: filters.page,
@@ -396,6 +419,17 @@ router.get('/threads/:id', optionalAuthMiddleware, asyncHandler(async (req: Auth
     threadUserVote = vote?.value || 0
   }
 
+  // Resolve source institution name
+  let sourceInstitutionName: string | null = null
+  if (threadData.thread.sourceInstitutionId) {
+    const [srcInst] = await db
+      .select({ name: users.institutionName })
+      .from(users)
+      .where(eq(users.id, threadData.thread.sourceInstitutionId))
+      .limit(1)
+    sourceInstitutionName = srcInst?.name || null
+  }
+
   res.json({
     success: true,
     data: {
@@ -404,6 +438,7 @@ router.get('/threads/:id', optionalAuthMiddleware, asyncHandler(async (req: Auth
       author: threadData.author,
       municipality: threadData.municipality,
       userVote: threadUserVote,
+      sourceInstitutionName,
       comments: commentList.map(({ comment, author }) => ({
         ...comment,
         author,
@@ -726,18 +761,193 @@ router.post('/threads/:threadId/vote', authMiddleware, asyncHandler(async (req: 
   })
 }))
 
-// GET /agora/tags - Get all available tags
+// GET /agora/tags - Get all available tags with category metadata
 router.get('/tags', asyncHandler(async (_req, res: Response) => {
-  const tags = await db
+  // Get tag usage counts
+  const tagCounts = await db
     .select({ tag: threadTags.tag, count: sql<number>`count(*)::int` })
     .from(threadTags)
     .groupBy(threadTags.tag)
     .orderBy(desc(sql`count(*)`))
-    .limit(50)
+    .limit(100)
+
+  // Get tag category metadata
+  const tagNames = tagCounts.map(t => t.tag)
+  const categories = tagNames.length > 0
+    ? await db
+        .select()
+        .from(tagCategories)
+        .where(inArray(tagCategories.tag, tagNames))
+    : []
+
+  const categoryMap = categories.reduce((acc, cat) => {
+    acc[cat.tag] = cat
+    return acc
+  }, {} as Record<string, typeof categories[number]>)
+
+  // Also include curated tags that have no threads yet
+  const allCurated = await db
+    .select()
+    .from(tagCategories)
+    .orderBy(tagCategories.category, tagCategories.sortOrder)
+
+  // Merge: used tags with metadata + unused curated tags
+  const usedTagSet = new Set(tagNames)
+  const mergedTags = [
+    ...tagCounts.map(t => ({
+      tag: t.tag,
+      count: t.count,
+      category: categoryMap[t.tag]?.category || null,
+      displayName: categoryMap[t.tag]?.displayName || null,
+      description: categoryMap[t.tag]?.description || null,
+      scope: categoryMap[t.tag]?.scope || null
+    })),
+    ...allCurated
+      .filter(c => !usedTagSet.has(c.tag))
+      .map(c => ({
+        tag: c.tag,
+        count: 0,
+        category: c.category,
+        displayName: c.displayName,
+        description: c.description,
+        scope: c.scope
+      }))
+  ]
 
   res.json({
     success: true,
-    data: tags
+    data: mergedTags
+  })
+}))
+
+// GET /agora/tags/:tag - Get threads for a specific tag + tag metadata
+router.get('/tags/:tag', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { tag } = req.params
+  const page = Math.max(1, parseInt(req.query.page as string) || 1)
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 20))
+  const offset = (page - 1) * limit
+  const userId = req.user?.id
+
+  // Get tag metadata
+  const [tagMeta] = await db
+    .select()
+    .from(tagCategories)
+    .where(eq(tagCategories.tag, tag))
+    .limit(1)
+
+  // Check if this is an institution topic tag
+  const [topicInfo] = await db
+    .select({
+      institutionId: institutionTopics.institutionId,
+      topicTag: institutionTopics.topicTag,
+      relatedTags: institutionTopics.relatedTags,
+      description: institutionTopics.description,
+      institutionName: users.institutionName,
+      institutionType: users.institutionType
+    })
+    .from(institutionTopics)
+    .leftJoin(users, eq(institutionTopics.institutionId, users.id))
+    .where(eq(institutionTopics.topicTag, tag))
+    .limit(1)
+
+  // Get thread IDs matching this tag
+  const taggedThreadIds = await db
+    .select({ threadId: threadTags.threadId })
+    .from(threadTags)
+    .where(eq(threadTags.tag, tag))
+
+  const threadIdList = taggedThreadIds.map(t => t.threadId)
+
+  if (threadIdList.length === 0) {
+    res.json({
+      success: true,
+      data: {
+        tag,
+        tagMeta: tagMeta || null,
+        institution: topicInfo || null,
+        items: [],
+        total: 0,
+        page,
+        limit,
+        hasMore: false
+      }
+    })
+    return
+  }
+
+  // Get threads
+  const threadList = await db
+    .select({
+      thread: threads,
+      author: {
+        id: users.id,
+        name: users.name,
+        avatarUrl: users.avatarUrl,
+        role: users.role,
+        institutionType: users.institutionType,
+        institutionName: users.institutionName
+      },
+      municipality: municipalities
+    })
+    .from(threads)
+    .leftJoin(users, eq(threads.authorId, users.id))
+    .leftJoin(municipalities, eq(threads.municipalityId, municipalities.id))
+    .where(inArray(threads.id, threadIdList))
+    .orderBy(desc(threads.updatedAt))
+    .limit(limit)
+    .offset(offset)
+
+  // Get all tags for these threads
+  const resultThreadIds = threadList.map(t => t.thread.id)
+  const allTags = resultThreadIds.length > 0
+    ? await db.select().from(threadTags).where(inArray(threadTags.threadId, resultThreadIds))
+    : []
+
+  const tagsByThread = allTags.reduce((acc, t) => {
+    if (!acc[t.threadId]) acc[t.threadId] = []
+    acc[t.threadId].push(t.tag)
+    return acc
+  }, {} as Record<string, string[]>)
+
+  // Resolve source institution names
+  const sourceInstIds = [...new Set(
+    threadList.map(t => t.thread.sourceInstitutionId).filter((id): id is string => !!id)
+  )]
+  let srcInstNames: Record<string, string> = {}
+  if (sourceInstIds.length > 0) {
+    const insts = await db.select({ id: users.id, name: users.institutionName }).from(users).where(inArray(users.id, sourceInstIds))
+    srcInstNames = insts.reduce((acc, i) => { if (i.name) acc[i.id] = i.name; return acc }, {} as Record<string, string>)
+  }
+
+  // User votes
+  let userVotes: Record<string, number> = {}
+  if (userId && resultThreadIds.length > 0) {
+    const votes = await db.select().from(threadVotes).where(and(
+      inArray(threadVotes.threadId, resultThreadIds),
+      eq(threadVotes.userId, userId)
+    ))
+    userVotes = votes.reduce((acc, v) => { acc[v.threadId] = v.value; return acc }, {} as Record<string, number>)
+  }
+
+  res.json({
+    success: true,
+    data: {
+      tag,
+      tagMeta: tagMeta || null,
+      institution: topicInfo || null,
+      items: threadList.map(({ thread, author, municipality }) => ({
+        ...thread,
+        tags: tagsByThread[thread.id] || [],
+        author,
+        municipality,
+        userVote: userVotes[thread.id] || 0,
+        sourceInstitutionName: thread.sourceInstitutionId ? srcInstNames[thread.sourceInstitutionId] || null : null
+      })),
+      total: threadIdList.length,
+      page,
+      limit,
+      hasMore: offset + threadList.length < threadIdList.length
+    }
   })
 }))
 

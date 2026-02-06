@@ -1,12 +1,15 @@
-import { FileText, Calendar, HelpCircle, Mail, ChevronDown, ChevronUp } from 'lucide-react'
+import { FileText, Calendar, HelpCircle, Mail, ChevronDown, ChevronUp, Bot, Building2, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import type { InstitutionalContext } from '../../types'
 
 interface InstitutionalContextBoxProps {
   context: InstitutionalContext
+  isAiGenerated?: boolean
+  sourceInstitutionName?: string
+  sourceUrl?: string
 }
 
-export function InstitutionalContextBox({ context }: InstitutionalContextBoxProps) {
+export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitutionName, sourceUrl }: InstitutionalContextBoxProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>('timeline')
 
   const toggleSection = (section: string) => {
@@ -18,15 +21,42 @@ export function InstitutionalContextBox({ context }: InstitutionalContextBoxProp
   const faq = context.faq || []
 
   return (
-    <div className="bg-violet-50 border border-violet-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 bg-violet-100 border-b border-violet-200">
-        <h3 className="font-semibold text-violet-900 flex items-center gap-2">
-          <FileText className="w-4 h-4" />
-          Official Information
-        </h3>
-        <p className="text-xs text-violet-700 mt-0.5">
-          Provided by the institution for this discussion
-        </p>
+    <div className={`rounded-xl overflow-hidden border ${isAiGenerated ? 'bg-purple-50 border-purple-200' : 'bg-violet-50 border-violet-200'}`}>
+      <div className={`px-4 py-3 border-b ${isAiGenerated ? 'bg-purple-100 border-purple-200' : 'bg-violet-100 border-violet-200'}`}>
+        {isAiGenerated ? (
+          <>
+            <h3 className="font-semibold text-purple-900 flex items-center gap-2">
+              <Bot className="w-4 h-4" />
+              Tekoälytiivistelmä virallisista lähteistä
+            </h3>
+            <p className="text-xs text-purple-700 mt-0.5">
+              {sourceInstitutionName
+                ? `Lähde: ${sourceInstitutionName}`
+                : 'Lähde: virallinen tiedote'}
+              {sourceUrl && (
+                <a
+                  href={sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-2 inline-flex items-center gap-0.5 text-purple-600 hover:text-purple-800 underline"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Alkuperäinen lähde
+                </a>
+              )}
+            </p>
+          </>
+        ) : (
+          <>
+            <h3 className="font-semibold text-violet-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              Virallinen tieto{sourceInstitutionName ? ` — ${sourceInstitutionName}` : ''}
+            </h3>
+            <p className="text-xs text-violet-700 mt-0.5">
+              Instituution julkaisema virallinen tieto
+            </p>
+          </>
+        )}
       </div>
 
       <div className="divide-y divide-violet-200">

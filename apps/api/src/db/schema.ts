@@ -229,6 +229,7 @@ export const threads = pgTable('threads', {
   source: threadSourceEnum('source').default('user'),
   sourceUrl: varchar('source_url', { length: 1000 }),  // Link to original document
   sourceId: varchar('source_id', { length: 255 }),     // External ID (meeting ID, etc.)
+  sourceInstitutionId: uuid('source_institution_id').references(() => users.id), // Links bot-imported thread to source institution
   aiGenerated: boolean('ai_generated').default(false),
   aiModel: varchar('ai_model', { length: 100 }),       // e.g., 'mistral-large-latest'
   originalContent: text('original_content'),            // Original pöytäkirja text before AI summary
@@ -247,7 +248,8 @@ export const threads = pgTable('threads', {
   placeIdx: index('threads_place_idx').on(table.placeId),
   coordsIdx: index('threads_coords_idx').on(table.latitude, table.longitude),
   sourceIdx: index('threads_source_idx').on(table.source),
-  sourceIdIdx: index('threads_source_id_idx').on(table.sourceId)
+  sourceIdIdx: index('threads_source_id_idx').on(table.sourceId),
+  sourceInstitutionIdx: index('threads_source_institution_idx').on(table.sourceInstitutionId)
 }))
 
 // Thread Tags
@@ -445,6 +447,62 @@ export const userSubscriptions = pgTable('user_subscriptions', {
   userIdx: index('user_subscriptions_user_idx').on(table.userId)
 }))
 
+// Institution Topics — links institution to its discussion topic (tag-based channel)
+export const institutionTopics = pgTable('institution_topics', {
+  institutionId: uuid('institution_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  topicTag: varchar('topic_tag', { length: 100 }).notNull(),
+  relatedTags: varchar('related_tags', { length: 100 }).array().default([]),
+  description: text('description')
+}, (table) => ({
+  topicTagIdx: index('institution_topics_topic_tag_idx').on(table.topicTag)
+}))
+
+// Tag Categories — optional metadata for tags: category, display name, description
+export const tagCategories = pgTable('tag_categories', {
+  tag: varchar('tag', { length: 100 }).primaryKey(),
+  category: varchar('category', { length: 100 }).notNull(),
+  displayName: varchar('display_name', { length: 255 }),
+  description: text('description'),
+  scope: scopeEnum('scope'),
+  sortOrder: integer('sort_order').default(0)
+}, (table) => ({
+  categoryIdx: index('tag_categories_category_idx').on(table.category),
+  sortIdx: index('tag_categories_sort_idx').on(table.category, table.sortOrder)
+}))
+
+// Direct Messages — Conversations
+export const conversations = pgTable('conversations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  updatedIdx: index('conversations_updated_idx').on(table.updatedAt)
+}))
+
+// Conversation Participants
+export const conversationParticipants = pgTable('conversation_participants', {
+  conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  lastReadAt: timestamp('last_read_at', { withTimezone: true }).defaultNow(),
+  isMuted: boolean('is_muted').default(false),
+  joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  pk: primaryKey({ columns: [table.conversationId, table.userId] }),
+  userIdx: index('conv_participants_user_idx').on(table.userId)
+}))
+
+// Direct Messages
+export const directMessages = pgTable('direct_messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+  authorId: uuid('author_id').notNull().references(() => users.id),
+  content: text('content').notNull(),
+  contentHtml: text('content_html'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  conversationIdx: index('dm_conversation_idx').on(table.conversationId, table.createdAt)
+}))
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   municipality: one(municipalities, {
@@ -464,13 +522,20 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   clubMemberships: many(clubMembers),
   notifications: many(notifications),
   rooms: many(rooms),
-  roomMemberships: many(roomMembers)
+  roomMemberships: many(roomMembers),
+  conversationParticipations: many(conversationParticipants),
+  directMessages: many(directMessages)
 }))
 
 export const threadsRelations = relations(threads, ({ one, many }) => ({
   author: one(users, {
     fields: [threads.authorId],
     references: [users.id]
+  }),
+  sourceInstitution: one(users, {
+    fields: [threads.sourceInstitutionId],
+    references: [users.id],
+    relationName: 'sourceInstitutionThreads'
   }),
   municipality: one(municipalities, {
     fields: [threads.municipalityId],
@@ -487,6 +552,13 @@ export const threadsRelations = relations(threads, ({ one, many }) => ({
   comments: many(comments),
   tags: many(threadTags),
   votes: many(threadVotes)
+}))
+
+export const institutionTopicsRelations = relations(institutionTopics, ({ one }) => ({
+  institution: one(users, {
+    fields: [institutionTopics.institutionId],
+    references: [users.id]
+  })
 }))
 
 export const commentsRelations = relations(comments, ({ one, many }) => ({
@@ -647,6 +719,34 @@ export const inviteCodesRelations = relations(inviteCodes, ({ one }) => ({
   })
 }))
 
+// DM Relations
+export const conversationsRelations = relations(conversations, ({ many }) => ({
+  participants: many(conversationParticipants),
+  messages: many(directMessages)
+}))
+
+export const conversationParticipantsRelations = relations(conversationParticipants, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [conversationParticipants.conversationId],
+    references: [conversations.id]
+  }),
+  user: one(users, {
+    fields: [conversationParticipants.userId],
+    references: [users.id]
+  })
+}))
+
+export const directMessagesRelations = relations(directMessages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [directMessages.conversationId],
+    references: [conversations.id]
+  }),
+  author: one(users, {
+    fields: [directMessages.authorId],
+    references: [users.id]
+  })
+}))
+
 // Types for insertion
 export type NewUser = typeof users.$inferInsert
 export type User = typeof users.$inferSelect
@@ -671,3 +771,13 @@ export type NewThreadVote = typeof threadVotes.$inferInsert
 export type ThreadVote = typeof threadVotes.$inferSelect
 export type NewUserSubscription = typeof userSubscriptions.$inferInsert
 export type UserSubscription = typeof userSubscriptions.$inferSelect
+export type NewInstitutionTopic = typeof institutionTopics.$inferInsert
+export type InstitutionTopic = typeof institutionTopics.$inferSelect
+export type NewTagCategory = typeof tagCategories.$inferInsert
+export type TagCategory = typeof tagCategories.$inferSelect
+export type NewConversation = typeof conversations.$inferInsert
+export type Conversation = typeof conversations.$inferSelect
+export type NewConversationParticipant = typeof conversationParticipants.$inferInsert
+export type ConversationParticipant = typeof conversationParticipants.$inferSelect
+export type NewDirectMessage = typeof directMessages.$inferInsert
+export type DirectMessage = typeof directMessages.$inferSelect

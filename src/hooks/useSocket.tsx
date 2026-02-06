@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
 import { queryKeys } from './useApi'
-import type { RoomMessage, RoomWithMessages } from '../lib/api'
+import type { RoomMessage, RoomWithMessages, DirectMessage, ConversationWithMessages } from '../lib/api'
 
 interface SocketContextType {
   socket: Socket | null
@@ -11,6 +11,8 @@ interface SocketContextType {
   sendRoomMessage: (roomId: string, content: string) => void
   joinRoom: (roomId: string) => void
   leaveRoom: (roomId: string) => void
+  joinDm: (conversationId: string) => void
+  leaveDm: (conversationId: string) => void
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined)
@@ -42,6 +44,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     newSocket.on('connect', () => {
       setIsConnected(true)
       console.log('Socket connected')
+      // Join user-specific room for notifications
+      newSocket.emit('join:user', currentUser.id)
     })
 
     newSocket.on('disconnect', () => {
@@ -73,9 +77,33 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       console.log(`${data.userName} is typing in room ${data.roomId}`)
     })
 
+    // Handle new notification events
+    newSocket.on('new_notification', () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications })
+      queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount })
+    })
+
+    // Handle new DM message events
+    newSocket.on('new_dm_message', (data: { conversationId: string; message: DirectMessage }) => {
+      // Update the conversation messages in the cache
+      queryClient.setQueryData(
+        queryKeys.conversation(data.conversationId),
+        (old: ConversationWithMessages | undefined) => {
+          if (!old) return old
+          return {
+            ...old,
+            messages: [...old.messages, data.message]
+          }
+        }
+      )
+      // Invalidate conversations list to update last message & unread count
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations })
+    })
+
     setSocket(newSocket)
 
     return () => {
+      newSocket.emit('leave:user', currentUser.id)
       newSocket.disconnect()
     }
   }, [isAuthenticated, currentUser, queryClient])
@@ -99,13 +127,25 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.emit('leave_room', { roomId })
   }, [socket, isConnected])
 
+  const joinDm = useCallback((conversationId: string) => {
+    if (!socket || !isConnected) return
+    socket.emit('join:dm', conversationId)
+  }, [socket, isConnected])
+
+  const leaveDm = useCallback((conversationId: string) => {
+    if (!socket || !isConnected) return
+    socket.emit('leave:dm', conversationId)
+  }, [socket, isConnected])
+
   return (
     <SocketContext.Provider value={{
       socket,
       isConnected,
       sendRoomMessage,
       joinRoom,
-      leaveRoom
+      leaveRoom,
+      joinDm,
+      leaveDm
     }}>
       {children}
     </SocketContext.Provider>

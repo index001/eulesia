@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express'
 import { z } from 'zod'
-import { eq, desc, inArray } from 'drizzle-orm'
-import { db, users, municipalities, threads, threadTags } from '../db/index.js'
+import { eq, desc, inArray, and } from 'drizzle-orm'
+import { db, users, municipalities, threads, threadTags, institutionTopics } from '../db/index.js'
 import { authMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
@@ -79,6 +79,91 @@ router.get('/:id', asyncHandler(async (req, res: Response) => {
     tagsByThread[tag.threadId].push(tag.tag)
   }
 
+  // For institutions, fetch topic info and separate threads by type
+  let institutionTopic = null
+  let botSummaries: typeof userThreads = []
+  let citizenDiscussions: typeof userThreads = []
+
+  if (user.role === 'institution') {
+    // Get institution topic
+    const [topic] = await db
+      .select()
+      .from(institutionTopics)
+      .where(eq(institutionTopics.institutionId, id))
+      .limit(1)
+
+    if (topic) {
+      institutionTopic = topic
+    }
+
+    // Get bot summaries (threads where this institution is the source)
+    const botThreads = await db
+      .select({
+        id: threads.id,
+        title: threads.title,
+        content: threads.content,
+        scope: threads.scope,
+        replyCount: threads.replyCount,
+        score: threads.score,
+        createdAt: threads.createdAt,
+        updatedAt: threads.updatedAt,
+        municipalityId: threads.municipalityId,
+        municipalityName: municipalities.name
+      })
+      .from(threads)
+      .leftJoin(municipalities, eq(threads.municipalityId, municipalities.id))
+      .where(eq(threads.sourceInstitutionId, id))
+      .orderBy(desc(threads.createdAt))
+      .limit(20)
+
+    botSummaries = botThreads
+
+    // Get citizen discussions (threads tagged with topic tag, NOT authored by bot)
+    if (topic) {
+      const taggedThreadIds = await db
+        .select({ threadId: threadTags.threadId })
+        .from(threadTags)
+        .where(eq(threadTags.tag, topic.topicTag))
+
+      const taggedIds = taggedThreadIds.map(t => t.threadId)
+      if (taggedIds.length > 0) {
+        const citizenThreads = await db
+          .select({
+            id: threads.id,
+            title: threads.title,
+            content: threads.content,
+            scope: threads.scope,
+            replyCount: threads.replyCount,
+            score: threads.score,
+            createdAt: threads.createdAt,
+            updatedAt: threads.updatedAt,
+            municipalityId: threads.municipalityId,
+            municipalityName: municipalities.name
+          })
+          .from(threads)
+          .leftJoin(municipalities, eq(threads.municipalityId, municipalities.id))
+          .where(and(
+            inArray(threads.id, taggedIds),
+            eq(threads.source, 'user')
+          ))
+          .orderBy(desc(threads.createdAt))
+          .limit(20)
+
+        citizenDiscussions = citizenThreads
+      }
+    }
+
+    // Get tags for bot summaries and citizen discussions
+    const allExtraIds = [...botSummaries, ...citizenDiscussions].map(t => t.id)
+    if (allExtraIds.length > 0) {
+      const extraTags = await db.select().from(threadTags).where(inArray(threadTags.threadId, allExtraIds))
+      for (const tag of extraTags) {
+        if (!tagsByThread[tag.threadId]) tagsByThread[tag.threadId] = []
+        tagsByThread[tag.threadId].push(tag.tag)
+      }
+    }
+  }
+
   res.json({
     success: true,
     data: {
@@ -86,7 +171,13 @@ router.get('/:id', asyncHandler(async (req, res: Response) => {
       threads: userThreads.map(t => ({
         ...t,
         tags: tagsByThread[t.id] || []
-      }))
+      })),
+      // Institution-specific fields
+      ...(user.role === 'institution' ? {
+        institutionTopic,
+        botSummaries: botSummaries.map(t => ({ ...t, tags: tagsByThread[t.id] || [] })),
+        citizenDiscussions: citizenDiscussions.map(t => ({ ...t, tags: tagsByThread[t.id] || [] }))
+      } : {})
     }
   })
 }))

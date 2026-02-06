@@ -1,10 +1,34 @@
 import { useState } from 'react'
-import { MapPin, Hash, Building2, CheckCircle2, Loader2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { MapPin, Hash, Building2, CheckCircle2, Loader2, ChevronRight } from 'lucide-react'
 import { useSubscribe, useMunicipalities, useTags } from '../../hooks/useApi'
-import type { Municipality } from '../../lib/api'
+import type { Municipality, TagWithCategory } from '../../lib/api'
 
 interface FeedOnboardingProps {
   onComplete: () => void
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  talous: 'Talous',
+  terveys: 'Terveys',
+  koulutus: 'Koulutus',
+  ympäristö: 'Ympäristö',
+  liikenne: 'Liikenne',
+  turvallisuus: 'Turvallisuus',
+  työ: 'Työ',
+  kulttuuri: 'Kulttuuri',
+  eu: 'EU',
+  kunta: 'Kunta'
+}
+
+function groupTagsByCategory(tags: TagWithCategory[]): Record<string, TagWithCategory[]> {
+  const groups: Record<string, TagWithCategory[]> = {}
+  for (const tag of tags) {
+    const category = tag.category || 'muut'
+    if (!groups[category]) groups[category] = []
+    groups[category].push(tag)
+  }
+  return groups
 }
 
 export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
@@ -16,9 +40,21 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
   const { data: tagsData } = useTags()
   const subscribeMutation = useSubscribe()
 
-  // Top municipalities to show (or use actual data)
   const topMunicipalities = (municipalitiesData || []).slice(0, 8)
-  const topTags = (tagsData || []).slice(0, 8).map(t => t.tag)
+
+  // Group tags by category, show top tags from each category
+  const allTags = tagsData || []
+  const grouped = groupTagsByCategory(allTags)
+  const categories = Object.keys(grouped).filter(c => c !== 'muut')
+
+  // Show top 2-3 tags per category for compact onboarding
+  const featuredTags: TagWithCategory[] = []
+  for (const category of categories) {
+    const categoryTags = grouped[category] || []
+    // Take tags with highest count or first by sort order
+    const sorted = [...categoryTags].sort((a, b) => (b.count || 0) - (a.count || 0))
+    featuredTags.push(...sorted.slice(0, 2))
+  }
 
   const toggleMunicipality = (id: string) => {
     setSelectedMunicipalities(prev =>
@@ -114,27 +150,38 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
         </div>
       </div>
 
-      {/* Tags/Topics */}
+      {/* Tags by category */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Hash className="w-5 h-5 text-teal-600" />
-          <h3 className="font-semibold text-gray-900">Aiheet</h3>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Hash className="w-5 h-5 text-teal-600" />
+            <h3 className="font-semibold text-gray-900">Aiheet</h3>
+          </div>
+          <Link
+            to="/aiheet"
+            className="text-xs text-teal-600 hover:underline flex items-center gap-0.5"
+          >
+            Kaikki aiheet
+            <ChevronRight className="w-3 h-3" />
+          </Link>
         </div>
+
+        {/* Featured tags from each category */}
         <div className="flex flex-wrap gap-2">
-          {topTags.map(tag => (
+          {featuredTags.map(tag => (
             <button
-              key={tag}
-              onClick={() => toggleTag(tag)}
+              key={tag.tag}
+              onClick={() => toggleTag(tag.tag)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                selectedTags.includes(tag)
+                selectedTags.includes(tag.tag)
                   ? 'bg-teal-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {selectedTags.includes(tag) && (
+              {selectedTags.includes(tag.tag) && (
                 <CheckCircle2 className="w-4 h-4" />
               )}
-              {tag.replace(/-/g, ' ')}
+              {tag.displayName || tag.tag.replace(/-/g, ' ')}
             </button>
           ))}
         </div>
@@ -145,7 +192,8 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
         <div className="flex items-start gap-2">
           <Building2 className="w-5 h-5 text-violet-600 flex-shrink-0 mt-0.5" />
           <p className="text-sm text-violet-700">
-            Voit myös seurata organisaatioita ja käyttäjiä heidän profiilisivuiltaan.
+            Voit myös seurata instituutioita ja organisaatioita heidän profiilisivuiltaan —
+            seuraa virallisia julkaisuja tai topicia erikseen.
           </p>
         </div>
       </div>

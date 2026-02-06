@@ -1,9 +1,11 @@
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Shield, Building2, Calendar, MessageSquare } from 'lucide-react'
+import { useState } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Shield, Building2, Calendar, MessageSquare, Hash, Bot, Users, Send } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Layout } from '../components/layout'
 import { FollowButton } from '../components/common'
 import { useAuth } from '../hooks/useAuth'
+import { useStartConversation } from '../hooks/useApi'
 
 interface UserThread {
   id: string
@@ -17,6 +19,13 @@ interface UserThread {
   tags: string[]
 }
 
+interface InstitutionTopic {
+  institutionId: string
+  topicTag: string
+  relatedTags: string[]
+  description: string | null
+}
+
 interface UserProfile {
   id: string
   name: string
@@ -27,6 +36,10 @@ interface UserProfile {
   identityVerified: boolean
   createdAt: string
   threads: UserThread[]
+  // Institution-specific
+  institutionTopic?: InstitutionTopic | null
+  botSummaries?: UserThread[]
+  citizenDiscussions?: UserThread[]
 }
 
 function formatDate(dateString: string): string {
@@ -38,9 +51,60 @@ function getAvatarInitials(name: string): string {
   return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 }
 
+function ThreadListItem({ thread }: { thread: UserThread }) {
+  return (
+    <Link
+      key={thread.id}
+      to={`/agora/thread/${thread.id}`}
+      className="block bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow"
+    >
+      <h3 className="font-semibold text-gray-900 line-clamp-2">{thread.title}</h3>
+      <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+        {thread.content.substring(0, 150)}...
+      </p>
+      <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
+        {thread.municipalityName && (
+          <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+            {thread.municipalityName}
+          </span>
+        )}
+        <span className="flex items-center gap-1">
+          <MessageSquare className="w-3.5 h-3.5" />
+          {thread.replyCount}
+        </span>
+        <span>{formatDate(thread.createdAt)}</span>
+      </div>
+      {thread.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {thread.tags.slice(0, 3).map(tag => (
+            <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </Link>
+  )
+}
+
 export function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
   const { currentUser } = useAuth()
+  const navigate = useNavigate()
+  const startConversationMutation = useStartConversation()
+  const [sendingMessage, setSendingMessage] = useState(false)
+
+  const handleSendMessage = async () => {
+    if (!userId || sendingMessage) return
+    setSendingMessage(true)
+    try {
+      const conversation = await startConversationMutation.mutateAsync(userId)
+      navigate(`/messages/${conversation.id}`)
+    } catch (err) {
+      console.error('Failed to start conversation:', err)
+      setSendingMessage(false)
+    }
+  }
 
   const { data: user, isLoading, error } = useQuery({
     queryKey: ['userProfile', userId],
@@ -56,6 +120,8 @@ export function UserProfilePage() {
   })
 
   const isOwnProfile = currentUser?.id === userId
+  const isInstitution = user?.role === 'institution'
+  const hasTopic = isInstitution && user?.institutionTopic
 
   if (isLoading) {
     return (
@@ -94,10 +160,10 @@ export function UserProfilePage() {
       </div>
 
       {/* Profile header */}
-      <div className="bg-gradient-to-b from-blue-50 to-white px-4 py-6">
+      <div className={`bg-gradient-to-b ${isInstitution ? 'from-violet-50' : 'from-blue-50'} to-white px-4 py-6`}>
         <div className="flex items-start gap-4">
           {/* Avatar */}
-          <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className={`w-20 h-20 ${isInstitution ? 'bg-violet-600' : 'bg-blue-600'} rounded-full flex items-center justify-center flex-shrink-0`}>
             {user.avatarUrl ? (
               <img src={user.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
             ) : (
@@ -111,7 +177,7 @@ export function UserProfilePage() {
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-gray-900 truncate">{user.name}</h1>
 
-            {user.role === 'institution' && user.institutionName && (
+            {isInstitution && user.institutionName && (
               <div className="flex items-center gap-1.5 text-sm text-teal-700 mt-1">
                 <Building2 className="w-4 h-4" />
                 <span>{user.institutionName}</span>
@@ -132,8 +198,41 @@ export function UserProfilePage() {
           </div>
         </div>
 
-        {/* Follow button (not shown for own profile) */}
+        {/* Send message button */}
         {!isOwnProfile && userId && (
+          <div className="mt-4">
+            <button
+              onClick={handleSendMessage}
+              disabled={sendingMessage}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+            >
+              <Send className="w-4 h-4" />
+              {sendingMessage ? 'Avataan...' : 'Laheta viesti'}
+            </button>
+          </div>
+        )}
+
+        {/* Follow buttons for institutions — dual follow */}
+        {!isOwnProfile && userId && isInstitution && (
+          <div className="mt-4 space-y-3">
+            {/* Follow institution (official posts) */}
+            <div className="flex items-center gap-3">
+              <FollowButton entityType="user" entityId={userId} />
+              <span className="text-xs text-gray-500">Viralliset julkaisut</span>
+            </div>
+
+            {/* Follow topic (AI summaries + citizen discussion) */}
+            {hasTopic && (
+              <div className="flex items-center gap-3">
+                <FollowButton entityType="tag" entityId={user.institutionTopic!.topicTag} />
+                <span className="text-xs text-gray-500">AI-tiivistelmät + kansalaiskeskustelu</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Follow button for non-institutions */}
+        {!isOwnProfile && userId && !isInstitution && (
           <div className="mt-4">
             <FollowButton entityType="user" entityId={userId} />
           </div>
@@ -148,53 +247,108 @@ export function UserProfilePage() {
             Muokkaa profiilia
           </Link>
         )}
+
+        {/* Institution topic info */}
+        {hasTopic && (
+          <div className="mt-4 p-3 bg-violet-50 border border-violet-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Hash className="w-4 h-4 text-violet-600" />
+              <Link
+                to={`/agora/tag/${encodeURIComponent(user.institutionTopic!.topicTag)}`}
+                className="text-sm font-medium text-violet-700 hover:underline"
+              >
+                {user.institutionTopic!.topicTag.replace(/-/g, ' ')}
+              </Link>
+            </div>
+            {user.institutionTopic!.description && (
+              <p className="text-xs text-violet-600">{user.institutionTopic!.description}</p>
+            )}
+            {user.institutionTopic!.relatedTags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {user.institutionTopic!.relatedTags.map(tag => (
+                  <Link
+                    key={tag}
+                    to={`/agora/tag/${encodeURIComponent(tag)}`}
+                    className="text-xs bg-violet-100 text-violet-600 px-2 py-0.5 rounded-full hover:bg-violet-200"
+                  >
+                    {tag.replace(/-/g, ' ')}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* User's threads */}
-      <div className="px-4 py-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Keskustelut ({user.threads.length})
-        </h2>
+      {/* Content sections */}
+      <div className="px-4 py-6 space-y-8">
 
-        {user.threads.length > 0 ? (
-          <div className="space-y-3">
-            {user.threads.map(thread => (
-              <Link
-                key={thread.id}
-                to={`/agora/${thread.id}`}
-                className="block bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow"
-              >
-                <h3 className="font-semibold text-gray-900 line-clamp-2">{thread.title}</h3>
-                <p className="text-sm text-gray-600 line-clamp-2 mt-1">
-                  {thread.content.substring(0, 150)}...
-                </p>
-                <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
-                  {thread.municipalityName && (
-                    <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
-                      {thread.municipalityName}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    {thread.replyCount}
-                  </span>
-                  <span>{formatDate(thread.createdAt)}</span>
-                </div>
-                {thread.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {thread.tags.slice(0, 3).map(tag => (
-                      <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </Link>
-            ))}
+        {/* Section 1: Official posts (institution's own threads) */}
+        {isInstitution && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-violet-600" />
+              Viralliset julkaisut ({user.threads.length})
+            </h2>
+            {user.threads.length > 0 ? (
+              <div className="space-y-3">
+                {user.threads.map(thread => (
+                  <ThreadListItem key={thread.id} thread={thread} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 py-4">Ei virallisia julkaisuja</p>
+            )}
           </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <p>Ei julkisia keskusteluja</p>
+        )}
+
+        {/* Section 2: Bot AI summaries */}
+        {isInstitution && user.botSummaries && user.botSummaries.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Bot className="w-5 h-5 text-purple-600" />
+              AI-tiivistelmät ({user.botSummaries.length})
+            </h2>
+            <div className="space-y-3">
+              {user.botSummaries.map(thread => (
+                <ThreadListItem key={thread.id} thread={thread} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Section 3: Citizen discussion */}
+        {isInstitution && user.citizenDiscussions && user.citizenDiscussions.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 text-teal-600" />
+              Kansalaiskeskustelu ({user.citizenDiscussions.length})
+            </h2>
+            <div className="space-y-3">
+              {user.citizenDiscussions.map(thread => (
+                <ThreadListItem key={thread.id} thread={thread} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Non-institution: just show threads */}
+        {!isInstitution && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Keskustelut ({user.threads.length})
+            </h2>
+            {user.threads.length > 0 ? (
+              <div className="space-y-3">
+                {user.threads.map(thread => (
+                  <ThreadListItem key={thread.id} thread={thread} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Ei julkisia keskusteluja</p>
+              </div>
+            )}
           </div>
         )}
       </div>

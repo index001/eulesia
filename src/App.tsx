@@ -17,7 +17,11 @@ import {
   AboutPage,
   MunicipalitiesPage,
   MunicipalityPage,
-  UserProfilePage
+  UserProfilePage,
+  TagPage,
+  TopicsPage,
+  MessagesPage,
+  DMConversationPage
 } from './pages'
 
 function LoadingScreen() {
@@ -84,6 +88,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ThreadPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/agora/tag/:tagName"
+        element={
+          <ProtectedRoute>
+            <TagPage />
           </ProtectedRoute>
         }
       />
@@ -157,6 +169,23 @@ function AppRoutes() {
       />
 
       <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <MessagesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages/:conversationId"
+        element={
+          <ProtectedRoute>
+            <DMConversationPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/services"
         element={
           <ProtectedRoute>
@@ -179,6 +208,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AboutPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/aiheet"
+        element={
+          <ProtectedRoute>
+            <TopicsPage />
           </ProtectedRoute>
         }
       />

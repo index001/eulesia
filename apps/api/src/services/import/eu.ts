@@ -11,7 +11,7 @@
  * - European Parliament
  */
 
-import { db, threads, threadTags, users } from '../../db/index.js'
+import { db, threads, threadTags, users, institutionTopics } from '../../db/index.js'
 import { eq, and } from 'drizzle-orm'
 import { parseFeed, fetchArticleContent, type FeedItem } from './feeds.js'
 import { generateEuSummary } from './mistral.js'
@@ -91,6 +91,35 @@ async function getOrCreateBotUser(): Promise<string> {
     .returning({ id: users.id })
 
   return botUser.id
+}
+
+/**
+ * Find institution user by name for source attribution
+ */
+async function findInstitutionByName(name: string): Promise<string | null> {
+  const [institution] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(
+      eq(users.role, 'institution'),
+      eq(users.institutionName, name)
+    ))
+    .limit(1)
+
+  return institution?.id || null
+}
+
+/**
+ * Get topic tag for an institution (from institution_topics table)
+ */
+async function getInstitutionTopicTag(institutionId: string): Promise<string | null> {
+  const [topic] = await db
+    .select({ topicTag: institutionTopics.topicTag })
+    .from(institutionTopics)
+    .where(eq(institutionTopics.institutionId, institutionId))
+    .limit(1)
+
+  return topic?.topicTag || null
 }
 
 /**
@@ -185,6 +214,10 @@ export async function importEuContent(options: ImportOptions = {}): Promise<Impo
           const content = buildThreadContent(summary, item, source)
           const contentHtml = renderMarkdown(content)
 
+          // Look up source institution for attribution
+          const sourceInstitutionId = await findInstitutionByName(source.institution)
+          const topicTag = sourceInstitutionId ? await getInstitutionTopicTag(sourceInstitutionId) : null
+
           // Create thread
           const [thread] = await db
             .insert(threads)
@@ -197,6 +230,7 @@ export async function importEuContent(options: ImportOptions = {}): Promise<Impo
               source: 'rss_import',
               sourceUrl: item.link,
               sourceId,
+              sourceInstitutionId,
               aiGenerated: true,
               aiModel: 'mistral-large-latest',
               originalContent: fullContent.slice(0, 50000),
@@ -211,8 +245,9 @@ export async function importEuContent(options: ImportOptions = {}): Promise<Impo
             })
             .returning({ id: threads.id })
 
-          // Add tags
+          // Add tags (include institution topic tag if available)
           const allTags = [...summary.tags, 'eu', source.contentType, source.institution.toLowerCase().split(' ').pop()!]
+          if (topicTag) allTags.push(topicTag)
           const uniqueTags = [...new Set(allTags)].slice(0, 10)
 
           for (const tag of uniqueTags) {

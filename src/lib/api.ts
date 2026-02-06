@@ -162,8 +162,15 @@ class ApiClient {
     })
   }
 
-  async getTags(): Promise<{ tag: string; count: number }[]> {
+  async getTags(): Promise<TagWithCategory[]> {
     return this.request('/agora/tags')
+  }
+
+  async getTagPage(tag: string, page = 1, limit = 20): Promise<TagPageResponse> {
+    const params = new URLSearchParams()
+    params.set('page', page.toString())
+    params.set('limit', limit.toString())
+    return this.request(`/agora/tags/${encodeURIComponent(tag)}?${params}`)
   }
 
   // Clubs
@@ -402,6 +409,56 @@ class ApiClient {
     return this.request(`/search/places?q=${encodeURIComponent(query)}&limit=${limit}`)
   }
 
+  // Direct Messages
+  async getConversations(): Promise<Conversation[]> {
+    return this.request('/dm')
+  }
+
+  async startConversation(userId: string): Promise<Conversation> {
+    return this.request('/dm', {
+      method: 'POST',
+      body: JSON.stringify({ userId })
+    })
+  }
+
+  async getConversation(id: string, limit?: number): Promise<ConversationWithMessages> {
+    const query = limit ? `?limit=${limit}` : ''
+    return this.request(`/dm/${id}${query}`)
+  }
+
+  async sendDirectMessage(conversationId: string, content: string): Promise<DirectMessage> {
+    return this.request(`/dm/${conversationId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content })
+    })
+  }
+
+  async markConversationRead(conversationId: string): Promise<void> {
+    await this.request(`/dm/${conversationId}/read`, { method: 'POST' })
+  }
+
+  // Notifications
+  async getNotifications(limit?: number): Promise<AppNotification[]> {
+    const query = limit ? `?limit=${limit}` : ''
+    return this.request(`/notifications${query}`)
+  }
+
+  async getUnreadNotificationCount(): Promise<{ count: number }> {
+    return this.request('/notifications/unread-count')
+  }
+
+  async markNotificationRead(id: string): Promise<void> {
+    await this.request(`/notifications/${id}/read`, { method: 'POST' })
+  }
+
+  async markAllNotificationsRead(): Promise<void> {
+    await this.request('/notifications/read-all', { method: 'POST' })
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    await this.request(`/notifications/${id}`, { method: 'DELETE' })
+  }
+
   // Uploads
   async uploadAvatar(file: File): Promise<UploadAvatarResponse> {
     const formData = new FormData()
@@ -495,6 +552,8 @@ export interface Thread {
   sourceUrl?: string
   sourceId?: string
   aiGenerated?: boolean
+  sourceInstitutionId?: string
+  sourceInstitutionName?: string
 }
 
 export interface ThreadWithComments extends Thread {
@@ -618,6 +677,41 @@ export interface HomeData {
     clubs: { id: string; name: string; slug: string }[]
   }
   isOwnHome: boolean
+}
+
+// Notification types
+export interface AppNotification {
+  id: string
+  type: string
+  title: string
+  body?: string
+  link?: string
+  read: boolean
+  createdAt: string
+}
+
+// Direct Message types
+export interface Conversation {
+  id: string
+  otherUser: UserSummary | null
+  lastMessage?: DirectMessage | null
+  unreadCount: number
+  updatedAt: string
+}
+
+export interface DirectMessage {
+  id: string
+  conversationId: string
+  content: string
+  contentHtml?: string
+  author: UserSummary
+  createdAt: string
+}
+
+export interface ConversationWithMessages {
+  id: string
+  otherUser: UserSummary | null
+  messages: DirectMessage[]
 }
 
 // Filter types - all scopes filter WITHIN subscriptions, never shows all content globally
@@ -914,6 +1008,40 @@ export interface SearchResults {
   tags: SearchTagResult[]
   query: string
   processingTimeMs: number
+}
+
+// Tag types
+export interface TagWithCategory {
+  tag: string
+  count: number
+  category: string | null
+  displayName: string | null
+  description: string | null
+  scope: string | null
+}
+
+export interface TagPageResponse {
+  tag: string
+  tagMeta: {
+    tag: string
+    category: string
+    displayName: string | null
+    description: string | null
+    scope: string | null
+  } | null
+  institution: {
+    institutionId: string
+    topicTag: string
+    relatedTags: string[]
+    description: string | null
+    institutionName: string | null
+    institutionType: string | null
+  } | null
+  items: Thread[]
+  total: number
+  page: number
+  limit: number
+  hasMore: boolean
 }
 
 // Upload types

@@ -38,7 +38,15 @@ export const queryKeys = {
   // Home
   home: (userId: string) => ['home', userId] as const,
   room: (id: string) => ['room', id] as const,
-  invitations: ['invitations'] as const
+  invitations: ['invitations'] as const,
+
+  // Direct Messages
+  conversations: ['conversations'] as const,
+  conversation: (id: string) => ['conversation', id] as const,
+
+  // Notifications
+  notifications: ['notifications'] as const,
+  notificationUnreadCount: ['notificationUnreadCount'] as const
 }
 
 // Auth hooks
@@ -88,6 +96,14 @@ export function useTags() {
   return useQuery({
     queryKey: queryKeys.tags,
     queryFn: () => api.getTags()
+  })
+}
+
+export function useTagPage(tag: string, page = 1) {
+  return useQuery({
+    queryKey: ['tagPage', tag, page] as const,
+    queryFn: () => api.getTagPage(tag, page),
+    enabled: !!tag
   })
 }
 
@@ -411,6 +427,108 @@ export function useDeclineInvitation() {
     mutationFn: (invitationId: string) => api.declineInvitation(invitationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.invitations })
+    }
+  })
+}
+
+// DM hooks
+export function useConversations() {
+  return useQuery({
+    queryKey: queryKeys.conversations,
+    queryFn: () => api.getConversations()
+  })
+}
+
+export function useConversation(id: string) {
+  return useQuery({
+    queryKey: queryKeys.conversation(id),
+    queryFn: () => api.getConversation(id),
+    enabled: !!id
+  })
+}
+
+export function useStartConversation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (userId: string) => api.startConversation(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations })
+    }
+  })
+}
+
+export function useSendDM(conversationId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (content: string) => api.sendDirectMessage(conversationId, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversation(conversationId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations })
+    }
+  })
+}
+
+export function useMarkRead(conversationId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => api.markConversationRead(conversationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations })
+    }
+  })
+}
+
+// Notification hooks
+export function useNotifications() {
+  return useQuery({
+    queryKey: queryKeys.notifications,
+    queryFn: () => api.getNotifications(30)
+  })
+}
+
+export function useUnreadNotificationCount() {
+  return useQuery({
+    queryKey: queryKeys.notificationUnreadCount,
+    queryFn: () => api.getUnreadNotificationCount(),
+    refetchInterval: 60_000
+  })
+}
+
+export function useMarkNotificationRead() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => api.markNotificationRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications })
+      queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount })
+    }
+  })
+}
+
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => api.markAllNotificationsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications })
+      queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount })
+    }
+  })
+}
+
+export function useDeleteNotification() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => api.deleteNotification(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications })
+      queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount })
     }
   })
 }
