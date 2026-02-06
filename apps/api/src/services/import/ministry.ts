@@ -31,14 +31,14 @@ export interface MinistrySource {
 export const MINISTRY_SOURCES: MinistrySource[] = [
   {
     name: 'Valtioneuvosto',
-    feedUrl: 'https://valtioneuvosto.fi/tiedotteet?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_1702702627327&p_p_lifecycle=2&p_p_resource_id=rss',
+    feedUrl: 'https://valtioneuvosto.fi/en/staattiset-feedit-en/-/asset_publisher/LOmkEPY4nk2s/rss',
     contentType: 'press',
-    language: 'fi'
+    language: 'en'  // English feed, AI translates to Finnish
   },
   {
-    name: 'Finlex',
-    feedUrl: 'https://finlex.fi/fi/uutiset/rss/',
-    contentType: 'law',
+    name: 'STM',
+    feedUrl: 'https://stm.fi/ajankohtaista/-/asset_publisher/QGPfXenrI9A4/rss',
+    contentType: 'press',
     language: 'fi'
   }
 ]

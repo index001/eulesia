@@ -36,17 +36,12 @@ export const EU_SOURCES: EuSource[] = [
     language: 'en'
   },
   {
-    institution: 'EUR-Lex',
-    feedUrl: 'https://eur-lex.europa.eu/EN/display-feed.html?rssId=1',
-    contentType: 'legislation',
-    language: 'en'
-  },
-  {
     institution: 'European Parliament',
     feedUrl: 'https://www.europarl.europa.eu/rss/doc/top-stories/en.xml',
     contentType: 'resolution',
     language: 'en'
   }
+  // EUR-Lex RSS not currently available — add when working feed URL found
 ]
 
 // ============================================
