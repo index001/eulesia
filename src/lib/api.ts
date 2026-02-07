@@ -292,6 +292,12 @@ class ApiClient {
     searchParams.set('west', bounds.west.toString())
     if (bounds.types) searchParams.set('types', bounds.types)
     if (bounds.categories) searchParams.set('categories', bounds.categories)
+    if (bounds.timePreset) searchParams.set('timePreset', bounds.timePreset)
+    if (bounds.dateFrom) searchParams.set('dateFrom', bounds.dateFrom)
+    if (bounds.dateTo) searchParams.set('dateTo', bounds.dateTo)
+    if (bounds.scope) searchParams.set('scope', bounds.scope)
+    if (bounds.language) searchParams.set('language', bounds.language)
+    if (bounds.tags) searchParams.set('tags', bounds.tags)
 
     return this.request(`/map/points?${searchParams.toString()}`)
   }
@@ -758,12 +764,14 @@ export interface CreateThreadData {
   locationOsmId?: number
   locationOsmType?: OsmType
   tags?: string[]
+  language?: string
   institutionalContext?: InstitutionalContext
 }
 
 export interface CreateCommentData {
   content: string
   parentId?: string
+  language?: string
 }
 
 export interface CreateClubData {
@@ -777,6 +785,7 @@ export interface CreateClubData {
 export interface CreateClubThreadData {
   title: string
   content: string
+  language?: string
 }
 
 export interface CreateRoomData {
@@ -798,6 +807,8 @@ export interface MapPoint {
     category?: string
     scope?: string
     placeType?: string
+    language?: string
+    createdAt?: string
   }
 }
 
@@ -808,6 +819,12 @@ export interface MapBounds {
   west: number
   types?: string
   categories?: string
+  dateFrom?: string
+  dateTo?: string
+  timePreset?: 'week' | 'month' | 'year' | 'all'
+  scope?: string
+  language?: string
+  tags?: string
 }
 
 export interface Place {

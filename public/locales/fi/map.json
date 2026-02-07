@@ -1,0 +1,30 @@
+{
+  "title": "Kartta",
+  "locationDetails": "Paikan tiedot",
+  "noSelection": "Valitse paikka kartalta",
+  "loading": "Ladataan...",
+  "noResults": "Ei tuloksia",
+  "filters": {
+    "cities": "Kunnat",
+    "agora": "Agora",
+    "clubs": "Kerhot",
+    "places": "Paikat",
+    "week": "Vk",
+    "month": "Kk",
+    "year": "V",
+    "all": "Kaikki",
+    "advanced": "Lisäsuodattimet",
+    "scope": "Laajuus",
+    "language": "Kieli",
+    "tags": "Tagit",
+    "dateFrom": "Alkaen",
+    "dateTo": "Päättyen",
+    "apply": "Käytä",
+    "reset": "Nollaa"
+  },
+  "scopes": {
+    "local": "Paikallinen",
+    "national": "Kansallinen",
+    "european": "Eurooppalainen"
+  }
+}

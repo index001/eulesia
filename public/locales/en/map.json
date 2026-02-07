@@ -1,0 +1,30 @@
+{
+  "title": "Map",
+  "locationDetails": "Location details",
+  "noSelection": "Select a place on the map",
+  "loading": "Loading...",
+  "noResults": "No results",
+  "filters": {
+    "cities": "Cities",
+    "agora": "Agora",
+    "clubs": "Clubs",
+    "places": "Places",
+    "week": "Wk",
+    "month": "Mo",
+    "year": "Yr",
+    "all": "All",
+    "advanced": "Advanced filters",
+    "scope": "Scope",
+    "language": "Language",
+    "tags": "Tags",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "apply": "Apply",
+    "reset": "Reset"
+  },
+  "scopes": {
+    "local": "Local",
+    "national": "National",
+    "european": "European"
+  }
+}

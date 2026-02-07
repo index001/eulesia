@@ -24,6 +24,8 @@ export function MapPopup({ point, onViewDetails }: MapPopupProps) {
         return `/agora/thread/${point.id}`
       case 'club':
         return `/clubs/${point.id}`
+      case 'municipality':
+        return `/kunnat/${point.id}`
       default:
         return null
     }
@@ -65,6 +67,11 @@ export function MapPopup({ point, onViewDetails }: MapPopupProps) {
         {point.meta.scope && (
           <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded capitalize">
             {point.meta.scope}
+          </span>
+        )}
+        {point.meta.language && (
+          <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded uppercase">
+            {point.meta.language}
           </span>
         )}
       </div>

@@ -1,10 +1,13 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { MapContainer as LeafletMap, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { api, type MapPoint, type MapBounds } from '../../lib/api'
-import { MapFilters, type MapFilterType } from './MapFilters'
+import { type MapPoint, type MapBounds } from '../../lib/api'
+import { useMapPoints } from '../../hooks/useApi'
+import { MapFilters } from './MapFilters'
 import { MapPopup } from './MapPopup'
+import type { MapFilterState } from './types'
 
 // Custom marker icons
 const createIcon = (color: string) => L.divIcon({
@@ -30,27 +33,73 @@ const icons = {
   place: createIcon('#ea580c')         // orange-600
 }
 
-// Component to handle map events
+const typeColors: Record<string, string> = {
+  municipality: '#2563eb',
+  thread: '#9333ea',
+  club: '#16a34a',
+  place: '#ea580c'
+}
+
+// Custom cluster icon that shows dominant type color
+function createClusterIcon(cluster: L.MarkerCluster) {
+  const markers = cluster.getAllChildMarkers()
+  const count = markers.length
+
+  // Count types
+  const typeCounts: Record<string, number> = {}
+  markers.forEach(m => {
+    const type = (m.options as { pointType?: string }).pointType || 'place'
+    typeCounts[type] = (typeCounts[type] || 0) + 1
+  })
+
+  // Find dominant type
+  const dominantType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'place'
+  const color = typeColors[dominantType] || '#6b7280'
+
+  // Size based on count
+  const size = count < 10 ? 36 : count < 50 ? 44 : 52
+  const fontSize = count < 10 ? 13 : count < 100 ? 12 : 11
+
+  return L.divIcon({
+    html: `<div style="
+      background-color: ${color};
+      width: ${size}px;
+      height: ${size}px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: ${fontSize}px;
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    ">${count}</div>`,
+    className: 'custom-cluster-icon',
+    iconSize: L.point(size, size)
+  })
+}
+
+// Component to handle map events with debounce
 function MapEventHandler({ onBoundsChange }: { onBoundsChange: (bounds: MapBounds) => void }) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const debouncedBoundsChange = useCallback((map: L.Map) => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      const bounds = map.getBounds()
+      onBoundsChange({
+        north: bounds.getNorth(),
+        south: bounds.getSouth(),
+        east: bounds.getEast(),
+        west: bounds.getWest()
+      })
+    }, 300)
+  }, [onBoundsChange])
+
   const map = useMapEvents({
-    moveend: () => {
-      const bounds = map.getBounds()
-      onBoundsChange({
-        north: bounds.getNorth(),
-        south: bounds.getSouth(),
-        east: bounds.getEast(),
-        west: bounds.getWest()
-      })
-    },
-    zoomend: () => {
-      const bounds = map.getBounds()
-      onBoundsChange({
-        north: bounds.getNorth(),
-        south: bounds.getSouth(),
-        east: bounds.getEast(),
-        west: bounds.getWest()
-      })
-    }
+    moveend: () => debouncedBoundsChange(map),
+    zoomend: () => debouncedBoundsChange(map)
   })
 
   // Trigger initial bounds on mount
@@ -63,6 +112,13 @@ function MapEventHandler({ onBoundsChange }: { onBoundsChange: (bounds: MapBound
       west: bounds.getWest()
     })
   }, [map, onBoundsChange])
+
+  // Cleanup timer
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   return null
 }
@@ -83,54 +139,27 @@ function MapCenterUpdater({ center }: { center: [number, number] | null }) {
 interface EulesiaMapProps {
   initialCenter?: [number, number]
   initialZoom?: number
+  filters: MapFilterState
+  onFiltersChange: (filters: MapFilterState) => void
   onPointClick?: (point: MapPoint) => void
 }
 
 export function EulesiaMap({
   initialCenter = [61.4978, 23.7610], // Default: Tampere, Finland
   initialZoom = 6,
+  filters,
+  onFiltersChange,
   onPointClick
 }: EulesiaMapProps) {
-  const [points, setPoints] = useState<MapPoint[]>([])
-  const [activeFilters, setActiveFilters] = useState<MapFilterType[]>(['municipalities', 'agora', 'clubs', 'places'])
-  const [isLoading, setIsLoading] = useState(false)
+  const [bounds, setBounds] = useState<MapBounds | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null)
-  const boundsRef = useRef<MapBounds | null>(null)
 
-  const fetchPoints = useCallback(async (bounds: MapBounds) => {
-    setIsLoading(true)
-    try {
-      const response = await api.getMapPoints({
-        ...bounds,
-        types: activeFilters.join(',')
-      })
-      setPoints(response.points)
-    } catch (error) {
-      console.error('Failed to fetch map points:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [activeFilters])
+  const { data, isLoading } = useMapPoints(bounds, filters)
+  const points = useMemo(() => data?.points || [], [data])
 
-  const handleBoundsChange = useCallback((bounds: MapBounds) => {
-    boundsRef.current = bounds
-    fetchPoints(bounds)
-  }, [fetchPoints])
-
-  // Refetch when filters change
-  useEffect(() => {
-    if (boundsRef.current) {
-      fetchPoints(boundsRef.current)
-    }
-  }, [activeFilters, fetchPoints])
-
-  const handleToggleFilter = (filter: MapFilterType) => {
-    setActiveFilters(prev =>
-      prev.includes(filter)
-        ? prev.filter(f => f !== filter)
-        : [...prev, filter]
-    )
-  }
+  const handleBoundsChange = useCallback((newBounds: MapBounds) => {
+    setBounds(newBounds)
+  }, [])
 
   // Get user location
   useEffect(() => {
@@ -162,25 +191,36 @@ export function EulesiaMap({
         <MapEventHandler onBoundsChange={handleBoundsChange} />
         <MapCenterUpdater center={mapCenter} />
 
-        {points.map((point) => (
-          <Marker
-            key={`${point.type}-${point.id}`}
-            position={[point.latitude, point.longitude]}
-            icon={icons[point.type]}
-            eventHandlers={{
-              click: () => onPointClick?.(point)
-            }}
-          >
-            <Popup>
-              <MapPopup point={point} />
-            </Popup>
-          </Marker>
-        ))}
+        <MarkerClusterGroup
+          chunkedLoading
+          iconCreateFunction={createClusterIcon}
+          maxClusterRadius={60}
+          spiderfyOnMaxZoom
+          showCoverageOnHover={false}
+          disableClusteringAtZoom={16}
+        >
+          {points.map((point) => (
+            <Marker
+              key={`${point.type}-${point.id}`}
+              position={[point.latitude, point.longitude]}
+              icon={icons[point.type]}
+              // Store point type for cluster icon calculation
+              {...{ pointType: point.type } as unknown as L.MarkerOptions}
+              eventHandlers={{
+                click: () => onPointClick?.(point)
+              }}
+            >
+              <Popup>
+                <MapPopup point={point} />
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
       </LeafletMap>
 
       <MapFilters
-        activeFilters={activeFilters}
-        onToggleFilter={handleToggleFilter}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
       />
 
       {isLoading && (

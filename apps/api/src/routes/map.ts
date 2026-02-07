@@ -16,7 +16,13 @@ const boundsSchema = z.object({
   east: z.coerce.number().min(-180).max(180),
   west: z.coerce.number().min(-180).max(180),
   types: z.string().optional(), // "agora,clubs,places,municipalities"
-  categories: z.string().optional() // "park,trail,landmark"
+  categories: z.string().optional(), // "park,trail,landmark"
+  timePreset: z.enum(['week', 'month', 'year', 'all']).optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  scope: z.string().optional(), // "local,national"
+  language: z.string().optional(), // "fi,en"
+  tags: z.string().optional() // "koulutus,liikenne"
 })
 
 const createPlaceSchema = z.object({
@@ -47,6 +53,21 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
   const bounds = boundsSchema.parse(req.query)
   const requestedTypes = bounds.types?.split(',') || ['agora', 'clubs', 'places', 'municipalities']
   const requestedCategories = bounds.categories?.split(',') || []
+  const requestedScopes = bounds.scope?.split(',') || []
+  const requestedLanguages = bounds.language?.split(',') || []
+  const requestedTags = bounds.tags?.split(',') || []
+
+  // Time filter calculation
+  let effectiveDateFrom: Date | undefined
+  let effectiveDateTo: Date | undefined
+  if (bounds.timePreset && bounds.timePreset !== 'all') {
+    effectiveDateTo = new Date()
+    const ms = { week: 7, month: 30, year: 365 }[bounds.timePreset]! * 86400000
+    effectiveDateFrom = new Date(Date.now() - ms)
+  }
+  // dateFrom/dateTo override preset if provided
+  if (bounds.dateFrom) effectiveDateFrom = new Date(bounds.dateFrom)
+  if (bounds.dateTo) effectiveDateTo = new Date(bounds.dateTo)
 
   interface MapPoint {
     id: string
@@ -60,12 +81,14 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
       category?: string
       scope?: string
       placeType?: string
+      language?: string
+      createdAt?: string
     }
   }
 
   const points: MapPoint[] = []
 
-  // Get municipalities with coordinates in bounds
+  // Get municipalities with coordinates in bounds (NO time filter - permanent entities)
   if (requestedTypes.includes('municipalities')) {
     const municipalityPoints = await db
       .select({
@@ -81,6 +104,7 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
         gte(municipalities.longitude, bounds.west.toString()),
         lte(municipalities.longitude, bounds.east.toString())
       ))
+      .limit(200)
 
     // Get thread counts for each municipality
     const municipalityIds = municipalityPoints.map(m => m.id)
@@ -120,25 +144,29 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
 
   // Get places in bounds
   if (requestedTypes.includes('places')) {
-    let placeQuery = db
+    const placeConditions = [
+      gte(places.latitude, bounds.south.toString()),
+      lte(places.latitude, bounds.north.toString()),
+      gte(places.longitude, bounds.west.toString()),
+      lte(places.longitude, bounds.east.toString())
+    ]
+
+    if (effectiveDateFrom) placeConditions.push(gte(places.createdAt, effectiveDateFrom))
+    if (effectiveDateTo) placeConditions.push(lte(places.createdAt, effectiveDateTo))
+
+    const placePoints = await db
       .select({
         id: places.id,
         name: places.name,
         latitude: places.latitude,
         longitude: places.longitude,
         type: places.type,
-        category: places.category
+        category: places.category,
+        createdAt: places.createdAt
       })
       .from(places)
-      .where(and(
-        gte(places.latitude, bounds.south.toString()),
-        lte(places.latitude, bounds.north.toString()),
-        gte(places.longitude, bounds.west.toString()),
-        lte(places.longitude, bounds.east.toString())
-      ))
-      .$dynamic()
-
-    const placePoints = await placeQuery
+      .where(and(...placeConditions))
+      .limit(500)
 
     for (const p of placePoints) {
       if (p.latitude && p.longitude) {
@@ -155,7 +183,8 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
           longitude: parseFloat(p.longitude),
           meta: {
             category: p.category || undefined,
-            placeType: p.type
+            placeType: p.type,
+            createdAt: p.createdAt?.toISOString()
           }
         })
       }
@@ -164,21 +193,37 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
 
   // Get threads with coordinates
   if (requestedTypes.includes('agora')) {
+    const threadConditions = [
+      gte(threads.latitude, bounds.south.toString()),
+      lte(threads.latitude, bounds.north.toString()),
+      gte(threads.longitude, bounds.west.toString()),
+      lte(threads.longitude, bounds.east.toString())
+    ]
+
+    if (effectiveDateFrom) threadConditions.push(gte(threads.createdAt, effectiveDateFrom))
+    if (effectiveDateTo) threadConditions.push(lte(threads.createdAt, effectiveDateTo))
+    if (requestedScopes.length > 0) threadConditions.push(inArray(threads.scope, requestedScopes as ('local' | 'national' | 'european')[]))
+    if (requestedLanguages.length > 0) threadConditions.push(inArray(threads.language, requestedLanguages))
+
+    // Tag filter using EXISTS subquery to avoid JOIN multiplication
+    if (requestedTags.length > 0) {
+      threadConditions.push(
+        sql`EXISTS (SELECT 1 FROM ${threadTags} WHERE ${threadTags.threadId} = ${threads.id} AND ${threadTags.tag} = ANY(${requestedTags}))`
+      )
+    }
+
     const threadPoints = await db
       .select({
         id: threads.id,
         title: threads.title,
         latitude: threads.latitude,
         longitude: threads.longitude,
-        scope: threads.scope
+        scope: threads.scope,
+        language: threads.language,
+        createdAt: threads.createdAt
       })
       .from(threads)
-      .where(and(
-        gte(threads.latitude, bounds.south.toString()),
-        lte(threads.latitude, bounds.north.toString()),
-        gte(threads.longitude, bounds.west.toString()),
-        lte(threads.longitude, bounds.east.toString())
-      ))
+      .where(and(...threadConditions))
       .limit(500)
 
     for (const t of threadPoints) {
@@ -190,7 +235,9 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
           latitude: parseFloat(t.latitude),
           longitude: parseFloat(t.longitude),
           meta: {
-            scope: t.scope
+            scope: t.scope,
+            language: t.language || undefined,
+            createdAt: t.createdAt?.toISOString()
           }
         })
       }
@@ -199,6 +246,16 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
 
   // Get clubs with coordinates
   if (requestedTypes.includes('clubs')) {
+    const clubConditions = [
+      gte(clubs.latitude, bounds.south.toString()),
+      lte(clubs.latitude, bounds.north.toString()),
+      gte(clubs.longitude, bounds.west.toString()),
+      lte(clubs.longitude, bounds.east.toString())
+    ]
+
+    if (effectiveDateFrom) clubConditions.push(gte(clubs.createdAt, effectiveDateFrom))
+    if (effectiveDateTo) clubConditions.push(lte(clubs.createdAt, effectiveDateTo))
+
     const clubPoints = await db
       .select({
         id: clubs.id,
@@ -206,15 +263,12 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
         latitude: clubs.latitude,
         longitude: clubs.longitude,
         category: clubs.category,
-        memberCount: clubs.memberCount
+        memberCount: clubs.memberCount,
+        createdAt: clubs.createdAt
       })
       .from(clubs)
-      .where(and(
-        gte(clubs.latitude, bounds.south.toString()),
-        lte(clubs.latitude, bounds.north.toString()),
-        gte(clubs.longitude, bounds.west.toString()),
-        lte(clubs.longitude, bounds.east.toString())
-      ))
+      .where(and(...clubConditions))
+      .limit(300)
 
     for (const c of clubPoints) {
       if (c.latitude && c.longitude) {
@@ -226,7 +280,8 @@ router.get('/points', optionalAuthMiddleware, asyncHandler(async (req: Authentic
           longitude: parseFloat(c.longitude),
           meta: {
             memberCount: c.memberCount || 0,
-            category: c.category || undefined
+            category: c.category || undefined,
+            createdAt: c.createdAt?.toISOString()
           }
         })
       }
@@ -261,6 +316,7 @@ router.get('/location/:type/:id', optionalAuthMiddleware, asyncHandler(async (re
         author: {
           id: users.id,
           name: users.name,
+          avatarUrl: users.avatarUrl,
           role: users.role
         }
       })
@@ -307,6 +363,7 @@ router.get('/location/:type/:id', optionalAuthMiddleware, asyncHandler(async (re
         author: {
           id: users.id,
           name: users.name,
+          avatarUrl: users.avatarUrl,
           role: users.role
         }
       })
@@ -339,6 +396,7 @@ router.get('/location/:type/:id', optionalAuthMiddleware, asyncHandler(async (re
         author: {
           id: users.id,
           name: users.name,
+          avatarUrl: users.avatarUrl,
           role: users.role
         },
         municipality: municipalities,

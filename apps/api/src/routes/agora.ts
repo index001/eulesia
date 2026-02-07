@@ -22,6 +22,7 @@ const createThreadSchema = z.object({
   locationOsmId: z.number().int().positive().optional(),
   locationOsmType: z.enum(['node', 'way', 'relation']).optional(),
   tags: z.array(z.string().max(100)).max(10).optional(),
+  language: z.string().max(10).optional(),
   institutionalContext: z.object({
     docs: z.array(z.object({ title: z.string(), url: z.string().url() })).optional(),
     timeline: z.array(z.object({ date: z.string(), event: z.string() })).optional(),
@@ -32,7 +33,8 @@ const createThreadSchema = z.object({
 
 const createCommentSchema = z.object({
   content: z.string().min(1).max(10000),
-  parentId: z.string().uuid().optional()
+  parentId: z.string().uuid().optional(),
+  language: z.string().max(10).optional()
 })
 
 const voteSchema = z.object({
@@ -489,7 +491,8 @@ router.post('/threads', authMiddleware, asyncHandler(async (req: AuthenticatedRe
       country: data.country || 'FI',
       municipalityId: data.municipalityId,
       locationId: resolvedLocationId,
-      institutionalContext: data.institutionalContext
+      institutionalContext: data.institutionalContext,
+      language: data.language || req.user?.locale || 'fi'
     })
     .returning()
 
@@ -566,7 +569,8 @@ router.post('/threads/:id/comments', authMiddleware, asyncHandler(async (req: Au
       parentId: data.parentId,
       content: data.content,
       contentHtml,
-      depth
+      depth,
+      language: data.language || req.user?.locale || 'fi'
     })
     .returning()
 

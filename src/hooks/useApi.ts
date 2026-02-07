@@ -10,8 +10,10 @@ import type {
   CreateRoomData,
   EntityType,
   SubscribeData,
-  OsmType
+  OsmType,
+  MapBounds
 } from '../lib/api'
+import type { MapFilterState } from '../components/map/types'
 
 export type CommentSort = 'best' | 'new' | 'old' | 'controversial'
 
@@ -47,7 +49,11 @@ export const queryKeys = {
 
   // Notifications
   notifications: ['notifications'] as const,
-  notificationUnreadCount: ['notificationUnreadCount'] as const
+  notificationUnreadCount: ['notificationUnreadCount'] as const,
+
+  // Map
+  mapPoints: (bounds: MapBounds | null, filters: MapFilterState) => ['mapPoints', bounds, filters] as const,
+  mapLocation: (type: string, id: string) => ['mapLocation', type, id] as const
 }
 
 // Auth hooks
@@ -642,5 +648,37 @@ export function useSearchPlaces(query: string, limit = 10) {
     queryFn: () => api.searchPlaces(query, limit),
     enabled: query.length >= 2,
     staleTime: 1000 * 60
+  })
+}
+
+// Map hooks
+function filtersToParams(filters: MapFilterState): Partial<MapBounds> {
+  return {
+    types: filters.types.join(','),
+    timePreset: filters.timePreset,
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
+    scope: filters.scopes?.join(','),
+    language: filters.languages?.join(','),
+    tags: filters.tags?.join(',')
+  }
+}
+
+export function useMapPoints(bounds: MapBounds | null, filters: MapFilterState) {
+  return useQuery({
+    queryKey: queryKeys.mapPoints(bounds, filters),
+    queryFn: () => api.getMapPoints({ ...bounds!, ...filtersToParams(filters) }),
+    enabled: !!bounds,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false
+  })
+}
+
+export function useMapLocationDetails(type: string, id: string) {
+  return useQuery({
+    queryKey: queryKeys.mapLocation(type, id),
+    queryFn: () => api.getLocationDetails(type, id),
+    enabled: !!type && !!id,
+    staleTime: 5 * 60_000
   })
 }

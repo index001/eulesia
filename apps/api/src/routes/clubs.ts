@@ -21,12 +21,14 @@ const createClubSchema = z.object({
 
 const createClubThreadSchema = z.object({
   title: z.string().min(5).max(500),
-  content: z.string().min(10).max(50000)
+  content: z.string().min(10).max(50000),
+  language: z.string().max(10).optional()
 })
 
 const createClubCommentSchema = z.object({
   content: z.string().min(1).max(10000),
-  parentId: z.string().uuid().optional()
+  parentId: z.string().uuid().optional(),
+  language: z.string().max(10).optional()
 })
 
 // GET /clubs - List clubs
@@ -351,7 +353,8 @@ router.post('/:id/threads', authMiddleware, asyncHandler(async (req: Authenticat
       authorId: userId,
       title: data.title,
       content: data.content,
-      contentHtml
+      contentHtml,
+      language: data.language || req.user?.locale || 'fi'
     })
     .returning()
 
@@ -465,7 +468,8 @@ router.post('/:clubId/threads/:threadId/comments', authMiddleware, asyncHandler(
       authorId: userId,
       parentId: data.parentId,
       content: data.content,
-      contentHtml
+      contentHtml,
+      language: data.language || req.user?.locale || 'fi'
     })
     .returning()
 

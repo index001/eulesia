@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { X, Landmark, Users, MapPin, Building2, MessageCircle, Clock, ChevronRight } from 'lucide-react'
-import { api, type MapPoint, type LocationDetails as LocationDetailsType } from '../../lib/api'
+import { useTranslation } from 'react-i18next'
+import type { MapPoint } from '../../lib/api'
+import { useMapLocationDetails } from '../../hooks/useApi'
 
 interface LocationDetailsProps {
   point: MapPoint
@@ -16,26 +17,8 @@ const typeConfig = {
 }
 
 export function LocationDetails({ point, onClose }: LocationDetailsProps) {
-  const [details, setDetails] = useState<LocationDetailsType | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function fetchDetails() {
-      setIsLoading(true)
-      setError(null)
-      try {
-        const data = await api.getLocationDetails(point.type, point.id)
-        setDetails(data)
-      } catch (err) {
-        setError('Failed to load details')
-        console.error(err)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchDetails()
-  }, [point.type, point.id])
+  const { t } = useTranslation('map')
+  const { data: details, isLoading, error } = useMapLocationDetails(point.type, point.id)
 
   const config = typeConfig[point.type]
   const Icon = config.icon
@@ -66,7 +49,7 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
             <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : error ? (
-          <div className="text-center py-8 text-red-500">{error}</div>
+          <div className="text-center py-8 text-red-500">{t('loading')}</div>
         ) : details ? (
           <div className="space-y-4">
             {/* Quick actions based on type */}
@@ -87,6 +70,16 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
               >
                 <span className="font-medium text-green-700">View club</span>
                 <ChevronRight className="w-5 h-5 text-green-600" />
+              </Link>
+            )}
+
+            {point.type === 'municipality' && (
+              <Link
+                to={`/kunnat/${point.id}`}
+                className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <span className="font-medium text-blue-700">View municipality</span>
+                <ChevronRight className="w-5 h-5 text-blue-600" />
               </Link>
             )}
 
@@ -159,7 +152,9 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
               </div>
             )}
           </div>
-        ) : null}
+        ) : (
+          <div className="text-center py-8 text-gray-500">{t('noResults')}</div>
+        )}
       </div>
     </div>
   )

@@ -235,6 +235,7 @@ export const threads = pgTable('threads', {
   originalContent: text('original_content'),            // Original pöytäkirja text before AI summary
   editedBy: uuid('edited_by').references(() => users.id), // If human edited AI content
   editedAt: timestamp('edited_at', { withTimezone: true }),
+  language: varchar('language', { length: 10 }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
@@ -249,7 +250,8 @@ export const threads = pgTable('threads', {
   coordsIdx: index('threads_coords_idx').on(table.latitude, table.longitude),
   sourceIdx: index('threads_source_idx').on(table.source),
   sourceIdIdx: index('threads_source_id_idx').on(table.sourceId),
-  sourceInstitutionIdx: index('threads_source_institution_idx').on(table.sourceInstitutionId)
+  sourceInstitutionIdx: index('threads_source_institution_idx').on(table.sourceInstitutionId),
+  languageIdx: index('threads_language_idx').on(table.language)
 }))
 
 // Thread Tags
@@ -270,6 +272,7 @@ export const comments = pgTable('comments', {
   contentHtml: text('content_html'),
   depth: integer('depth').default(0), // Nesting depth for display
   score: integer('score').default(0), // Cached vote score
+  language: varchar('language', { length: 10 }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
@@ -349,10 +352,12 @@ export const clubThreads = pgTable('club_threads', {
   isPinned: boolean('is_pinned').default(false),
   isLocked: boolean('is_locked').default(false),
   replyCount: integer('reply_count').default(0),
+  language: varchar('language', { length: 10 }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
-  clubIdx: index('club_threads_club_idx').on(table.clubId)
+  clubIdx: index('club_threads_club_idx').on(table.clubId),
+  languageIdx: index('club_threads_language_idx').on(table.language)
 }))
 
 // Club Comments
@@ -363,6 +368,7 @@ export const clubComments = pgTable('club_comments', {
   authorId: uuid('author_id').notNull().references(() => users.id),
   content: text('content').notNull(),
   contentHtml: text('content_html'),
+  language: varchar('language', { length: 10 }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 })
