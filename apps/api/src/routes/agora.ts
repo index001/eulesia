@@ -83,8 +83,8 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
   }
 
   // Handle feedScope filtering
-  // - 'following' = content from subscriptions only (personalized feed)
-  // - 'local' = ALL local scope content
+  // - 'following' = content from all subscriptions (personalized feed)
+  // - 'local' = local-scope content from subscribed municipalities only
   // - 'national' = ALL national scope content
   // - 'european' = ALL european scope content
   // - 'all' = all content (no filter)
@@ -95,15 +95,8 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
   let followedMunicipalities: string[] = []
   let followedTags: string[] = []
 
-  // Scope filters show ALL content of that scope (not just subscribed)
-  if (filters.feedScope === 'local') {
-    conditions.push(eq(threads.scope, 'local'))
-  } else if (filters.feedScope === 'national') {
-    conditions.push(eq(threads.scope, 'national'))
-  } else if (filters.feedScope === 'european') {
-    conditions.push(eq(threads.scope, 'european'))
-  } else if (filters.feedScope === 'following' && userId && !isViewingSpecificMunicipality) {
-    // 'following' shows only subscribed content
+  // Load subscriptions for personalized scopes
+  if (['local', 'national', 'european', 'following'].includes(filters.feedScope || '') && userId && !isViewingSpecificMunicipality) {
     const subscriptions = await db
       .select()
       .from(userSubscriptions)
@@ -118,12 +111,83 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
     followedTags = subscriptions
       .filter(s => s.entityType === 'tag')
       .map(s => s.entityId)
+  }
 
-    // Build subscription filter
+  if (filters.feedScope === 'local') {
+    // Local scope: only show content from municipalities the user follows
+    conditions.push(eq(threads.scope, 'local'))
+
+    if (userId && followedMunicipalities.length > 0) {
+      conditions.push(inArray(threads.municipalityId, followedMunicipalities))
+    } else {
+      // Not logged in or no subscriptions — return empty with onboarding flag
+      res.json({
+        success: true,
+        data: {
+          items: [],
+          total: 0,
+          page: filters.page,
+          limit: filters.limit,
+          hasMore: false,
+          feedScope: filters.feedScope,
+          hasSubscriptions: false
+        }
+      })
+      return
+    }
+  } else if (filters.feedScope === 'national' || filters.feedScope === 'european') {
+    // National/European: scope filter + subscription filter
+    conditions.push(eq(threads.scope, filters.feedScope))
+
+    if (userId) {
+      const scopeFollowConditions = []
+      if (followedAuthors.length > 0) {
+        scopeFollowConditions.push(inArray(threads.authorId, followedAuthors))
+        scopeFollowConditions.push(inArray(threads.sourceInstitutionId, followedAuthors))
+      }
+      if (followedTags.length > 0) {
+        // For national/eu, tag subscriptions are the main discovery mechanism
+        // We'll filter by tags in the post-query step below
+      }
+
+      if (scopeFollowConditions.length > 0) {
+        conditions.push(or(...scopeFollowConditions))
+      } else if (followedTags.length === 0) {
+        res.json({
+          success: true,
+          data: {
+            items: [],
+            total: 0,
+            page: filters.page,
+            limit: filters.limit,
+            hasMore: false,
+            feedScope: filters.feedScope,
+            hasSubscriptions: false
+          }
+        })
+        return
+      }
+    } else {
+      // Not logged in — empty
+      res.json({
+        success: true,
+        data: {
+          items: [],
+          total: 0,
+          page: filters.page,
+          limit: filters.limit,
+          hasMore: false,
+          feedScope: filters.feedScope,
+          hasSubscriptions: false
+        }
+      })
+      return
+    }
+  } else if (filters.feedScope === 'following' && userId && !isViewingSpecificMunicipality) {
+    // 'following' shows only subscribed content across all scopes
     const followConditions = []
     if (followedAuthors.length > 0) {
       followConditions.push(inArray(threads.authorId, followedAuthors))
-      // Also include bot-imported threads for followed institutions
       followConditions.push(inArray(threads.sourceInstitutionId, followedAuthors))
     }
     if (followedMunicipalities.length > 0) {
@@ -133,7 +197,6 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
     if (followConditions.length > 0) {
       conditions.push(or(...followConditions))
     } else if (followedTags.length === 0) {
-      // No subscriptions at all - return empty result with onboarding flag
       res.json({
         success: true,
         data: {
