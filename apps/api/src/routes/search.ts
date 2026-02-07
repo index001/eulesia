@@ -7,6 +7,7 @@
 import { Router, type Response } from 'express'
 import { z } from 'zod'
 import { search, searchUsers, searchThreads, searchPlaces, healthCheck } from '../services/search/index.js'
+import { searchLocations } from '../services/locations.js'
 import { optionalAuthMiddleware } from '../middleware/auth.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import type { AuthenticatedRequest } from '../types/index.js'
@@ -50,6 +51,38 @@ router.get('/', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRe
     limit,
     userId: req.user?.id
   })
+
+  // If few location/municipality results from Meilisearch, supplement with Nominatim
+  const totalLocationResults = results.locations.length + results.municipalities.length
+  if (totalLocationResults < 3) {
+    try {
+      const { results: nominatimResults } = await searchLocations(q, {
+        limit: 5,
+        includeNominatim: true
+      })
+      // Add Nominatim results that aren't already in locations
+      const existingOsmIds = new Set(results.locations.map(l => l.osmId))
+      for (const loc of nominatimResults) {
+        if (!existingOsmIds.has(loc.osmId)) {
+          results.locations.push({
+            id: loc.id || `nom-${loc.osmId}`,
+            osmId: loc.osmId,
+            osmType: loc.osmType,
+            name: loc.name,
+            nameFi: loc.nameFi || undefined,
+            displayName: loc.displayName,
+            type: loc.type,
+            country: loc.country,
+            contentCount: loc.contentCount,
+            parentName: loc.parent?.name
+          })
+          existingOsmIds.add(loc.osmId)
+        }
+      }
+    } catch {
+      // Don't fail the whole search if Nominatim is down
+    }
+  }
 
   res.json({
     success: true,

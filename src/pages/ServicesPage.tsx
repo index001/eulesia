@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Store, Calendar, BookOpen, Bus, Newspaper, Heart, ChevronRight, Info, X, ExternalLink } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ContentEndMarker } from '../components/common'
@@ -37,6 +38,7 @@ function ServiceCard({ service, onClick }: { service: Service; onClick: () => vo
 }
 
 export function ServicesPage() {
+  const { t } = useTranslation('services')
   const categories = getServiceCategories()
   const [selectedService, setSelectedService] = useState<Service | null>(null)
 
@@ -51,10 +53,10 @@ export function ServicesPage() {
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div className="flex items-center gap-2 mb-1">
           <Store className="w-5 h-5 text-gray-700" />
-          <h1 className="text-xl font-bold text-gray-900">Services</h1>
+          <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
         </div>
         <p className="text-sm text-gray-600">
-          Useful integrations — optional, not the core
+          {t('subtitle')}
         </p>
       </div>
 
@@ -64,8 +66,7 @@ export function ServicesPage() {
           <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm text-amber-900">
-              Services complement Eulesia but don't define it. The civic core (Agora, Clubs, Home)
-              operates independently. Services are optional integrations that respect your privacy.
+              {t('explanation')}
             </p>
           </div>
         </div>
@@ -88,14 +89,14 @@ export function ServicesPage() {
         {/* No attention economy note */}
         <div className="bg-gray-100 rounded-xl p-4 text-center">
           <p className="text-sm text-gray-600">
-            No algorithmic recommendations. No engagement optimization.
+            {t('noEngagement')}
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            Just useful services, when you need them.
+            {t('noEngagementSub')}
           </p>
         </div>
 
-        <ContentEndMarker message="All services shown" />
+        <ContentEndMarker message={t('allServicesShown')} />
       </div>
 
       {/* Service Detail Modal */}
@@ -110,15 +111,15 @@ export function ServicesPage() {
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Provider</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('provider')}</p>
                 <p className="text-sm text-gray-900">{selectedService.provider}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Category</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('category')}</p>
                 <p className="text-sm text-gray-900">{selectedService.category}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Description</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('description')}</p>
                 <p className="text-sm text-gray-700">{selectedService.description}</p>
               </div>
               {selectedService.url && (
@@ -129,7 +130,7 @@ export function ServicesPage() {
                   className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Visit Service
+                  {t('visitService')}
                 </a>
               )}
             </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Shield, Building2, Calendar, MessageSquare, Hash, Bot, Users, Send, Home } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
@@ -6,6 +7,7 @@ import { Layout } from '../components/layout'
 import { FollowButton } from '../components/common'
 import { useAuth } from '../hooks/useAuth'
 import { useStartConversation } from '../hooks/useApi'
+import { formatDateLong } from '../lib/formatTime'
 
 interface UserThread {
   id: string
@@ -42,11 +44,6 @@ interface UserProfile {
   citizenDiscussions?: UserThread[]
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('fi-FI', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
 function getAvatarInitials(name: string): string {
   return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 }
@@ -72,7 +69,7 @@ function ThreadListItem({ thread }: { thread: UserThread }) {
           <MessageSquare className="w-3.5 h-3.5" />
           {thread.replyCount}
         </span>
-        <span>{formatDate(thread.createdAt)}</span>
+        <span>{formatDateLong(thread.createdAt)}</span>
       </div>
       {thread.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-2">
@@ -88,6 +85,7 @@ function ThreadListItem({ thread }: { thread: UserThread }) {
 }
 
 export function UserProfilePage() {
+  const { t } = useTranslation(['profile', 'agora', 'common'])
   const { userId } = useParams<{ userId: string }>()
   const { currentUser } = useAuth()
   const navigate = useNavigate()
@@ -137,9 +135,9 @@ export function UserProfilePage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">Käyttäjää ei löytynyt</p>
+          <p className="text-gray-500">{t('profile:userProfile.notFound')}</p>
           <Link to="/agora" className="text-blue-600 hover:underline mt-2 inline-block">
-            Takaisin Agoraan
+            {t('profile:userProfile.backToAgora')}
           </Link>
         </div>
       </Layout>
@@ -155,7 +153,7 @@ export function UserProfilePage() {
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Takaisin
+          {t('profile:userProfile.back')}
         </button>
       </div>
 
@@ -187,13 +185,13 @@ export function UserProfilePage() {
             {user.identityVerified && (
               <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full w-fit mt-2">
                 <Shield className="w-3 h-3" />
-                <span>Vahvistettu</span>
+                <span>{t('profile:userProfile.verified')}</span>
               </div>
             )}
 
             <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
               <Calendar className="w-3 h-3" />
-              <span>Liittynyt {formatDate(user.createdAt)}</span>
+              <span>{t('profile:userProfile.joined', { date: formatDateLong(user.createdAt) })}</span>
             </div>
           </div>
         </div>
@@ -207,14 +205,14 @@ export function UserProfilePage() {
               className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
-              {sendingMessage ? 'Avataan...' : 'Lähetä viesti'}
+              {sendingMessage ? t('profile:userProfile.opening') : t('profile:userProfile.sendMessage')}
             </button>
             <Link
               to={`/home/${userId}`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
             >
               <Home className="w-4 h-4" />
-              Käy kotisivulla
+              {t('profile:userProfile.visitHome')}
             </Link>
           </div>
         )}
@@ -225,14 +223,14 @@ export function UserProfilePage() {
             {/* Follow institution (official posts) */}
             <div className="flex items-center gap-3">
               <FollowButton entityType="user" entityId={userId} />
-              <span className="text-xs text-gray-500">Viralliset julkaisut</span>
+              <span className="text-xs text-gray-500">{t('profile:userProfile.followOfficialPosts')}</span>
             </div>
 
             {/* Follow topic (AI summaries + citizen discussion) */}
             {hasTopic && (
               <div className="flex items-center gap-3">
                 <FollowButton entityType="tag" entityId={user.institutionTopic!.topicTag} />
-                <span className="text-xs text-gray-500">AI-tiivistelmät + kansalaiskeskustelu</span>
+                <span className="text-xs text-gray-500">{t('profile:userProfile.followAiSummaries')}</span>
               </div>
             )}
           </div>
@@ -251,7 +249,7 @@ export function UserProfilePage() {
             to="/profile"
             className="mt-4 inline-block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
           >
-            Muokkaa profiilia
+            {t('profile:userProfile.editProfile')}
           </Link>
         )}
 
@@ -295,7 +293,7 @@ export function UserProfilePage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-violet-600" />
-              Viralliset julkaisut ({user.threads.length})
+              {t('profile:userProfile.officialPosts', { count: user.threads.length })}
             </h2>
             {user.threads.length > 0 ? (
               <div className="space-y-3">
@@ -304,7 +302,7 @@ export function UserProfilePage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500 py-4">Ei virallisia julkaisuja</p>
+              <p className="text-sm text-gray-500 py-4">{t('profile:userProfile.noOfficialPosts')}</p>
             )}
           </div>
         )}
@@ -314,7 +312,7 @@ export function UserProfilePage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Bot className="w-5 h-5 text-purple-600" />
-              AI-tiivistelmät ({user.botSummaries.length})
+              {t('profile:userProfile.aiSummaries', { count: user.botSummaries.length })}
             </h2>
             <div className="space-y-3">
               {user.botSummaries.map(thread => (
@@ -329,7 +327,7 @@ export function UserProfilePage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-teal-600" />
-              Kansalaiskeskustelu ({user.citizenDiscussions.length})
+              {t('profile:userProfile.citizenDiscussion', { count: user.citizenDiscussions.length })}
             </h2>
             <div className="space-y-3">
               {user.citizenDiscussions.map(thread => (
@@ -343,7 +341,7 @@ export function UserProfilePage() {
         {!isInstitution && (
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Keskustelut ({user.threads.length})
+              {t('profile:userProfile.discussions', { count: user.threads.length })}
             </h2>
             {user.threads.length > 0 ? (
               <div className="space-y-3">
@@ -353,7 +351,7 @@ export function UserProfilePage() {
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <p>Ei julkisia keskusteluja</p>
+                <p>{t('profile:userProfile.noPublicDiscussions')}</p>
               </div>
             )}
           </div>

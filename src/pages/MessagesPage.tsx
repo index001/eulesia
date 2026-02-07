@@ -1,32 +1,17 @@
 import { Link } from 'react-router-dom'
 import { MessageSquare } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { useConversations } from '../hooks/useApi'
+import { formatMessageDate } from '../lib/formatTime'
 import type { Conversation } from '../lib/api'
-
-function formatTime(dateString: string | undefined): string {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) {
-    return date.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })
-  } else if (diffDays === 1) {
-    return 'Eilen'
-  } else if (diffDays < 7) {
-    return date.toLocaleDateString('fi-FI', { weekday: 'short' })
-  } else {
-    return date.toLocaleDateString('fi-FI', { day: 'numeric', month: 'short' })
-  }
-}
 
 function getAvatarInitials(name: string): string {
   return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 }
 
 function ConversationItem({ conversation }: { conversation: Conversation }) {
+  const { t } = useTranslation('messages')
   const { otherUser, lastMessage, unreadCount, updatedAt } = conversation
 
   if (!otherUser) return null
@@ -54,14 +39,14 @@ function ConversationItem({ conversation }: { conversation: Conversation }) {
             {otherUser.name}
           </span>
           <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
-            {formatTime(lastMessage?.createdAt || updatedAt)}
+            {formatMessageDate(lastMessage?.createdAt || updatedAt)}
           </span>
         </div>
         <div className="flex items-center justify-between mt-0.5">
           <p className={`text-sm truncate ${unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
             {lastMessage
               ? lastMessage.content.substring(0, 80)
-              : 'Ei viestejä vielä'
+              : t('noMessagesPreview')
             }
           </p>
           {unreadCount > 0 && (
@@ -76,13 +61,14 @@ function ConversationItem({ conversation }: { conversation: Conversation }) {
 }
 
 export function MessagesPage() {
+  const { t } = useTranslation('messages')
   const { data: conversations, isLoading } = useConversations()
 
   return (
     <Layout>
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-4">
-        <h1 className="text-xl font-bold text-gray-900">Viestit</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
       </div>
 
       {/* Conversations list */}
@@ -99,9 +85,9 @@ export function MessagesPage() {
       ) : (
         <div className="text-center py-16 px-4">
           <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-lg font-medium text-gray-900 mb-2">Ei viestejä vielä</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-2">{t('noConversations')}</h2>
           <p className="text-sm text-gray-500">
-            Aloita keskustelu käyttäjän profiilisivulta.
+            {t('noConversationsHint')}
           </p>
         </div>
       )}

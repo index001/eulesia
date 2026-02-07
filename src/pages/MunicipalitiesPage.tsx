@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { MapPin, MessageSquare, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Layout } from '../components/layout'
@@ -5,6 +6,7 @@ import { useMunicipalities, useThreads } from '../hooks/useApi'
 import type { Municipality } from '../lib/api'
 
 export function MunicipalitiesPage() {
+  const { t } = useTranslation(['common', 'agora'])
   const { data: municipalities, isLoading, error } = useMunicipalities()
   const { data: threadsData } = useThreads({ scope: 'local' })
 
@@ -33,9 +35,9 @@ export function MunicipalitiesPage() {
       {/* Page header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Kunnat</h1>
+          <h1 className="text-xl font-bold text-gray-900">{t('common:municipalities.title')}</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Kuntakohtaiset keskustelut ja pöytäkirjayhteenvedot
+            {t('common:municipalities.subtitle')}
           </p>
         </div>
       </div>
@@ -50,8 +52,8 @@ export function MunicipalitiesPage() {
 
         {error && (
           <div className="text-center py-12 text-red-600">
-            <p>Kuntien lataaminen epäonnistui</p>
-            <p className="text-sm mt-1">{error instanceof Error ? error.message : 'Tuntematon virhe'}</p>
+            <p>{t('common:municipalities.loadError')}</p>
+            <p className="text-sm mt-1">{error instanceof Error ? error.message : t('common:errors.unknown')}</p>
           </div>
         )}
 
@@ -70,7 +72,7 @@ export function MunicipalitiesPage() {
         {!isLoading && !error && (!municipalitiesWithThreads || municipalitiesWithThreads.length === 0) && (
           <div className="text-center py-12 text-gray-500">
             <MapPin className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>Ei vielä kuntakohtaisia keskusteluja</p>
+            <p>{t('common:municipalities.noDiscussions')}</p>
           </div>
         )}
       </div>

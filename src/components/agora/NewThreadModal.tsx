@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, MapPin, Building2, Globe, Loader2, Hash, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useCreateThread } from '../../hooks/useApi'
 import { LocationSearch } from '../common/LocationSearch'
 import type { Scope } from '../../types'
@@ -15,27 +16,6 @@ interface NewThreadModalProps {
   prefilledLocation?: LocationResult
 }
 
-const scopeOptions: { value: Scope; icon: React.ElementType; label: string; description: string }[] = [
-  {
-    value: 'local',
-    icon: MapPin,
-    label: 'Paikallinen',
-    description: 'Kunta, kylä tai alue'
-  },
-  {
-    value: 'national',
-    icon: Building2,
-    label: 'Valtakunnallinen',
-    description: 'Koko Suomi'
-  },
-  {
-    value: 'european',
-    icon: Globe,
-    label: 'EU',
-    description: 'Euroopan laajuinen'
-  }
-]
-
 // Common tags for quick selection
 const suggestedTags = [
   'liikenne', 'koulutus', 'terveys', 'ympäristö', 'asuminen',
@@ -50,7 +30,29 @@ export function NewThreadModal({
   prefilledMunicipalityName,
   prefilledLocation
 }: NewThreadModalProps) {
+  const { t } = useTranslation('agora')
   const createThreadMutation = useCreateThread()
+
+  const scopeOptions: { value: Scope; icon: React.ElementType; label: string; description: string }[] = [
+    {
+      value: 'local',
+      icon: MapPin,
+      label: t('threadForm.scopeLocal'),
+      description: t('threadForm.scopeLocalDesc')
+    },
+    {
+      value: 'national',
+      icon: Building2,
+      label: t('threadForm.scopeNational'),
+      description: t('threadForm.scopeNationalDesc')
+    },
+    {
+      value: 'european',
+      icon: Globe,
+      label: t('threadForm.scopeEuropean'),
+      description: t('threadForm.scopeEuropeanDesc')
+    }
+  ]
 
   // Form state
   const [scope, setScope] = useState<Scope>('local')
@@ -175,7 +177,7 @@ export function NewThreadModal({
       <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">Aloita keskustelu</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('threadForm.collapsed')}</h2>
           <button
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -235,7 +237,7 @@ export function NewThreadModal({
                   onChange={setSelectedLocation}
                   country="FI"
                   types={['municipality', 'village', 'city']}
-                  placeholder="Hae kuntaa, kaupunkia tai kylää..."
+                  placeholder={t('threadForm.locationPlaceholder')}
                 />
               ) : (
                 <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg">
@@ -249,13 +251,13 @@ export function NewThreadModal({
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Otsikko
+              {t('threadForm.title')}
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Mistä haluaisit keskustella?"
+              placeholder={t('threadForm.collapsed')}
               className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               maxLength={500}
             />
@@ -272,12 +274,12 @@ export function NewThreadModal({
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Kerro tarkemmin aiheesta..."
+              placeholder={t('threadForm.contentPlaceholder')}
               rows={5}
               className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             />
             <div className="mt-1 text-xs text-gray-400">
-              Tukee Markdown-muotoilua
+              {t('threadForm.markdown')}
             </div>
           </div>
 
@@ -309,7 +311,7 @@ export function NewThreadModal({
                 value={customTag}
                 onChange={(e) => setCustomTag(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomTag())}
-                placeholder="Lisää oma aihe..."
+                placeholder={t('threadForm.customTag')}
                 className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button
@@ -364,7 +366,7 @@ export function NewThreadModal({
             className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isSubmitting ? 'Julkaistaan...' : 'Julkaise keskustelu'}
+            {isSubmitting ? t('threadForm.publishing') : t('threadForm.publish')}
           </button>
         </div>
       </div>

@@ -1,0 +1,14 @@
+{
+  "title": "Messages",
+  "noConversations": "No conversations yet",
+  "noConversationsHint": "Start a conversation from a user's profile page",
+  "writeMessage": "Write a message...",
+  "noMessages": "No messages yet. Start the conversation!",
+  "noMessagesYet": "No messages yet",
+  "noMessagesPreview": "No messages yet",
+  "sendFirstMessage": "Send the first message!",
+  "loadError": "Could not load conversation",
+  "backToMessages": "Back to messages",
+  "unread_one": "{{count}} unread",
+  "unread_other": "{{count}} unread"
+}

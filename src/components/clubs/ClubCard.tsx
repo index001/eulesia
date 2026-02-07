@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Users, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Club } from '../../types'
@@ -7,6 +8,8 @@ interface ClubCardProps {
 }
 
 export function ClubCard({ club }: ClubCardProps) {
+  const { t } = useTranslation('clubs')
+
   return (
     <Link
       to={`/clubs/${club.id}`}
@@ -32,7 +35,7 @@ export function ClubCard({ club }: ClubCardProps) {
           {/* Member count - acceptable in community layer */}
           <div className="flex items-center gap-1 text-sm text-gray-500">
             <Users className="w-4 h-4" />
-            <span>{club.memberCount.toLocaleString()} members</span>
+            <span>{t('members', { count: club.memberCount })}</span>
           </div>
         </div>
 

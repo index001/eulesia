@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Send } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { ActorBadge } from '../components/common'
 import { useConversation, useSendDM, useMarkRead } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import { useSocket } from '../hooks/useSocket'
+import { formatRelativeTime } from '../lib/formatTime'
 import type { DirectMessage, UserSummary } from '../lib/api'
 
 function transformUser(user: UserSummary) {
@@ -18,22 +20,6 @@ function transformUser(user: UserSummary) {
     avatarInitials: user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
     institutionType: user.institutionType as 'municipality' | 'agency' | 'ministry' | undefined,
     institutionName: user.institutionName
-  }
-}
-
-function formatMessageTime(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) {
-    return date.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })
-  } else if (diffDays === 1) {
-    return 'Eilen ' + date.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })
-  } else {
-    return date.toLocaleDateString('fi-FI', { day: 'numeric', month: 'short' }) + ' ' +
-           date.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })
   }
 }
 
@@ -53,7 +39,7 @@ function MessageBubble({ message, isOwnMessage }: { message: DirectMessage; isOw
             {message.author.name}
           </span>
           <span className="text-xs text-gray-500">
-            {formatMessageTime(message.createdAt)}
+            {formatRelativeTime(message.createdAt)}
           </span>
         </div>
         <div
@@ -75,6 +61,7 @@ function MessageBubble({ message, isOwnMessage }: { message: DirectMessage; isOw
 }
 
 export function DMConversationPage() {
+  const { t } = useTranslation('messages')
   const { conversationId } = useParams<{ conversationId: string }>()
   const { currentUser } = useAuth()
   const { joinDm, leaveDm } = useSocket()
@@ -131,9 +118,9 @@ export function DMConversationPage() {
     return (
       <Layout>
         <div className="px-4 py-12 text-center">
-          <p className="text-red-600 mb-4">Keskustelua ei voitu ladata</p>
+          <p className="text-red-600 mb-4">{t('loadError')}</p>
           <Link to="/messages" className="text-teal-600 hover:underline">
-            Takaisin viesteihin
+            {t('backToMessages')}
           </Link>
         </div>
       </Layout>
@@ -177,8 +164,8 @@ export function DMConversationPage() {
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
           {messages.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              <p>Ei viestejä vielä</p>
-              <p className="text-sm mt-1">Lähetä ensimmäinen viesti!</p>
+              <p>{t('noMessagesYet')}</p>
+              <p className="text-sm mt-1">{t('sendFirstMessage')}</p>
             </div>
           ) : (
             messages.map((msg: DirectMessage) => (
@@ -199,7 +186,7 @@ export function DMConversationPage() {
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Kirjoita viesti..."
+              placeholder={t('writeMessage')}
               enterKeyHint="send"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />

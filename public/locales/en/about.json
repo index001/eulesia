@@ -1,0 +1,78 @@
+{
+  "signIn": "Sign in",
+  "back": "Back",
+  "heroSubtitle": "European citizen infrastructure",
+  "heroDescription": "Eulesia is social media designed as citizen infrastructure rather than commercial media. A public space, not a private platform.",
+  "earlyStage": "Project is in early stages — development is active",
+  "whatIs": {
+    "title": "What is Eulesia?",
+    "p1": "Public discourse has moved to commercial platforms designed to capture attention and sell ads — not for democratic discussion. Municipalities communicate via Facebook, citizens discuss on Reddit, but the incentive structures of these platforms do not serve civic discourse.",
+    "p2": "Eulesia is the answer to this problem: social media with familiar features (feeds, messages, communities, discussions), but built from the ground up on civic terms. The name refers to the ancient agora — a public space where common affairs were discussed under common rules."
+  },
+  "whyNeeded": {
+    "title": "Why is this needed?",
+    "p1": "When public institutions rely on commercial platforms to reach citizens, they cede part of the digital public space to private actors. A municipality's Facebook page operates under Meta's terms of service, not a democratic mandate.",
+    "p2": "Existing participation platforms (like Decidim or CONSUL) provide structures for participatory democracy, but lack everyday social interaction. Commercial platforms offer social agency, but without civic structure. Eulesia combines both: social agency and citizenship."
+  },
+  "fourSpaces": {
+    "title": "Four spaces",
+    "agora": "Agora",
+    "agoraDesc": "Public citizen discussion structured by administrative level: local, national, European. Discussion is anchored to real decision-making processes.",
+    "clubs": "Clubs",
+    "clubsDesc": "Spaces for civil society and interest groups, where people can organize freely without institutional intermediaries.",
+    "home": "Home",
+    "homeDesc": "Private messaging and personal spaces. A personal area whose content is not used for advertising or profiling.",
+    "services": "Services",
+    "servicesDesc": "An ecosystem layer for practical civic functions without attention economy logic."
+  },
+  "principles": {
+    "title": "Design principles",
+    "identity": "Verified identity",
+    "identityDesc": "One person, one account. Participation under your real name, like in the agora. The goal is integration with the European Digital Identity Wallet (EUDI).",
+    "institutional": "Institutional presence",
+    "institutionalDesc": "Public institutions participate as civic actors, not advertisers. When a municipality participates in a discussion, official documents, timelines, and contact information become visible.",
+    "noAttention": "No attention economy",
+    "noAttentionDesc": "No algorithmic feed, no infinite scroll, no engagement metrics. Content appears in chronological order or user-chosen order. The value proposition is not dopamine but impact.",
+    "socialAgency": "Social agency",
+    "socialAgencyDesc": "Citizens can organize and discuss freely without all activity being channeled through institutional processes.",
+    "privacy": "User-centric privacy",
+    "privacyDesc": "No advertising, no behavioral tracking, no data sales. GDPR built in, not added afterwards."
+  },
+  "automated": {
+    "title": "Automated civic content",
+    "p1": "Municipal meeting minutes are automatically fetched, summarized by AI (the European Mistral language model), and published as discussion starters. Summaries are an access layer to official documents, not a replacement — there is always a direct link to original sources.",
+    "p2": "This solves the fundamental problem of civic platforms: the lack of content at the start. New users immediately encounter genuine civic content, and discussion begins while decisions are still being prepared — not only after they are made."
+  },
+  "project": {
+    "title": "Project status and participation",
+    "p1": "Eulesia is an early-stage research and development project. A working prototype exists and is being developed iteratively based on pilot user feedback. Design principles are derived from platform governance research literature.",
+    "p2": "Development proceeds on multiple parallel tracks: research funding, volunteer development work, and community building. The governance model is still open — possibilities include an independent foundation, association, or other organizational form serving the public interest.",
+    "ctaTitle": "Get involved",
+    "ctaDesc": "You can get involved within Eulesia itself — join discussions, give feedback, or participate in development work. Early-stage users play a significant role in shaping the platform's direction."
+  },
+  "whatNot": {
+    "title": "What Eulesia is not",
+    "notShareholder": "Not accountable to shareholders (cf. Meta, X)",
+    "notAdFunded": "Not ad-funded — no business model based on behavioral data",
+    "notUnilateral": "No unilateral rule changes by private actors",
+    "notEngagement": "Not optimized for engagement, attention, or addiction"
+  },
+  "research": {
+    "title": "Research foundation",
+    "description": "Eulesia's design is based on Design Science Research methodology. Six design requirements are derived through normative synthesis from platform governance research literature. The project is developed alongside academic research at Tampere University."
+  },
+  "openSource": {
+    "title": "Open source",
+    "description": "Eulesia's code is open source. Anyone can inspect, audit, and participate in the platform's development. Transparency is a core principle.",
+    "viewOnGithub": "View on GitHub →"
+  },
+  "euAlignment": {
+    "title": "European digital public infrastructure",
+    "description": "Designed in accordance with EU values: privacy, human dignity, democratic governance. Aligned with GDPR, DSA, and the EUDI Wallet framework."
+  },
+  "cta": {
+    "title": "Interested?",
+    "description": "Eulesia is currently in an invite-only phase. If you know someone who is already a member, ask for an invite code.",
+    "button": "Go to login page"
+  }
+}

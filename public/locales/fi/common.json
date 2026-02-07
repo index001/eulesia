@@ -1,0 +1,142 @@
+{
+  "nav": {
+    "agora": "Agora",
+    "clubs": "Klubit",
+    "messages": "Viestit",
+    "map": "Kartta",
+    "home": "Koti"
+  },
+  "scope": {
+    "local": "Paikallinen",
+    "national": "Valtakunnallinen",
+    "european": "EU",
+    "all": "Kaikki"
+  },
+  "time": {
+    "justNow": "juuri nyt",
+    "justNowShort": "nyt",
+    "minutesAgo_one": "{{count}} minuutti sitten",
+    "minutesAgo_other": "{{count}} minuuttia sitten",
+    "minutesShort_one": "{{count}} min",
+    "minutesShort_other": "{{count}} min",
+    "hoursAgo_one": "{{count}} tunti sitten",
+    "hoursAgo_other": "{{count}} tuntia sitten",
+    "hoursShort_one": "{{count}} t",
+    "hoursShort_other": "{{count}} t",
+    "yesterday": "eilen",
+    "daysAgo_one": "{{count}} päivä sitten",
+    "daysAgo_other": "{{count}} päivää sitten",
+    "daysShort_one": "{{count}} pv",
+    "daysShort_other": "{{count}} pv"
+  },
+  "actions": {
+    "follow": "Seuraa",
+    "following": "Seurataan",
+    "reply": "Vastaa",
+    "cancel": "Peruuta",
+    "save": "Tallenna",
+    "delete": "Poista",
+    "edit": "Muokkaa",
+    "back": "Takaisin",
+    "continue": "Jatka",
+    "close": "Sulje",
+    "create": "Luo",
+    "search": "Hae",
+    "clear": "Tyhjennä",
+    "skip": "Ohita",
+    "submit": "Lähetä",
+    "loading": "Ladataan...",
+    "saving": "Tallennetaan...",
+    "done": "Valmis",
+    "collapse": "Pienennä",
+    "upvote": "Äänestä ylös",
+    "downvote": "Äänestä alas",
+    "loginToVote": "Kirjaudu äänestääksesi",
+    "view": "Näytä",
+    "send": "Lähetä",
+    "copyCode": "Kopioi koodi",
+    "revokeCode": "Peru koodi"
+  },
+  "contentEnd": {
+    "upToDate": "Olet ajan tasalla",
+    "noMore": "Ei enempää sisältöä"
+  },
+  "notifications": {
+    "title": "Ilmoitukset",
+    "empty": "Ei ilmoituksia",
+    "emptyHint": "Vastaukset ja maininnat näkyvät täällä",
+    "markAllRead": "Merkitse luetuksi",
+    "markAllReadTitle": "Merkitse kaikki luetuiksi"
+  },
+  "search": {
+    "placeholder": "Hae käyttäjiä, keskusteluja, paikkoja...",
+    "placeholderShort": "Hae...",
+    "noResults": "Ei tuloksia haulle \"{{query}}\"",
+    "users": "Käyttäjät",
+    "municipalities": "Kunnat",
+    "threads": "Keskustelut",
+    "places": "Paikat",
+    "topics": "Aiheet",
+    "replies_one": "{{count}} vastaus",
+    "replies_other": "{{count}} vastausta",
+    "processingTime": "Haku kesti {{ms}}ms",
+    "municipality": "Kunta",
+    "agency": "Virasto",
+    "discussions_one": "{{count}} keskustelu",
+    "discussions_other": "{{count}} keskustelua"
+  },
+  "location": {
+    "searchPlaceholder": "Hae paikkaa...",
+    "noResults": "Ei hakutuloksia",
+    "minChars": "Kirjoita vähintään 2 merkkiä",
+    "types": {
+      "country": "Maa",
+      "region": "Maakunta",
+      "municipality": "Kunta",
+      "village": "Kylä",
+      "city": "Kaupunki",
+      "district": "Kaupunginosa"
+    },
+    "source": {
+      "cache": "Tulokset tietokannasta",
+      "nominatim": "Tulokset OpenStreetMapista",
+      "mixed": "Tulokset tietokannasta ja OpenStreetMapista"
+    }
+  },
+  "footer": {
+    "about": "Tietoa",
+    "openSource": "Avoin lähdekoodi · Ei voittoa tavoitteleva",
+    "tagline": "Kansalaisinfrastruktuuria yhteiseksi hyväksi. Datasi ei ole tuote."
+  },
+  "verified": "Varmennettu",
+  "comments_one": "{{count}} kommentti",
+  "comments_other": "{{count}} kommenttia",
+  "errors": {
+    "unknown": "Tuntematon virhe",
+    "loadFailed": "Lataaminen epäonnistui"
+  },
+  "municipalities": {
+    "title": "Kunnat",
+    "subtitle": "Kuntakohtaiset keskustelut ja pöytäkirjayhteenvedot",
+    "loadError": "Kuntien lataaminen epäonnistui",
+    "noDiscussions": "Ei vielä kuntakohtaisia keskusteluja",
+    "discussions_one": "{{count}} keskustelu",
+    "discussions_other": "{{count}} keskustelua",
+    "municipality": "Kunta",
+    "goToAgora": "Siirry Agoraan"
+  },
+  "feed": {
+    "sort": {
+      "recent": "Viimeaikainen",
+      "newest": "Uusin",
+      "top": "Suosituin"
+    },
+    "period": {
+      "day": "Tänään",
+      "week": "Tällä viikolla",
+      "month": "Tässä kuussa",
+      "year": "Tänä vuonna"
+    },
+    "topics": "Aiheet:"
+  }
+}

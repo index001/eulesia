@@ -1,16 +1,18 @@
 import { Landmark, Users, Home, MapPin, MessageSquare } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useUnreadDmCount } from '../../hooks/useApi'
 
 const navItems = [
-  { to: '/agora', icon: Landmark, label: 'Agora' },
-  { to: '/clubs', icon: Users, label: 'Clubs' },
-  { to: '/messages', icon: MessageSquare, label: 'Viestit', badge: 'dm' as const },
-  { to: '/map', icon: MapPin, label: 'Map' },
-  { to: '/home', icon: Home, label: 'Home' }
+  { to: '/agora', icon: Landmark, tKey: 'nav.agora' },
+  { to: '/clubs', icon: Users, tKey: 'nav.clubs' },
+  { to: '/messages', icon: MessageSquare, tKey: 'nav.messages', badge: 'dm' as const },
+  { to: '/map', icon: MapPin, tKey: 'nav.map' },
+  { to: '/home', icon: Home, tKey: 'nav.home' }
 ]
 
 export function BottomNav() {
+  const { t } = useTranslation()
   const { data: dmUnread } = useUnreadDmCount()
   const unreadCount = dmUnread?.count ?? 0
 
@@ -18,7 +20,7 @@ export function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex justify-around">
-          {navItems.map(({ to, icon: Icon, label, badge }) => (
+          {navItems.map(({ to, icon: Icon, tKey, badge }) => (
             <NavLink
               key={to}
               to={to}
@@ -38,7 +40,7 @@ export function BottomNav() {
                   </span>
                 )}
               </div>
-              <span className="text-xs mt-1 font-medium">{label}</span>
+              <span className="text-xs mt-1 font-medium">{t(tKey)}</span>
             </NavLink>
           ))}
         </div>

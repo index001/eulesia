@@ -1,0 +1,85 @@
+{
+  "title": "Profiili",
+  "identity": {
+    "title": "Identiteetti",
+    "highAssurance": "Korkean varmuuden identiteetti",
+    "substantial": "Merkittävä identiteetti",
+    "verified": "Varmennettu identiteetti",
+    "eudiConnected": "EUDI Wallet yhdistetty",
+    "emailVerified": "Sähköposti varmennettu",
+    "eudiDescription": "Eurooppalainen digitaalinen identiteetti",
+    "magicLink": "Taikalinkkivarmennus",
+    "active": "Aktiivinen",
+    "eudiInfo": "Identiteettisi on varmennettu EU:n digitaalisen identiteetin kehyksen kautta. Tämä varmistaa yksi-henkilö-yksi-tili -periaatteen Eulesiassa.",
+    "upgradeInfo": "Päivitä EUDI Walletiin kun se on saatavilla vahvempaa identiteettivarennusta varten."
+  },
+  "invites": {
+    "title": "Kutsuni",
+    "remaining_one": "{{count}} kutsu jäljellä",
+    "remaining_other": "{{count}} kutsua jäljellä",
+    "shareInfo": "Jaa kutsukoodeja kutsuaksesi muita Eulesiaan",
+    "createCode": "Luo koodi",
+    "available": "Käytettävissä",
+    "usedBy": "Käyttänyt {{name}}",
+    "revoked": "Peruttu",
+    "noCodesYet": "Ei kutsukoodeja vielä. Luo yksi kutsuaksesi jonkun!",
+    "peopleInvited": "Kutsumasi henkilöt ({{count}})"
+  },
+  "notifications": {
+    "title": "Ilmoitukset",
+    "replies": "Vastaukset julkaisuihisi",
+    "repliesDesc": "Kun joku vastaa keskusteluihisi",
+    "mentions": "Suorat maininnat",
+    "mentionsDesc": "Kun joku mainitsee sinut",
+    "official": "Viralliset päivitykset",
+    "officialDesc": "Seuraamiltasi instituutioilta",
+    "noGrowthNudges": "Ei \"kasvuhäkkyröitä\". Vain merkitykselliset ilmoitukset."
+  },
+  "privacy": {
+    "title": "Yksityisyys ja data",
+    "notProduct": "Datasi ei ole tuote",
+    "notProductDesc": "Eulesia ei kerää käyttäytymisdataa mainontaa varten. Emme myy dataasi tai käytä sitä huomiosi manipulointiin.",
+    "dataStored": "Tallennettu data",
+    "dataList": {
+      "profile": "Profiilitiedot (nimi, kunta)",
+      "posts": "Julkaisusi ja kommenttisi",
+      "clubs": "Klubijäsenyydet",
+      "notifications": "Ilmoitusasetukset"
+    },
+    "exporting": "Viedään...",
+    "exportData": "Vie datani"
+  },
+  "language": {
+    "title": "Kieli",
+    "description": "Valitse käyttöliittymän kieli"
+  },
+  "aboutEulesia": "Tietoa Eulesiasta",
+  "aboutDesc": "Hallinto, säätiö, avoin lähdekoodi",
+  "signOut": "Kirjaudu ulos",
+  "userProfile": {
+    "notFound": "Käyttäjää ei löytynyt",
+    "backToAgora": "Takaisin Agoraan",
+    "back": "Takaisin",
+    "sendMessage": "Lähetä viesti",
+    "opening": "Avataan...",
+    "visitHome": "Käy kotisivulla",
+    "verified": "Vahvistettu",
+    "joined": "Liittynyt {{date}}",
+    "editProfile": "Muokkaa profiilia",
+    "officialPosts": "Viralliset julkaisut ({{count}})",
+    "aiSummaries": "AI-tiivistelmät ({{count}})",
+    "citizenDiscussion": "Kansalaiskeskustelu ({{count}})",
+    "discussions": "Keskustelut ({{count}})",
+    "noOfficialPosts": "Ei virallisia julkaisuja",
+    "noPublicDiscussions": "Ei julkisia keskusteluja",
+    "followOfficialPosts": "Viralliset julkaisut",
+    "followAiSummaries": "AI-tiivistelmät + kansalaiskeskustelu"
+  },
+  "avatar": {
+    "removeTitle": "Poista kuva",
+    "allowedFormats": "Vain JPEG, PNG, WebP ja GIF sallittu",
+    "maxSize": "Kuva saa olla max 5MB",
+    "uploadFailed": "Kuvan lataus epäonnistui",
+    "removeFailed": "Kuvan poisto epäonnistui"
+  }
+}

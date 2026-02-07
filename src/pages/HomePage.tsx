@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Home, Plus, Lock, Globe, MessageSquare, Users, Settings, ChevronRight, BookOpen, Activity } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { ContentEndMarker } from '../components/common'
 import { useHome, useCreateRoom, useInvitations, useAcceptInvitation, useDeclineInvitation } from '../hooks/useApi'
@@ -8,6 +9,7 @@ import { useAuth } from '../hooks/useAuth'
 import type { Room, RoomInvitationWithDetails } from '../lib/api'
 
 export function HomePage() {
+  const { t } = useTranslation('home')
   const navigate = useNavigate()
   const { currentUser } = useAuth()
   const { data: homeData, isLoading, error } = useHome(currentUser?.id || '')
@@ -25,10 +27,10 @@ export function HomePage() {
       <Layout>
         <div className="px-4 py-12 text-center">
           <Home className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-lg font-medium text-gray-900 mb-2">Welcome to Eulesia</h2>
-          <p className="text-gray-600 mb-4">Sign in to access your home</p>
+          <h2 className="text-lg font-medium text-gray-900 mb-2">{t('welcome')}</h2>
+          <p className="text-gray-600 mb-4">{t('signInPrompt')}</p>
           <Link to="/login" className="text-blue-600 hover:underline">
-            Sign in
+            {t('signIn')}
           </Link>
         </div>
       </Layout>
@@ -70,8 +72,8 @@ export function HomePage() {
               <Home className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">{currentUser.name}'s Home</h1>
-              <p className="text-sm text-teal-100">Your personal space on Eulesia</p>
+              <h1 className="text-xl font-bold text-white">{t('greeting', { name: currentUser.name })}</h1>
+              <p className="text-sm text-teal-100">{t('subtitle')}</p>
             </div>
           </div>
           <Link to="/profile" className="p-2 hover:bg-white/10 rounded-lg transition-colors">
@@ -86,14 +88,14 @@ export function HomePage() {
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <h2 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
               <Users className="w-4 h-4" />
-              Pending Invitations ({pendingInvitations.length})
+              {t('pendingInvites')} ({pendingInvitations.length})
             </h2>
             <div className="space-y-2">
               {pendingInvitations.map((inv: RoomInvitationWithDetails) => (
                 <div key={inv.id} className="flex items-center justify-between bg-white p-3 rounded-lg">
                   <div>
                     <p className="font-medium text-gray-900">{inv.room.name}</p>
-                    <p className="text-xs text-gray-500">From {inv.inviter.name}</p>
+                    <p className="text-xs text-gray-500">{t('fromUser', { name: inv.inviter.name })}</p>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -101,14 +103,14 @@ export function HomePage() {
                       disabled={acceptInvitationMutation.isPending}
                       className="text-xs bg-teal-600 text-white px-3 py-1 rounded-full hover:bg-teal-700 disabled:opacity-50"
                     >
-                      {acceptInvitationMutation.isPending ? '...' : 'Accept'}
+                      {acceptInvitationMutation.isPending ? '...' : t('accept')}
                     </button>
                     <button
                       onClick={() => declineInvitationMutation.mutate(inv.id)}
                       disabled={declineInvitationMutation.isPending}
                       className="text-xs text-gray-600 px-3 py-1 rounded-full hover:bg-gray-100 disabled:opacity-50"
                     >
-                      {declineInvitationMutation.isPending ? '...' : 'Decline'}
+                      {declineInvitationMutation.isPending ? '...' : t('decline')}
                     </button>
                   </div>
                 </div>
@@ -125,7 +127,7 @@ export function HomePage() {
 
         {error && (
           <div className="text-center py-12 text-red-600">
-            <p>Failed to load home</p>
+            <p>{t('loadError')}</p>
           </div>
         )}
 
@@ -136,34 +138,34 @@ export function HomePage() {
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                   <MessageSquare className="w-4 h-4" />
-                  Rooms
+                  {t('rooms.title')}
                 </h2>
                 <button
                   onClick={() => setShowCreateRoom(true)}
                   className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1"
                 >
                   <Plus className="w-4 h-4" />
-                  New Room
+                  {t('rooms.create')}
                 </button>
               </div>
 
               {/* Create Room Form */}
               {showCreateRoom && (
                 <form onSubmit={handleCreateRoom} className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
-                  <h3 className="font-medium text-gray-900 mb-3">Create New Room</h3>
+                  <h3 className="font-medium text-gray-900 mb-3">{t('rooms.createTitle')}</h3>
                   <div className="space-y-3">
                     <input
                       type="text"
                       value={newRoomName}
                       onChange={(e) => setNewRoomName(e.target.value)}
-                      placeholder="Room name"
+                      placeholder={t('rooms.namePlaceholder')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                       required
                     />
                     <textarea
                       value={newRoomDescription}
                       onChange={(e) => setNewRoomDescription(e.target.value)}
-                      placeholder="Description (optional)"
+                      placeholder={t('rooms.description')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                       rows={2}
                     />
@@ -177,7 +179,7 @@ export function HomePage() {
                           className="text-teal-600"
                         />
                         <Globe className="w-4 h-4 text-green-600" />
-                        <span className="text-sm">Open to all</span>
+                        <span className="text-sm">{t('rooms.openToAll')}</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -188,7 +190,7 @@ export function HomePage() {
                           className="text-teal-600"
                         />
                         <Lock className="w-4 h-4 text-amber-600" />
-                        <span className="text-sm">Invite only</span>
+                        <span className="text-sm">{t('rooms.inviteOnly')}</span>
                       </label>
                     </div>
                     <div className="flex gap-2 pt-2">
@@ -197,14 +199,14 @@ export function HomePage() {
                         disabled={createRoomMutation.isPending}
                         className="flex-1 bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50"
                       >
-                        {createRoomMutation.isPending ? 'Creating...' : 'Create Room'}
+                        {createRoomMutation.isPending ? t('rooms.creating') : t('rooms.createButton')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setShowCreateRoom(false)}
                         className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                       >
-                        Cancel
+                        {t('common:actions.cancel')}
                       </button>
                     </div>
                   </div>
@@ -215,7 +217,7 @@ export function HomePage() {
               {publicRooms.length > 0 && (
                 <div className="space-y-2 mb-4">
                   <p className="text-xs text-gray-500 font-medium flex items-center gap-1">
-                    <Globe className="w-3 h-3" /> Open Rooms
+                    <Globe className="w-3 h-3" /> {t('rooms.public')}
                   </p>
                   {publicRooms.map((room: Room) => (
                     <RoomCard key={room.id} room={room} />
@@ -227,7 +229,7 @@ export function HomePage() {
               {privateRooms.length > 0 && (
                 <div className="space-y-2 mb-4">
                   <p className="text-xs text-gray-500 font-medium flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> Private Rooms
+                    <Lock className="w-3 h-3" /> {t('rooms.private')}
                   </p>
                   {privateRooms.map((room: Room) => (
                     <RoomCard key={room.id} room={room} />
@@ -238,8 +240,8 @@ export function HomePage() {
               {publicRooms.length === 0 && privateRooms.length === 0 && (
                 <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                   <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 mb-1">No rooms yet</p>
-                  <p className="text-sm text-gray-500">Create your first room to start conversations</p>
+                  <p className="text-gray-600 mb-1">{t('rooms.noRooms')}</p>
+                  <p className="text-sm text-gray-500">{t('rooms.noRoomsHint')}</p>
                 </div>
               )}
             </div>
@@ -248,12 +250,12 @@ export function HomePage() {
             <div>
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Activity className="w-4 h-4" />
-                Recent Activity
+                {t('recentActivity')}
               </h2>
 
               {homeData?.recentActivity?.threads && homeData.recentActivity.threads.length > 0 && (
                 <div className="space-y-2 mb-4">
-                  <p className="text-xs text-gray-500">Agora Discussions</p>
+                  <p className="text-xs text-gray-500">{t('agoraDiscussions')}</p>
                   {homeData.recentActivity.threads.slice(0, 3).map((thread: { id: string; title: string; scope: string }) => (
                     <Link
                       key={thread.id}
@@ -270,7 +272,7 @@ export function HomePage() {
 
               {homeData?.recentActivity?.clubs && homeData.recentActivity.clubs.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs text-gray-500">Clubs</p>
+                  <p className="text-xs text-gray-500">{t('clubs')}</p>
                   {homeData.recentActivity.clubs.slice(0, 3).map((club: { id: string; name: string; slug: string }) => (
                     <Link
                       key={club.id}
@@ -286,7 +288,7 @@ export function HomePage() {
               )}
             </div>
 
-            <ContentEndMarker message="You're up to date" />
+            <ContentEndMarker />
           </>
         )}
       </div>
@@ -295,6 +297,8 @@ export function HomePage() {
 }
 
 function RoomCard({ room }: { room: Room }) {
+  const { t } = useTranslation('home')
+
   return (
     <Link
       to={`/home/room/${room.id}`}
@@ -319,7 +323,7 @@ function RoomCard({ room }: { room: Room }) {
       </div>
       <div className="flex items-center gap-2">
         {room.messageCount > 0 && (
-          <span className="text-xs text-gray-500">{room.messageCount} messages</span>
+          <span className="text-xs text-gray-500">{t('rooms.messages', { count: room.messageCount })}</span>
         )}
         <ChevronRight className="w-5 h-5 text-gray-400" />
       </div>

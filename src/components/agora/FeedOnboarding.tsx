@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MapPin, Hash, Building2, CheckCircle2, Loader2, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useSubscribe, useMunicipalities, useTags } from '../../hooks/useApi'
 import type { Municipality, TagWithCategory } from '../../lib/api'
 
@@ -19,6 +20,7 @@ function groupTagsByCategory(tags: TagWithCategory[]): Record<string, TagWithCat
 }
 
 export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
+  const { t } = useTranslation(['agora', 'common'])
   const [selectedMunicipalities, setSelectedMunicipalities] = useState<string[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -104,10 +106,10 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
           </svg>
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">
-          Tervetuloa Agoraan!
+          {t('agora:onboarding.welcome')}
         </h2>
         <p className="text-gray-600">
-          Feedisi on tyhjä. Aloita seuraamalla paikkakuntia ja aiheita, jotka kiinnostavat sinua.
+          {t('agora:onboarding.emptyFeed')}
         </p>
       </div>
 
@@ -115,7 +117,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <MapPin className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Paikkakunnat</h3>
+          <h3 className="font-semibold text-gray-900">{t('agora:onboarding.municipalities')}</h3>
         </div>
         <div className="flex flex-wrap gap-2">
           {topMunicipalities.map((m: Municipality) => (
@@ -142,13 +144,13 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Hash className="w-5 h-5 text-teal-600" />
-            <h3 className="font-semibold text-gray-900">Aiheet</h3>
+            <h3 className="font-semibold text-gray-900">{t('agora:onboarding.topics')}</h3>
           </div>
           <Link
             to="/aiheet"
             className="text-xs text-teal-600 hover:underline flex items-center gap-0.5"
           >
-            Kaikki aiheet
+            {t('agora:onboarding.allTopics')}
             <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
@@ -179,8 +181,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
         <div className="flex items-start gap-2">
           <Building2 className="w-5 h-5 text-violet-600 flex-shrink-0 mt-0.5" />
           <p className="text-sm text-violet-700">
-            Voit myös seurata instituutioita ja organisaatioita heidän profiilisivuiltaan —
-            seuraa virallisia julkaisuja tai topicia erikseen.
+            {t('agora:onboarding.institutionHint')}
           </p>
         </div>
       </div>
@@ -191,7 +192,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
           onClick={onComplete}
           className="flex-1 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors"
         >
-          Ohita
+          {t('common:actions.skip')}
         </button>
         <button
           onClick={handleSubmit}
@@ -201,10 +202,10 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
           {isSubmitting ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Tallennetaan...
+              {t('common:actions.saving')}
             </>
           ) : (
-            'Valmis'
+            t('agora:onboarding.ready')
           )}
         </button>
       </div>

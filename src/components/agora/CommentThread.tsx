@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { ChevronUp, ChevronDown, MessageSquare, Minus, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { ActorBadge } from '../common/ActorBadge'
+import { formatRelativeTime } from '../../lib/formatTime'
 import type { UserRole } from '../../types'
 
 interface CommentAuthor {
@@ -39,25 +41,6 @@ interface CommentItemProps {
   onCancelReply: () => void
 }
 
-function formatCommentDate(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
-
-  if (diffMins < 1) return 'just now'
-  if (diffMins < 60) return `${diffMins}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-
-  return date.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short'
-  })
-}
-
 function CommentItem({
   comment,
   replies: _replies,
@@ -69,6 +52,7 @@ function CommentItem({
   onSubmitReply,
   onCancelReply
 }: CommentItemProps) {
+  const { t } = useTranslation(['agora', 'common'])
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [replyContent, setReplyContent] = useState('')
 
@@ -111,7 +95,7 @@ function CommentItem({
               className={`p-0.5 rounded hover:bg-gray-100 transition-colors ${
                 userVote === 1 ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
               }`}
-              title="Upvote"
+              title={t('common:actions.upvote')}
             >
               <ChevronUp className="w-5 h-5" />
             </button>
@@ -125,7 +109,7 @@ function CommentItem({
               className={`p-0.5 rounded hover:bg-gray-100 transition-colors ${
                 userVote === -1 ? 'text-blue-500' : 'text-gray-400 hover:text-gray-600'
               }`}
-              title="Downvote"
+              title={t('common:actions.downvote')}
             >
               <ChevronDown className="w-5 h-5" />
             </button>
@@ -141,7 +125,7 @@ function CommentItem({
               >
                 <Plus className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-500">
-                  {author.name} • {childReplies.length + 1} comments
+                  {author.name} • {t('common:comments', { count: childReplies.length + 1 })}
                 </span>
               </div>
             ) : (
@@ -151,13 +135,13 @@ function CommentItem({
                   <button
                     onClick={() => setIsCollapsed(true)}
                     className="p-0.5 hover:bg-gray-100 rounded"
-                    title="Collapse"
+                    title={t('common:actions.collapse')}
                   >
                     <Minus className="w-3 h-3 text-gray-400" />
                   </button>
                   <ActorBadge user={author} size="sm" />
                   <span className="text-gray-400">•</span>
-                  <span className="text-gray-500">{formatCommentDate(comment.createdAt)}</span>
+                  <span className="text-gray-500">{formatRelativeTime(comment.createdAt)}</span>
                 </div>
 
                 {/* Content */}
@@ -183,7 +167,7 @@ function CommentItem({
                     className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 py-1 rounded transition-colors"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
-                    Reply
+                    {t('common:actions.reply')}
                   </button>
                 </div>
 
@@ -193,7 +177,7 @@ function CommentItem({
                     <textarea
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
-                      placeholder="Write a reply..."
+                      placeholder={t('writeReply')}
                       className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       rows={3}
                       autoFocus
@@ -204,13 +188,13 @@ function CommentItem({
                         disabled={!replyContent.trim()}
                         className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Reply
+                        {t('common:actions.reply')}
                       </button>
                       <button
                         onClick={onCancelReply}
                         className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800"
                       >
-                        Cancel
+                        {t('common:actions.cancel')}
                       </button>
                     </div>
                   </div>
@@ -251,6 +235,7 @@ interface CommentThreadProps {
 }
 
 export function CommentThread({ comments, onVote, onReply }: CommentThreadProps) {
+  const { t } = useTranslation('agora')
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
 
   // Get top-level comments (no parent)
@@ -280,7 +265,7 @@ export function CommentThread({ comments, onVote, onReply }: CommentThreadProps)
   if (comments.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <p>No comments yet. Be the first to contribute.</p>
+        <p>{t('noComments')}</p>
       </div>
     )
   }

@@ -1,0 +1,116 @@
+{
+  "title": "Agora",
+  "subtitle": "Public citizen discussions",
+  "loadError": "Failed to load discussions",
+  "noThreads": "No discussions match your filters",
+  "editSubscriptions": "Edit subscriptions",
+  "replies_one": "{{count}} reply",
+  "replies_other": "{{count}} replies",
+  "aiSummary": "AI summary",
+  "aiSummarySource": "AI summary — source: {{source}}",
+  "minutesSummary": "Meeting minutes summary",
+  "original": "Original",
+  "officialInfo": "Official information — {{name}}",
+  "institutionalContext": "Includes official documents, timeline & FAQ",
+  "noComments": "No comments yet. Be the first to contribute.",
+  "commentSort": {
+    "best": "Best",
+    "new": "New",
+    "old": "Old",
+    "controversial": "Controversial"
+  },
+  "writeComment": "Write a comment...",
+  "addComment": "Comment",
+  "writeReply": "Write a reply...",
+  "onboarding": {
+    "welcome": "Welcome to Agora!",
+    "emptyFeed": "Your feed is empty. Start by following places and topics that interest you.",
+    "municipalities": "Municipalities",
+    "topics": "Topics",
+    "allTopics": "All topics",
+    "institutionHint": "You can also follow institutions and organizations from their profile pages — follow official posts or topics separately.",
+    "ready": "Done"
+  },
+  "filters": {
+    "scope": {
+      "all": "All",
+      "local": "Local",
+      "national": "National",
+      "european": "EU"
+    },
+    "municipalityLabel": "Municipality:",
+    "allMunicipalities": "All",
+    "topicsLabel": "Topics:",
+    "clearFilters": "Clear filters"
+  },
+  "threadForm": {
+    "collapsed": "What would you like to discuss?",
+    "title": "Title",
+    "titlePlaceholder": "What would you like to discuss?",
+    "content": "Content",
+    "contentPlaceholder": "Tell more about the topic...",
+    "scope": "Scope",
+    "scopeLocal": "Local",
+    "scopeLocalDesc": "Municipality, village or area",
+    "scopeNational": "National",
+    "scopeNationalDesc": "All of Finland",
+    "scopeEuropean": "EU",
+    "scopeEuropeanDesc": "Europe-wide",
+    "location": "Location",
+    "locationPlaceholder": "Search municipality, city or village...",
+    "tags": "Topics",
+    "customTag": "other...",
+    "publish": "Publish",
+    "publishing": "Publishing...",
+    "preview": "Preview",
+    "markdown": "Markdown supported",
+    "imageUpload": "Add image",
+    "imageError": "Only JPEG, PNG, WebP and GIF allowed (max 5MB)",
+    "suggestedTags": ["transport", "education", "health", "environment", "housing", "culture", "economy", "security", "social services", "infrastructure"]
+  },
+  "institutionalBox": {
+    "documents": "Documents",
+    "timeline": "Timeline",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "source": "Source",
+    "aiGenerated": "AI-generated summary",
+    "official": "Official information"
+  },
+  "thread": {
+    "notFound": "Thread not found",
+    "backToAgora": "Back to Agora",
+    "returnToAgora": "Return to Agora",
+    "officialChannel": "Official channel",
+    "posted": "Posted {{time}}",
+    "discussion": "Discussion",
+    "shareThoughts": "Share your thoughts...",
+    "posting": "Posting...",
+    "postReply": "Post reply",
+    "noReplies": "No replies yet. Be the first to contribute to this discussion.",
+    "endOfDiscussion": "End of discussion",
+    "sort": "Sort:"
+  },
+  "municipality": {
+    "defaultName": "Municipality",
+    "discussions_one": "{{count}} discussion",
+    "discussions_other": "{{count}} discussions",
+    "loadError": "Failed to load discussions",
+    "noDiscussions": "No discussions in this municipality",
+    "goToAgora": "Go to Agora"
+  },
+  "topics": {
+    "title": "Topics",
+    "subtitle": "Browse and follow interesting topics. Followed topics appear in your feed.",
+    "otherTopics": "Other topics"
+  },
+  "tag": {
+    "threads": "discussions",
+    "thread_one": "{{count}} discussion",
+    "thread_other": "{{count}} discussions",
+    "relatedTags": "Related topics",
+    "noThreads": "No discussions on this topic yet.",
+    "notFound": "Tag not found",
+    "showing": "Showing {{shown}} / {{total}} discussions"
+  }
+}

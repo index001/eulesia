@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '../common/LanguageSwitcher'
 
 export function Footer() {
+  const { t } = useTranslation()
+
   return (
     <footer className="bg-gray-50 border-t border-gray-200 py-8 px-4 mb-16">
       <div className="max-w-4xl mx-auto">
@@ -11,20 +15,20 @@ export function Footer() {
             </div>
             <span className="font-medium text-gray-900">Eulesia</span>
             <span className="text-gray-400">·</span>
-            <span>Suomi</span>
+            <LanguageSwitcher variant="compact" />
           </div>
 
           <div className="flex items-center gap-4">
             <Link to="/about" className="hover:text-gray-900 transition-colors">
-              Tietoa
+              {t('footer.about')}
             </Link>
             <span className="text-gray-400">·</span>
-            <span className="text-gray-500">Avoin lähdekoodi · Ei voittoa tavoitteleva</span>
+            <span className="text-gray-500">{t('footer.openSource')}</span>
           </div>
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
-          Kansalaisinfrastruktuuria yhteiseksi hyväksi. Datasi ei ole tuote.
+          {t('footer.tagline')}
         </div>
       </div>
     </footer>

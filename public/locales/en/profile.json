@@ -1,0 +1,85 @@
+{
+  "title": "Profile",
+  "identity": {
+    "title": "Identity",
+    "highAssurance": "High Assurance Identity",
+    "substantial": "Substantial Identity",
+    "verified": "Verified Identity",
+    "eudiConnected": "EUDI Wallet Connected",
+    "emailVerified": "Email Verified",
+    "eudiDescription": "European Digital Identity",
+    "magicLink": "Magic Link Authentication",
+    "active": "Active",
+    "eudiInfo": "Your identity is verified through the EU Digital Identity framework. This ensures one-person-one-account in Eulesia.",
+    "upgradeInfo": "Upgrade to EUDI Wallet when available for stronger identity verification."
+  },
+  "invites": {
+    "title": "My Invites",
+    "remaining_one": "{{count}} invite remaining",
+    "remaining_other": "{{count}} invites remaining",
+    "shareInfo": "Share codes to invite others to Eulesia",
+    "createCode": "Create Code",
+    "available": "Available",
+    "usedBy": "Used by {{name}}",
+    "revoked": "Revoked",
+    "noCodesYet": "No invite codes yet. Create one to invite someone!",
+    "peopleInvited": "People you invited ({{count}})"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "replies": "Replies to your posts",
+    "repliesDesc": "When someone replies to your discussions",
+    "mentions": "Direct mentions",
+    "mentionsDesc": "When someone mentions you",
+    "official": "Official updates",
+    "officialDesc": "From institutions you follow",
+    "noGrowthNudges": "No \"growth\" nudges. Only meaningful notifications."
+  },
+  "privacy": {
+    "title": "Privacy & Data",
+    "notProduct": "Your data is not the product",
+    "notProductDesc": "Eulesia does not collect behavioral data for advertising. We do not sell your data or use it to manipulate your attention.",
+    "dataStored": "Data stored",
+    "dataList": {
+      "profile": "Profile information (name, municipality)",
+      "posts": "Your posts and comments",
+      "clubs": "Club memberships",
+      "notifications": "Notification preferences"
+    },
+    "exporting": "Exporting...",
+    "exportData": "Export my data"
+  },
+  "language": {
+    "title": "Language",
+    "description": "Choose the interface language"
+  },
+  "aboutEulesia": "About Eulesia",
+  "aboutDesc": "Governance, foundation, open source",
+  "signOut": "Sign out",
+  "userProfile": {
+    "notFound": "User not found",
+    "backToAgora": "Back to Agora",
+    "back": "Back",
+    "sendMessage": "Send message",
+    "opening": "Opening...",
+    "visitHome": "Visit home page",
+    "verified": "Verified",
+    "joined": "Joined {{date}}",
+    "editProfile": "Edit profile",
+    "officialPosts": "Official posts ({{count}})",
+    "aiSummaries": "AI summaries ({{count}})",
+    "citizenDiscussion": "Citizen discussion ({{count}})",
+    "discussions": "Discussions ({{count}})",
+    "noOfficialPosts": "No official posts",
+    "noPublicDiscussions": "No public discussions",
+    "followOfficialPosts": "Official posts",
+    "followAiSummaries": "AI summaries + citizen discussion"
+  },
+  "avatar": {
+    "removeTitle": "Remove photo",
+    "allowedFormats": "Only JPEG, PNG, WebP and GIF allowed",
+    "maxSize": "Image must be max 5MB",
+    "uploadFailed": "Image upload failed",
+    "removeFailed": "Image removal failed"
+  }
+}

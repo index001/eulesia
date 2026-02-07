@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '../components/layout'
@@ -44,6 +45,7 @@ function transformAuthor(author: UserSummary) {
 }
 
 export function MunicipalityPage() {
+  const { t } = useTranslation(['agora', 'common'])
   const { municipalityId } = useParams<{ municipalityId: string }>()
   const navigate = useNavigate()
   const { currentUser } = useAuth()
@@ -80,7 +82,7 @@ export function MunicipalityPage() {
             </Link>
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                {municipality?.name || 'Kunta'}
+                {municipality?.name || t('agora:municipality.defaultName')}
               </h1>
               {municipality?.region && (
                 <p className="text-sm text-gray-500">{municipality.region}</p>
@@ -92,7 +94,7 @@ export function MunicipalityPage() {
           )}
         </div>
         <p className="text-sm text-gray-600">
-          {threads.length} keskustelua
+          {t('agora:municipality.discussions', { count: threads.length })}
         </p>
       </div>
 
@@ -114,8 +116,8 @@ export function MunicipalityPage() {
 
         {error && (
           <div className="text-center py-12 text-red-600">
-            <p>Keskustelujen lataaminen epäonnistui</p>
-            <p className="text-sm mt-1">{error instanceof Error ? error.message : 'Tuntematon virhe'}</p>
+            <p>{t('agora:municipality.loadError')}</p>
+            <p className="text-sm mt-1">{error instanceof Error ? error.message : t('common:errors.unknown')}</p>
           </div>
         )}
 
@@ -133,12 +135,12 @@ export function MunicipalityPage() {
 
         {!isLoading && !error && threads.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            <p>Ei keskusteluja tässä kunnassa</p>
+            <p>{t('agora:municipality.noDiscussions')}</p>
             <Link
               to="/agora"
               className="mt-2 text-blue-600 hover:underline text-sm inline-block"
             >
-              Siirry Agoraan
+              {t('agora:municipality.goToAgora')}
             </Link>
           </div>
         )}

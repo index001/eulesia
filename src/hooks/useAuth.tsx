@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import i18n from '../lib/i18n'
 import { api } from '../lib/api'
 import type { User } from '../lib/api'
 
@@ -28,6 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const user = await api.getCurrentUser()
       setCurrentUser(user)
       setIsAuthenticated(true)
+      // Sync user's locale preference to i18next
+      if (user.settings?.locale && user.settings.locale !== i18n.language) {
+        i18n.changeLanguage(user.settings.locale)
+      }
     } catch {
       setCurrentUser(null)
       setIsAuthenticated(false)
@@ -44,6 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const user = await api.login(username, password)
     setCurrentUser(user)
     setIsAuthenticated(true)
+    if (user.settings?.locale) {
+      i18n.changeLanguage(user.settings.locale)
+    }
   }
 
   const register = async (data: { inviteCode: string; username: string; password: string; name: string }) => {

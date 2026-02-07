@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Hash, Building2, Tag } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ThreadCard } from '../components/agora/ThreadCard'
@@ -42,6 +43,7 @@ function transformAuthor(author: UserSummary) {
 }
 
 export function TagPage() {
+  const { t } = useTranslation(['agora', 'common'])
   const { tagName } = useParams<{ tagName: string }>()
   const decodedTag = decodeURIComponent(tagName || '')
 
@@ -66,9 +68,9 @@ export function TagPage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">Tagia ei löytynyt</p>
+          <p className="text-gray-500">{t('tag.notFound')}</p>
           <Link to="/agora" className="text-blue-600 hover:underline mt-2 inline-block">
-            Takaisin Agoraan
+            {t('thread.returnToAgora')}
           </Link>
         </div>
       </Layout>
@@ -87,7 +89,7 @@ export function TagPage() {
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Takaisin
+          {t('common:actions.back')}
         </button>
       </div>
 
@@ -145,7 +147,7 @@ export function TagPage() {
         </div>
 
         <div className="mt-3 text-sm text-gray-500">
-          {data.total} {data.total === 1 ? 'keskustelu' : 'keskustelua'}
+          {t('tag.thread', { count: data.total })}
         </div>
       </div>
 
@@ -164,7 +166,7 @@ export function TagPage() {
         ) : (
           <div className="text-center py-8 text-gray-500">
             <Hash className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-            <p>Ei vielä keskusteluja tällä tagilla</p>
+            <p>{t('tag.noThreads')}</p>
           </div>
         )}
 
@@ -172,7 +174,7 @@ export function TagPage() {
         {data.hasMore && (
           <div className="text-center py-4">
             <p className="text-sm text-gray-500">
-              Näytetään {data.items.length} / {data.total} keskustelua
+              {t('tag.showing', { shown: data.items.length, total: data.total })}
             </p>
           </div>
         )}

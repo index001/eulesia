@@ -1,4 +1,5 @@
 import { Filter, MapPin, Building2, Globe, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Scope } from '../../types'
 import type { Municipality } from '../../lib/api'
 
@@ -14,13 +15,6 @@ interface AgoraFiltersProps {
   onMunicipalityChange?: (municipalityId: string | undefined) => void
 }
 
-const scopeOptions: { value: Scope | 'all'; label: string; icon: React.ElementType }[] = [
-  { value: 'all', label: 'Kaikki', icon: Filter },
-  { value: 'local', label: 'Paikallinen', icon: MapPin },
-  { value: 'national', label: 'Valtakunnallinen', icon: Building2 },
-  { value: 'european', label: 'EU', icon: Globe }
-]
-
 export function AgoraFilters({
   selectedScope,
   onScopeChange,
@@ -32,6 +26,15 @@ export function AgoraFilters({
   selectedMunicipality,
   onMunicipalityChange
 }: AgoraFiltersProps) {
+  const { t } = useTranslation('agora')
+
+  const scopeOptions: { value: Scope | 'all'; label: string; icon: React.ElementType }[] = [
+    { value: 'all', label: t('filters.scope.all'), icon: Filter },
+    { value: 'local', label: t('filters.scope.local'), icon: MapPin },
+    { value: 'national', label: t('filters.scope.national'), icon: Building2 },
+    { value: 'european', label: t('filters.scope.european'), icon: Globe }
+  ]
+
   const hasActiveFilters = selectedScope !== 'all' || selectedTags.length > 0 || !!selectedMunicipality
 
   return (
@@ -64,7 +67,7 @@ export function AgoraFilters({
         {/* Municipality chips - show when Local scope is selected */}
         {selectedScope === 'local' && municipalities && municipalities.length > 0 && (
           <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide">
-            <span className="text-xs text-gray-500 flex-shrink-0">Kunta:</span>
+            <span className="text-xs text-gray-500 flex-shrink-0">{t('filters.municipalityLabel')}</span>
             <button
               onClick={() => onMunicipalityChange?.(undefined)}
               className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
@@ -73,7 +76,7 @@ export function AgoraFilters({
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              Kaikki
+              {t('filters.allMunicipalities')}
             </button>
             {municipalities.map(m => (
               <button
@@ -93,7 +96,7 @@ export function AgoraFilters({
 
         {/* Topic tags */}
         <div className="flex items-center gap-2 overflow-x-auto pt-2 scrollbar-hide">
-          <span className="text-xs text-gray-500 flex-shrink-0">Aiheet:</span>
+          <span className="text-xs text-gray-500 flex-shrink-0">{t('filters.topicsLabel')}</span>
           {availableTags.slice(0, 8).map(tag => (
             <button
               key={tag}
@@ -116,7 +119,7 @@ export function AgoraFilters({
             className="mt-2 flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
           >
             <X className="w-3 h-3" />
-            Tyhjennä suodattimet
+            {t('filters.clearFilters')}
           </button>
         )}
       </div>

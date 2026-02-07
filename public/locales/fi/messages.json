@@ -1,0 +1,14 @@
+{
+  "title": "Viestit",
+  "noConversations": "Ei keskusteluja vielä",
+  "noConversationsHint": "Aloita keskustelu käyttäjän profiilisivulta",
+  "writeMessage": "Kirjoita viesti...",
+  "noMessages": "Ei viestejä vielä. Aloita keskustelu!",
+  "noMessagesYet": "Ei viestejä vielä",
+  "noMessagesPreview": "Ei viestejä vielä",
+  "sendFirstMessage": "Lähetä ensimmäinen viesti!",
+  "loadError": "Keskustelua ei voitu ladata",
+  "backToMessages": "Takaisin viesteihin",
+  "unread_one": "{{count}} lukematon",
+  "unread_other": "{{count}} lukematonta"
+}

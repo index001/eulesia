@@ -1,4 +1,5 @@
 import { ChevronUp, ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../hooks/useAuth'
 
 interface ThreadVoteButtonsProps {
@@ -17,6 +18,7 @@ export function ThreadVoteButtons({
   isLoading = false,
   size = 'md'
 }: ThreadVoteButtonsProps) {
+  const { t } = useTranslation()
   const { currentUser } = useAuth()
 
   const handleUpvote = (e: React.MouseEvent) => {
@@ -74,7 +76,7 @@ export function ThreadVoteButtons({
           }
           disabled:opacity-50 disabled:cursor-not-allowed
         `}
-        title={currentUser ? 'Upvote' : 'Login to vote'}
+        title={currentUser ? t('actions.upvote') : t('actions.loginToVote')}
       >
         <ChevronUp className={classes.icon} strokeWidth={2.5} />
       </button>
@@ -101,7 +103,7 @@ export function ThreadVoteButtons({
           }
           disabled:opacity-50 disabled:cursor-not-allowed
         `}
-        title={currentUser ? 'Downvote' : 'Login to vote'}
+        title={currentUser ? t('actions.downvote') : t('actions.loginToVote')}
       >
         <ChevronDown className={classes.icon} strokeWidth={2.5} />
       </button>

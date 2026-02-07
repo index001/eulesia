@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Shield, Fingerprint, CheckCircle, Lock, Users, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Ticket } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../lib/api'
 
 type LoginStep = 'initial' | 'login' | 'register' | 'invite-check'
 
 export function LoginPage() {
+  const { t } = useTranslation(['auth', 'common'])
   const { login, register } = useAuth()
   const [step, setStep] = useState<LoginStep>('initial')
   const [isLoading, setIsLoading] = useState(false)
@@ -32,7 +34,7 @@ export function LoginPage() {
       await login(loginUsername, loginPassword)
       // Navigation handled by App.tsx
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      setError(err instanceof Error ? err.message : t('loginFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -50,10 +52,10 @@ export function LoginPage() {
         setInvitedBy(result.invitedBy || null)
         setStep('register')
       } else {
-        setError(result.reason || 'Invalid invite code')
+        setError(result.reason || t('invalidInvite'))
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to validate invite code')
+      setError(err instanceof Error ? err.message : t('inviteValidationFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -73,7 +75,7 @@ export function LoginPage() {
       })
       // Navigation handled by App.tsx
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed')
+      setError(err instanceof Error ? err.message : t('registrationFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -96,11 +98,10 @@ export function LoginPage() {
         <div className="max-w-md mx-auto w-full">
           {/* Tagline */}
           <h1 className="text-white text-3xl font-bold mb-3">
-            Digitaalisen ajan kansalaistila
+            {t('tagline')}
           </h1>
           <p className="text-blue-200 text-lg mb-8">
-            Julkinen infrastruktuuri, ei yksityinen alusta. Todellinen identiteetti,
-            ei anonymiteetti. Keskustelu, ei häiriö.
+            {t('taglineBody')}
           </p>
 
           {/* Login/Register card */}
@@ -112,8 +113,8 @@ export function LoginPage() {
                     <Fingerprint className="w-6 h-6 text-blue-800" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-gray-900">Welcome to Eulesia</h2>
-                    <p className="text-sm text-gray-500">Invite-only beta</p>
+                    <h2 className="font-semibold text-gray-900">{t('welcome')}</h2>
+                    <p className="text-sm text-gray-500">{t('inviteOnlyBeta')}</p>
                   </div>
                 </div>
 
@@ -122,7 +123,7 @@ export function LoginPage() {
                   className="w-full bg-blue-800 text-white py-3 px-4 rounded-xl font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mb-3"
                 >
                   <LogIn className="w-5 h-5" />
-                  Sign In
+                  {t('signIn')}
                 </button>
 
                 <button
@@ -130,7 +131,7 @@ export function LoginPage() {
                   className="w-full bg-white text-blue-800 border-2 border-blue-800 py-3 px-4 rounded-xl font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
                 >
                   <Ticket className="w-5 h-5" />
-                  I have an invite code
+                  {t('iHaveInvite')}
                 </button>
 
                 {/* Future: EUDI Wallet button */}
@@ -140,7 +141,7 @@ export function LoginPage() {
                     className="w-full bg-gray-100 text-gray-400 py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 cursor-not-allowed"
                   >
                     <Shield className="w-5 h-5" />
-                    EUDI Wallet (Coming 2026)
+                    {t('eudiWallet')}
                   </button>
                 </div>
               </>
@@ -153,22 +154,22 @@ export function LoginPage() {
                     <LogIn className="w-6 h-6 text-blue-800" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-gray-900">Sign In</h2>
-                    <p className="text-sm text-gray-500">Enter your credentials</p>
+                    <h2 className="font-semibold text-gray-900">{t('signIn')}</h2>
+                    <p className="text-sm text-gray-500">{t('enterCredentials')}</p>
                   </div>
                 </div>
 
                 <div className="space-y-4 mb-4">
                   <div>
                     <label htmlFor="login-username" className="block text-sm font-medium text-gray-700 mb-1">
-                      Username
+                      {t('username')}
                     </label>
                     <input
                       type="text"
                       id="login-username"
                       value={loginUsername}
                       onChange={(e) => setLoginUsername(e.target.value)}
-                      placeholder="your_username"
+                      placeholder={t('usernamePlaceholder')}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                       autoFocus
@@ -178,7 +179,7 @@ export function LoginPage() {
 
                   <div>
                     <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
-                      Password
+                      {t('password')}
                     </label>
                     <input
                       type="password"
@@ -207,11 +208,11 @@ export function LoginPage() {
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Signing in...
+                      {t('signingIn')}
                     </>
                   ) : (
                     <>
-                      Sign In
+                      {t('signIn')}
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
@@ -223,7 +224,7 @@ export function LoginPage() {
                   className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700 flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Back
+                  {t('common:actions.back')}
                 </button>
               </form>
             )}
@@ -235,14 +236,14 @@ export function LoginPage() {
                     <Ticket className="w-6 h-6 text-green-700" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-gray-900">Enter Invite Code</h2>
-                    <p className="text-sm text-gray-500">You need an invite to join</p>
+                    <h2 className="font-semibold text-gray-900">{t('enterInviteCode')}</h2>
+                    <p className="text-sm text-gray-500">{t('needInvite')}</p>
                   </div>
                 </div>
 
                 <div className="mb-4">
                   <label htmlFor="invite-code" className="block text-sm font-medium text-gray-700 mb-1">
-                    Invite Code
+                    {t('inviteCode')}
                   </label>
                   <input
                     type="text"
@@ -270,11 +271,11 @@ export function LoginPage() {
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Checking...
+                      {t('checking')}
                     </>
                   ) : (
                     <>
-                      Continue
+                      {t('common:actions.continue')}
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
@@ -286,7 +287,7 @@ export function LoginPage() {
                   className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700 flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Back
+                  {t('common:actions.back')}
                 </button>
               </form>
             )}
@@ -298,9 +299,9 @@ export function LoginPage() {
                     <UserPlus className="w-6 h-6 text-green-700" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-gray-900">Create Account</h2>
+                    <h2 className="font-semibold text-gray-900">{t('createAccount')}</h2>
                     {invitedBy && (
-                      <p className="text-sm text-gray-500">Invited by {invitedBy}</p>
+                      <p className="text-sm text-gray-500">{t('invitedBy', { name: invitedBy })}</p>
                     )}
                   </div>
                 </div>
@@ -308,21 +309,21 @@ export function LoginPage() {
                 <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl">
                   <div className="flex items-center gap-2 text-green-700 text-sm">
                     <CheckCircle className="w-4 h-4" />
-                    <span>Invite code: <span className="font-mono font-medium">{inviteCode}</span></span>
+                    <span>{t('inviteCodeConfirmed')} <span className="font-mono font-medium">{inviteCode}</span></span>
                   </div>
                 </div>
 
                 <div className="space-y-4 mb-4">
                   <div>
                     <label htmlFor="reg-name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
+                      {t('fullName')}
                     </label>
                     <input
                       type="text"
                       id="reg-name"
                       value={regName}
                       onChange={(e) => setRegName(e.target.value)}
-                      placeholder="Your Name"
+                      placeholder={t('fullNamePlaceholder')}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                       autoFocus
@@ -332,25 +333,25 @@ export function LoginPage() {
 
                   <div>
                     <label htmlFor="reg-username" className="block text-sm font-medium text-gray-700 mb-1">
-                      Username
+                      {t('username')}
                     </label>
                     <input
                       type="text"
                       id="reg-username"
                       value={regUsername}
                       onChange={(e) => setRegUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                      placeholder="your_username"
+                      placeholder={t('usernamePlaceholder')}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                       autoComplete="username"
                       pattern="[a-z0-9_]+"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Letters, numbers, and underscores only</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('usernameHint')}</p>
                   </div>
 
                   <div>
                     <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 mb-1">
-                      Password
+                      {t('password')}
                     </label>
                     <input
                       type="password"
@@ -363,7 +364,7 @@ export function LoginPage() {
                       minLength={6}
                       autoComplete="new-password"
                     />
-                    <p className="text-xs text-gray-500 mt-1">At least 6 characters</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('passwordHint')}</p>
                   </div>
                 </div>
 
@@ -381,11 +382,11 @@ export function LoginPage() {
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Creating account...
+                      {t('creatingAccount')}
                     </>
                   ) : (
                     <>
-                      Create Account
+                      {t('createAccount')}
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
@@ -397,7 +398,7 @@ export function LoginPage() {
                   className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700 flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Back
+                  {t('common:actions.back')}
                 </button>
               </form>
             )}
@@ -407,11 +408,10 @@ export function LoginPage() {
           <div className="mt-6 bg-blue-800/50 rounded-xl p-4 border border-blue-700">
             <h3 className="text-white font-medium flex items-center gap-2 mb-2">
               <Lock className="w-4 h-4" />
-              Kutsuvaihe
+              {t('invitePhase.title')}
             </h3>
             <p className="text-blue-200 text-sm">
-              Eulesia kasvaa henkilökohtaisten kutsujen kautta. Jokainen jäsen voi kutsua
-              5 muuta, rakentaen luottamusverkoston aktiivisista kansalaisista.
+              {t('invitePhase.description')}
             </p>
           </div>
         </div>
@@ -421,7 +421,7 @@ export function LoginPage() {
       <div className="bg-white px-6 py-8">
         <div className="max-w-md mx-auto">
           <h3 className="text-gray-900 font-semibold mb-4 text-center">
-            Mikä tekee Eulesiasta erilaisen
+            {t('features.title')}
           </h3>
 
           <div className="space-y-4">
@@ -430,9 +430,9 @@ export function LoginPage() {
                 <CheckCircle className="w-4 h-4 text-green-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">Ei huomiotaloutta</h4>
+                <h4 className="font-medium text-gray-900 text-sm">{t('features.noAttentionEconomy.title')}</h4>
                 <p className="text-gray-500 text-sm">
-                  Ei algoritmista syötettä, ei loputonta scrollausta, ei sitoutumismittareita. Aikasi on omaasi.
+                  {t('features.noAttentionEconomy.description')}
                 </p>
               </div>
             </div>
@@ -442,9 +442,9 @@ export function LoginPage() {
                 <Building2 className="w-4 h-4 text-violet-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">Instituutiot osallistujina</h4>
+                <h4 className="font-medium text-gray-900 text-sm">{t('features.institutions.title')}</h4>
                 <p className="text-gray-500 text-sm">
-                  Julkiset instituutiot osallistuvat kansalaistoimijoina, eivät mainostajina tai "vahvistettuina brändeinä".
+                  {t('features.institutions.description')}
                 </p>
               </div>
             </div>
@@ -454,9 +454,9 @@ export function LoginPage() {
                 <Users className="w-4 h-4 text-teal-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">Sosiaalinen, ei valvontaa</h4>
+                <h4 className="font-medium text-gray-900 text-sm">{t('features.socialNotSurveillance.title')}</h4>
                 <p className="text-gray-500 text-sm">
-                  Yhteys yhteisöihin ja naapureihin. Ei datan keruuta, ei mainoskohdennusta.
+                  {t('features.socialNotSurveillance.description')}
                 </p>
               </div>
             </div>
@@ -466,14 +466,14 @@ export function LoginPage() {
           <div className="mt-6 pt-4 border-t border-gray-200 space-y-3">
             <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
               <span className="text-lg">🇪🇺</span>
-              <span>Eurooppalainen digitaalinen julkinen infrastruktuuri</span>
+              <span>{t('euInfrastructure')}</span>
             </div>
             <div className="text-center">
               <a
                 href="/about"
                 className="text-sm text-blue-600 hover:underline"
               >
-                Lue lisää Eulesiasta →
+                {t('readMore')}
               </a>
             </div>
           </div>

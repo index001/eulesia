@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
-import { Shield, Bell, Eye, Database, LogOut, ChevronRight, Info, ExternalLink, Ticket, Plus, Copy, Check, Trash2, Users, Camera, Loader2 } from 'lucide-react'
+import { Shield, Bell, Eye, Database, LogOut, ChevronRight, Info, ExternalLink, Ticket, Plus, Copy, Check, Trash2, Users, Camera, Loader2, Globe } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { LanguageSwitcher } from '../components/common/LanguageSwitcher'
 import { useAuth } from '../hooks/useAuth'
 import { useUpdateProfile, useExportData } from '../hooks/useApi'
 import { api, type InviteCode, type InvitedUser } from '../lib/api'
 
 export function ProfilePage() {
+  const { t } = useTranslation(['profile', 'common', 'auth'])
   const { currentUser, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
   const updateProfileMutation = useUpdateProfile()
@@ -136,13 +139,13 @@ export function ProfilePage() {
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
     if (!allowedTypes.includes(file.type)) {
-      setAvatarError('Vain JPEG, PNG, WebP ja GIF sallittu')
+      setAvatarError(t('avatar.allowedFormats'))
       return
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      setAvatarError('Kuva saa olla max 5MB')
+      setAvatarError(t('avatar.maxSize'))
       return
     }
 
@@ -154,7 +157,7 @@ export function ProfilePage() {
       // Refresh user to get new avatar URL
       await refreshUser()
     } catch (err) {
-      setAvatarError('Kuvan lataus epäonnistui')
+      setAvatarError(t('avatar.uploadFailed'))
       console.error('Avatar upload failed:', err)
     } finally {
       setIsUploadingAvatar(false)
@@ -173,7 +176,7 @@ export function ProfilePage() {
       await api.deleteAvatar()
       await refreshUser()
     } catch (err) {
-      setAvatarError('Kuvan poisto epäonnistui')
+      setAvatarError(t('avatar.removeFailed'))
       console.error('Avatar delete failed:', err)
     } finally {
       setIsUploadingAvatar(false)
@@ -184,7 +187,7 @@ export function ProfilePage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">Please log in to view your profile</p>
+          <p className="text-gray-500">{t('auth:pleaseLogin')}</p>
         </div>
       </Layout>
     )
@@ -235,7 +238,7 @@ export function ProfilePage() {
               <button
                 onClick={handleRemoveAvatar}
                 className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-colors shadow-sm"
-                title="Poista kuva"
+                title={t('avatar.removeTitle')}
               >
                 <Trash2 className="w-3 h-3" />
               </button>
@@ -246,9 +249,9 @@ export function ProfilePage() {
             <div className="flex items-center gap-2 mt-1">
               <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
                 <Shield className="w-3 h-3" />
-                {currentUser.identityLevel === 'high' ? 'High Assurance Identity' :
-                 currentUser.identityLevel === 'substantial' ? 'Substantial Identity' :
-                 'Verified Identity'}
+                {currentUser.identityLevel === 'high' ? t('identity.highAssurance') :
+                 currentUser.identityLevel === 'substantial' ? t('identity.substantial') :
+                 t('identity.verified')}
               </span>
               {currentUser.municipality && (
                 <span className="text-xs text-gray-500">
@@ -269,26 +272,26 @@ export function ProfilePage() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <Shield className="w-4 h-4 text-blue-600" />
-              Identity
+              {t('identity.title')}
             </h2>
           </div>
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {currentUser.identityLevel === 'high' ? 'EUDI Wallet Connected' : 'Email Verified'}
+                  {currentUser.identityLevel === 'high' ? t('identity.eudiConnected') : t('identity.emailVerified')}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {currentUser.identityLevel === 'high' ? 'European Digital Identity' : 'Magic Link Authentication'}
+                  {currentUser.identityLevel === 'high' ? t('identity.eudiDescription') : t('identity.magicLink')}
                 </p>
               </div>
-              <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">Active</span>
+              <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">{t('identity.active')}</span>
             </div>
             <div className="pt-3 border-t border-gray-100">
               <p className="text-xs text-gray-500">
                 {currentUser.identityLevel === 'high'
-                  ? 'Your identity is verified through the EU Digital Identity framework. This ensures one-person-one-account in Eulesia.'
-                  : 'Upgrade to EUDI Wallet when available for stronger identity verification.'}
+                  ? t('identity.eudiInfo')
+                  : t('identity.upgradeInfo')}
               </p>
             </div>
           </div>
@@ -299,7 +302,7 @@ export function ProfilePage() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <Ticket className="w-4 h-4 text-green-600" />
-              My Invites
+              {t('invites.title')}
             </h2>
           </div>
           <div className="p-4 space-y-4">
@@ -307,10 +310,10 @@ export function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {invitesRemaining} invite{invitesRemaining !== 1 ? 's' : ''} remaining
+                  {t('invites.remaining', { count: invitesRemaining })}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Share codes to invite others to Eulesia
+                  {t('invites.shareInfo')}
                 </p>
               </div>
               <button
@@ -323,7 +326,7 @@ export function ProfilePage() {
                 ) : (
                   <Plus className="w-4 h-4" />
                 )}
-                Create Code
+                {t('invites.createCode')}
               </button>
             </div>
 
@@ -348,9 +351,9 @@ export function ProfilePage() {
                         {code.code}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        {code.status === 'available' && 'Available'}
-                        {code.status === 'used' && code.usedBy && `Used by ${code.usedBy.name}`}
-                        {code.status === 'revoked' && 'Revoked'}
+                        {code.status === 'available' && t('invites.available')}
+                        {code.status === 'used' && code.usedBy && t('invites.usedBy', { name: code.usedBy.name })}
+                        {code.status === 'revoked' && t('invites.revoked')}
                       </p>
                     </div>
                     {code.status === 'available' && (
@@ -358,7 +361,7 @@ export function ProfilePage() {
                         <button
                           onClick={() => handleCopyCode(code.code)}
                           className="p-1.5 text-green-600 hover:bg-green-100 rounded"
-                          title="Copy code"
+                          title={t('common:actions.copyCode')}
                         >
                           {copiedCode === code.code ? (
                             <Check className="w-4 h-4" />
@@ -369,7 +372,7 @@ export function ProfilePage() {
                         <button
                           onClick={() => handleRevokeInvite(code.id)}
                           className="p-1.5 text-red-500 hover:bg-red-100 rounded"
-                          title="Revoke code"
+                          title={t('common:actions.revokeCode')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -380,7 +383,7 @@ export function ProfilePage() {
               </div>
             ) : (
               <p className="text-sm text-gray-500 text-center py-4">
-                No invite codes yet. Create one to invite someone!
+                {t('invites.noCodesYet')}
               </p>
             )}
 
@@ -389,7 +392,7 @@ export function ProfilePage() {
               <div className="pt-4 border-t border-gray-200">
                 <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2 mb-3">
                   <Users className="w-4 h-4 text-blue-600" />
-                  People you invited ({invitedUsers.length})
+                  {t('invites.peopleInvited', { count: invitedUsers.length })}
                 </h3>
                 <div className="space-y-2">
                   {invitedUsers.map(user => (
@@ -412,14 +415,14 @@ export function ProfilePage() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <Bell className="w-4 h-4 text-blue-600" />
-              Notifications
+              {t('notifications.title')}
             </h2>
           </div>
           <div className="divide-y divide-gray-100">
             <div className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">Replies to your posts</p>
-                <p className="text-xs text-gray-500">When someone replies to your discussions</p>
+                <p className="text-sm font-medium text-gray-900">{t('notifications.replies')}</p>
+                <p className="text-xs text-gray-500">{t('notifications.repliesDesc')}</p>
               </div>
               <input
                 type="checkbox"
@@ -430,8 +433,8 @@ export function ProfilePage() {
             </div>
             <div className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">Direct mentions</p>
-                <p className="text-xs text-gray-500">When someone mentions you</p>
+                <p className="text-sm font-medium text-gray-900">{t('notifications.mentions')}</p>
+                <p className="text-xs text-gray-500">{t('notifications.mentionsDesc')}</p>
               </div>
               <input
                 type="checkbox"
@@ -442,8 +445,8 @@ export function ProfilePage() {
             </div>
             <div className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">Official updates</p>
-                <p className="text-xs text-gray-500">From institutions you follow</p>
+                <p className="text-sm font-medium text-gray-900">{t('notifications.official')}</p>
+                <p className="text-xs text-gray-500">{t('notifications.officialDesc')}</p>
               </div>
               <input
                 type="checkbox"
@@ -456,7 +459,7 @@ export function ProfilePage() {
           <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
             <p className="text-xs text-gray-500 flex items-center gap-1">
               <Info className="w-3 h-3" />
-              No "growth" nudges. Only meaningful notifications.
+              {t('notifications.noGrowthNudges')}
             </p>
           </div>
         </div>
@@ -466,15 +469,14 @@ export function ProfilePage() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <Eye className="w-4 h-4 text-blue-600" />
-              Privacy & Data
+              {t('privacy.title')}
             </h2>
           </div>
           <div className="p-4 space-y-4">
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <p className="text-sm text-green-800 font-medium">Your data is not the product</p>
+              <p className="text-sm text-green-800 font-medium">{t('privacy.notProduct')}</p>
               <p className="text-xs text-green-700 mt-1">
-                Eulesia does not collect behavioral data for advertising.
-                We do not sell your data or use it to manipulate your attention.
+                {t('privacy.notProductDesc')}
               </p>
             </div>
 
@@ -482,19 +484,19 @@ export function ProfilePage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Database className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-700">Data stored</span>
+                  <span className="text-sm text-gray-700">{t('privacy.dataStored')}</span>
                 </div>
                 <Link to="/profile/data" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-                  View
+                  {t('common:actions.view')}
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
 
               <div className="text-xs text-gray-500 space-y-1">
-                <p>• Profile information (name, municipality)</p>
-                <p>• Your posts and comments</p>
-                <p>• Club memberships</p>
-                <p>• Notification preferences</p>
+                <p>• {t('privacy.dataList.profile')}</p>
+                <p>• {t('privacy.dataList.posts')}</p>
+                <p>• {t('privacy.dataList.clubs')}</p>
+                <p>• {t('privacy.dataList.notifications')}</p>
               </div>
             </div>
 
@@ -505,9 +507,23 @@ export function ProfilePage() {
                 className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2 disabled:opacity-50"
               >
                 <ExternalLink className="w-4 h-4" />
-                {exportDataMutation.isPending ? 'Exporting...' : 'Export my data'}
+                {exportDataMutation.isPending ? t('privacy.exporting') : t('privacy.exportData')}
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Language */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-blue-600" />
+              {t('language.title')}
+            </h2>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-gray-600 mb-3">{t('language.description')}</p>
+            <LanguageSwitcher />
           </div>
         </div>
 
@@ -522,8 +538,8 @@ export function ProfilePage() {
                 <span className="text-blue-800 font-bold">E</span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">About Eulesia</p>
-                <p className="text-xs text-gray-500">Governance, foundation, open source</p>
+                <p className="font-medium text-gray-900">{t('aboutEulesia')}</p>
+                <p className="text-xs text-gray-500">{t('aboutDesc')}</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
@@ -536,7 +552,7 @@ export function ProfilePage() {
           className="w-full flex items-center justify-center gap-2 text-red-600 hover:text-red-700 py-3"
         >
           <LogOut className="w-4 h-4" />
-          <span>Sign out</span>
+          <span>{t('signOut')}</span>
         </button>
       </div>
     </Layout>

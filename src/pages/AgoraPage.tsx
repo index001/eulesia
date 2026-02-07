@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { ThreadCard, FeedFilters, FeedOnboarding, InlineThreadForm } from '../components/agora'
 import { ContentEndMarker } from '../components/common'
@@ -45,6 +46,7 @@ function transformAuthor(author: UserSummary) {
 }
 
 export function AgoraPage() {
+  const { t } = useTranslation('agora')
   const navigate = useNavigate()
   const { currentUser } = useAuth()
 
@@ -136,9 +138,9 @@ export function AgoraPage() {
     <Layout>
       {/* Page header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-900">Agora</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Julkiset kansalaiskeskustelut
+          {t('subtitle')}
         </p>
       </div>
 
@@ -174,8 +176,8 @@ export function AgoraPage() {
 
         {error && (
           <div className="text-center py-12 text-red-600">
-            <p>Keskustelujen lataaminen epäonnistui</p>
-            <p className="text-sm mt-1">{error instanceof Error ? error.message : 'Tuntematon virhe'}</p>
+            <p>{t('loadError')}</p>
+            <p className="text-sm mt-1">{error instanceof Error ? error.message : t('common:errors.unknown')}</p>
           </div>
         )}
 
@@ -204,13 +206,13 @@ export function AgoraPage() {
         {/* Empty state (not onboarding) */}
         {!isLoading && !error && !showOnboarding && threads.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            <p>Ei keskusteluja valituilla suodattimilla</p>
+            <p>{t('noThreads')}</p>
             {feedScope === 'following' && (
               <button
                 onClick={() => setShowOnboarding(true)}
                 className="mt-2 text-blue-600 hover:underline text-sm"
               >
-                Muokkaa seuraamisia
+                {t('editSubscriptions')}
               </button>
             )}
           </div>

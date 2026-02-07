@@ -1,0 +1,78 @@
+{
+  "signIn": "Kirjaudu sisään",
+  "back": "Takaisin",
+  "heroSubtitle": "Eurooppalainen kansalaisinfrastruktuuri",
+  "heroDescription": "Eulesia on sosiaalinen media, joka on suunniteltu kansalaisinfrastruktuuriksi kaupallisen median sijaan. Julkinen tila, ei yksityinen alusta.",
+  "earlyStage": "Projekti on alkuvaiheessa — kehitys on aktiivista",
+  "whatIs": {
+    "title": "Mikä on Eulesia?",
+    "p1": "Yhteiskunnallinen keskustelu on siirtynyt kaupallisille alustoille, jotka on suunniteltu huomion kaappaamiseen ja mainosmyyntiin — eivät demokraattiseen keskusteluun. Kunnat tiedottavat Facebookissa, kansalaiset keskustelevat Redditissä, mutta näiden alustojen kannustinrakenteet eivät palvele kansalaiskeskustelua.",
+    "p2": "Eulesia on vastaus tähän ongelmaan: sosiaalinen media, jossa on tutut toiminnot (syötteet, viestit, yhteisöt, keskustelut), mutta joka on rakennettu alusta asti kansalaistoiminnan ehdoilla. Nimi viittaa antiikin agoraan — julkiseen tilaan, jossa yhteisistä asioista keskusteltiin yhteisten sääntöjen alla."
+  },
+  "whyNeeded": {
+    "title": "Miksi tämä on tarpeen?",
+    "p1": "Kun julkiset instituutiot luottavat kaupallisiin alustoihin kansalaisten tavoittamisessa, ne luovuttavat osan digitaalisesta julkisesta tilasta yksityisille toimijoille. Kunnan Facebook-sivu toimii Metan käyttöehdoilla, ei demokraattisella mandaatilla.",
+    "p2": "Olemassa olevat osallisuusalustat (kuten Decidim tai CONSUL) tarjoavat rakenteita osallistuvaan demokratiaan, mutta niistä puuttuu arjen sosiaalinen vuorovaikutus. Kaupalliset alustat taas tarjoavat sosiaalisen toimijuuden, mutta ilman kansalaisrakennetta. Eulesia yhdistää molemmat: sosiaalisen toimijuuden ja kansalaisuuden."
+  },
+  "fourSpaces": {
+    "title": "Neljä tilaa",
+    "agora": "Agora",
+    "agoraDesc": "Julkinen kansalaiskeskustelu, joka on jäsennetty hallinnollisen tason mukaan: paikallinen, kansallinen, eurooppalainen. Keskustelu ankkuroituu todellisiin päätöksentekoprosesseihin.",
+    "clubs": "Klubit",
+    "clubsDesc": "Kansalaisyhteiskunnan ja kiinnostusryhmien tiloja, joissa ihmiset voivat järjestäytyä vapaasti ilman institutionaalista välittäjää.",
+    "home": "Koti",
+    "homeDesc": "Yksityinen viestintä ja omat tilat. Henkilökohtainen alue, jonka sisältöä ei käytetä mainontaan tai profilointiin.",
+    "services": "Palvelut",
+    "servicesDesc": "Ekosysteemikerros käytännön kansalaistoiminnoille ilman huomiotalouden logiikkaa."
+  },
+  "principles": {
+    "title": "Suunnitteluperiaatteet",
+    "identity": "Todennettu identiteetti",
+    "identityDesc": "Yksi henkilö, yksi tili. Osallistuminen omalla nimellä, kuten agoralla. Tavoitteena integraatio eurooppalaiseen digitaaliseen identiteettilompakkoon (EUDI).",
+    "institutional": "Institutionaalinen läsnäolo",
+    "institutionalDesc": "Julkiset instituutiot osallistuvat kansalaistoimijoina, eivät mainostajina. Kunnan osallistuessa keskusteluun näkyviin tulevat viralliset asiakirjat, aikataulut ja yhteystiedot.",
+    "noAttention": "Ei huomiotaloutta",
+    "noAttentionDesc": "Ei algoritmista syötettä, ei loputonta scrollausta, ei sitoutumismittareita. Sisältö näkyy aikajärjestyksessä tai käyttäjän valitsemassa järjestyksessä. Arvolupaus ei ole dopamiini vaan vaikuttavuus.",
+    "socialAgency": "Sosiaalinen toimijuus",
+    "socialAgencyDesc": "Kansalaiset voivat järjestäytyä ja keskustella vapaasti ilman, että kaikki toiminta kulkee institutionaalisten prosessien kautta.",
+    "privacy": "Käyttäjäkeskeinen tietosuoja",
+    "privacyDesc": "Ei mainontaa, ei käyttäytymisen seurantaa, ei datan myyntiä. GDPR sisäänrakennettuna, ei jälkikäteen lisättynä."
+  },
+  "automated": {
+    "title": "Automaattinen kansalaissisältö",
+    "p1": "Kunnallisten kokousten pöytäkirjat haetaan automaattisesti, tiivistetään tekoälyllä (eurooppalainen Mistral-kielimalli) ja julkaistaan keskustelunavauksina. Tiivistelmät ovat pääsykerros virallisiin asiakirjoihin, eivät niiden korvike — alkuperäislähteisiin on aina suora linkki.",
+    "p2": "Tämä ratkaisee kansalaisalustojen perusongelman: sisällön puutteen alussa. Uudet käyttäjät kohtaavat heti aitoa kansalaissisältöä, ja keskustelu alkaa kun päätökset ovat vielä valmisteilla — ei vasta niiden jälkeen."
+  },
+  "project": {
+    "title": "Projektin tilanne ja osallistuminen",
+    "p1": "Eulesia on alkuvaiheessa oleva tutkimus- ja kehitysprojekti. Toimiva prototyyppi on olemassa ja sitä kehitetään iteratiivisesti pilottikäyttäjien palautteen pohjalta. Suunnitteluperiaatteet on johdettu alustahallinnan tutkimuskirjallisuudesta.",
+    "p2": "Kehitys etenee usealla rinnakkaisella raiteella: tutkimusrahoitus, vapaaehtoinen kehitystyö ja yhteisön rakentaminen. Hallintomalli on vielä avoin — mahdollisuuksia ovat mm. itsenäinen säätiö, yhdistys tai muu julkista etua palveleva organisaatiomuoto.",
+    "ctaTitle": "Tule mukaan kehittämään",
+    "ctaDesc": "Projektiin pääsee mukaan Eulesian sisällä — liity keskusteluun, anna palautetta, tai osallistu kehitystyöhön. Alkuvaiheen käyttäjillä on merkittävä rooli alustan suunnan muodostamisessa."
+  },
+  "whatNot": {
+    "title": "Mitä Eulesia ei ole",
+    "notShareholder": "Ei osakkeenomistajille tilivelvollinen (vrt. Meta, X)",
+    "notAdFunded": "Ei mainosrahoitteinen — ei käyttäytymisdataan perustuvaa liiketoimintamallia",
+    "notUnilateral": "Ei yksipuolisia sääntömuutoksia yksityisten toimijoiden toimesta",
+    "notEngagement": "Ei optimoitu sitoutumiselle, huomiolle tai riippuvuudelle"
+  },
+  "research": {
+    "title": "Tutkimustausta",
+    "description": "Eulesian suunnittelu perustuu Design Science Research -metodologiaan. Kuusi suunnitteluvaatimusta on johdettu normatiivisella synteesillä alustahallinnan tutkimuskirjallisuudesta. Projektia kehitetään akateemisen tutkimuksen rinnalla Tampereen yliopistossa."
+  },
+  "openSource": {
+    "title": "Avoin lähdekoodi",
+    "description": "Eulesian koodi on avointa lähdekoodia. Kuka tahansa voi tarkastella, auditoida ja osallistua alustan kehitykseen. Läpinäkyvyys on keskeinen periaate.",
+    "viewOnGithub": "Näytä GitHubissa →"
+  },
+  "euAlignment": {
+    "title": "Eurooppalainen digitaalinen julkinen infrastruktuuri",
+    "description": "Suunniteltu EU:n arvojen mukaisesti: yksityisyys, ihmisarvo, demokraattinen hallinto. Linjassa GDPR:n, DSA:n ja EUDI-lompakkokehyksen kanssa."
+  },
+  "cta": {
+    "title": "Kiinnostaako?",
+    "description": "Eulesia on tällä hetkellä kutsuvaiheessa. Jos tunnet jonkun joka on jo mukana, pyydä kutsukoodi.",
+    "button": "Kirjautumissivulle"
+  }
+}

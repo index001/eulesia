@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Hash } from 'lucide-react'
 import { Layout } from '../components/layout'
@@ -41,6 +42,7 @@ function groupByCategory(tags: TagWithCategory[]): Record<string, TagWithCategor
 }
 
 export function TopicsPage() {
+  const { t } = useTranslation(['agora', 'common'])
   const { data: tags, isLoading } = useTags()
 
   const grouped = tags ? groupByCategory(tags) : {}
@@ -69,10 +71,10 @@ export function TopicsPage() {
           <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center">
             <Hash className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Aiheet</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('agora:topics.title')}</h1>
         </div>
         <p className="text-gray-600">
-          Selaa ja seuraa kiinnostavia aiheita. Seuraamasi aiheet näkyvät feedissäsi.
+          {t('agora:topics.subtitle')}
         </p>
       </div>
 
@@ -120,7 +122,7 @@ export function TopicsPage() {
         {/* Uncategorized tags (from thread usage, not in tagCategories) */}
         {grouped['muut'] && grouped['muut'].length > 0 && !orderedCategories.includes('muut') && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">Muut aiheet</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('agora:topics.otherTopics')}</h2>
             <div className="flex flex-wrap gap-2">
               {grouped['muut'].map(tag => (
                 <Link

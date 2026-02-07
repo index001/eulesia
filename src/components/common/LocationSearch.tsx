@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, MapPin, Loader2, Check, X } from 'lucide-react'
 import { useLocationSearch } from '../../hooks/useApi'
 import type { LocationResult } from '../../lib/api'
@@ -18,10 +19,11 @@ export function LocationSearch({
   onChange,
   country = 'FI',
   types,
-  placeholder = 'Hae paikkaa...',
+  placeholder,
   disabled = false,
   className = ''
 }: LocationSearchProps) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -86,12 +88,12 @@ export function LocationSearch({
   // Format location type for display
   const formatLocationType = (type: string) => {
     const typeMap: Record<string, string> = {
-      'country': 'Maa',
-      'region': 'Maakunta',
-      'municipality': 'Kunta',
-      'village': 'Kylä',
-      'city': 'Kaupunki',
-      'district': 'Kaupunginosa'
+      'country': t('location.types.country'),
+      'region': t('location.types.region'),
+      'municipality': t('location.types.municipality'),
+      'village': t('location.types.village'),
+      'city': t('location.types.city'),
+      'district': t('location.types.district')
     }
     return typeMap[type] || type
   }
@@ -107,7 +109,7 @@ export function LocationSearch({
           value={value ? value.name : query}
           onChange={handleInputChange}
           onFocus={() => !value && setIsOpen(true)}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('location.searchPlaceholder')}
           disabled={disabled}
           className={`
             w-full pl-9 pr-10 py-2.5 border border-gray-200 rounded-lg text-sm
@@ -139,13 +141,13 @@ export function LocationSearch({
         >
           {results.length === 0 && debouncedQuery.length >= 2 && !isLoading && (
             <div className="px-4 py-3 text-sm text-gray-500 text-center">
-              Ei hakutuloksia
+              {t('location.noResults')}
             </div>
           )}
 
           {results.length === 0 && debouncedQuery.length < 2 && (
             <div className="px-4 py-3 text-sm text-gray-500 text-center">
-              Kirjoita vähintään 2 merkkiä
+              {t('location.minChars')}
             </div>
           )}
 
@@ -165,7 +167,7 @@ export function LocationSearch({
                   {location.status === 'active' && (
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs">
                       <Check className="w-3 h-3" />
-                      {location.contentCount} keskustelua
+                      {t('search.discussions', { count: location.contentCount })}
                     </span>
                   )}
                 </div>
@@ -173,7 +175,7 @@ export function LocationSearch({
                   <span>{formatLocationType(location.type)}</span>
                   {location.parent && (
                     <>
-                      <span className="text-gray-300">•</span>
+                      <span className="text-gray-300">&bull;</span>
                       <span>{location.parent.name}</span>
                     </>
                   )}
@@ -185,9 +187,9 @@ export function LocationSearch({
           {/* Source indicator */}
           {results.length > 0 && data?.source && (
             <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-100">
-              {data.source === 'cache' && 'Tulokset tietokannasta'}
-              {data.source === 'nominatim' && 'Tulokset OpenStreetMapista'}
-              {data.source === 'mixed' && 'Tulokset tietokannasta ja OpenStreetMapista'}
+              {data.source === 'cache' && t('location.source.cache')}
+              {data.source === 'nominatim' && t('location.source.nominatim')}
+              {data.source === 'mixed' && t('location.source.mixed')}
             </div>
           )}
         </div>

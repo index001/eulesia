@@ -1,0 +1,142 @@
+{
+  "nav": {
+    "agora": "Agora",
+    "clubs": "Clubs",
+    "messages": "Messages",
+    "map": "Map",
+    "home": "Home"
+  },
+  "scope": {
+    "local": "Local",
+    "national": "National",
+    "european": "EU",
+    "all": "All"
+  },
+  "time": {
+    "justNow": "just now",
+    "justNowShort": "now",
+    "minutesAgo_one": "{{count}} minute ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "minutesShort_one": "{{count}}m",
+    "minutesShort_other": "{{count}}m",
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "hoursShort_one": "{{count}}h",
+    "hoursShort_other": "{{count}}h",
+    "yesterday": "yesterday",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "daysShort_one": "{{count}}d",
+    "daysShort_other": "{{count}}d"
+  },
+  "actions": {
+    "follow": "Follow",
+    "following": "Following",
+    "reply": "Reply",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "continue": "Continue",
+    "close": "Close",
+    "create": "Create",
+    "search": "Search",
+    "clear": "Clear",
+    "skip": "Skip",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "done": "Done",
+    "collapse": "Collapse",
+    "upvote": "Upvote",
+    "downvote": "Downvote",
+    "loginToVote": "Login to vote",
+    "view": "View",
+    "send": "Send",
+    "copyCode": "Copy code",
+    "revokeCode": "Revoke code"
+  },
+  "contentEnd": {
+    "upToDate": "You're up to date",
+    "noMore": "No more content to show"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "emptyHint": "Replies and mentions will appear here",
+    "markAllRead": "Mark as read",
+    "markAllReadTitle": "Mark all as read"
+  },
+  "search": {
+    "placeholder": "Search users, discussions, places...",
+    "placeholderShort": "Search...",
+    "noResults": "No results for \"{{query}}\"",
+    "users": "Users",
+    "municipalities": "Municipalities",
+    "threads": "Discussions",
+    "places": "Places",
+    "topics": "Topics",
+    "replies_one": "{{count}} reply",
+    "replies_other": "{{count}} replies",
+    "processingTime": "Search took {{ms}}ms",
+    "municipality": "Municipality",
+    "agency": "Agency",
+    "discussions_one": "{{count}} discussion",
+    "discussions_other": "{{count}} discussions"
+  },
+  "location": {
+    "searchPlaceholder": "Search location...",
+    "noResults": "No search results",
+    "minChars": "Type at least 2 characters",
+    "types": {
+      "country": "Country",
+      "region": "Region",
+      "municipality": "Municipality",
+      "village": "Village",
+      "city": "City",
+      "district": "District"
+    },
+    "source": {
+      "cache": "Results from database",
+      "nominatim": "Results from OpenStreetMap",
+      "mixed": "Results from database and OpenStreetMap"
+    }
+  },
+  "footer": {
+    "about": "About",
+    "openSource": "Open source · Non-profit",
+    "tagline": "Citizen infrastructure for the common good. Your data is not a product."
+  },
+  "verified": "Verified",
+  "comments_one": "{{count}} comment",
+  "comments_other": "{{count}} comments",
+  "errors": {
+    "unknown": "Unknown error",
+    "loadFailed": "Failed to load"
+  },
+  "municipalities": {
+    "title": "Municipalities",
+    "subtitle": "Municipal discussions and meeting summaries",
+    "loadError": "Failed to load municipalities",
+    "noDiscussions": "No municipal discussions yet",
+    "discussions_one": "{{count}} discussion",
+    "discussions_other": "{{count}} discussions",
+    "municipality": "Municipality",
+    "goToAgora": "Go to Agora"
+  },
+  "feed": {
+    "sort": {
+      "recent": "Recent activity",
+      "newest": "Newest",
+      "top": "Top"
+    },
+    "period": {
+      "day": "Today",
+      "week": "This week",
+      "month": "This month",
+      "year": "This year"
+    },
+    "topics": "Topics:"
+  }
+}

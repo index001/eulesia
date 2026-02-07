@@ -1,0 +1,116 @@
+{
+  "title": "Agora",
+  "subtitle": "Julkiset kansalaiskeskustelut",
+  "loadError": "Keskustelujen lataaminen epäonnistui",
+  "noThreads": "Ei keskusteluja valituilla suodattimilla",
+  "editSubscriptions": "Muokkaa seuraamisia",
+  "replies_one": "{{count}} vastaus",
+  "replies_other": "{{count}} vastausta",
+  "aiSummary": "AI-tiivistelmä",
+  "aiSummarySource": "AI-tiivistelmä — lähde: {{source}}",
+  "minutesSummary": "Pöytäkirjayhteenveto",
+  "original": "Alkuperäinen",
+  "officialInfo": "Virallinen tieto — {{name}}",
+  "institutionalContext": "Sisältää viralliset asiakirjat, aikajana ja UKK",
+  "noComments": "Ei vielä kommentteja. Ole ensimmäinen.",
+  "commentSort": {
+    "best": "Paras",
+    "new": "Uusin",
+    "old": "Vanhin",
+    "controversial": "Kiistanalaisin"
+  },
+  "writeComment": "Kirjoita kommentti...",
+  "addComment": "Kommentoi",
+  "writeReply": "Kirjoita vastaus...",
+  "onboarding": {
+    "welcome": "Tervetuloa Agoraan!",
+    "emptyFeed": "Feedisi on tyhjä. Aloita seuraamalla paikkakuntia ja aiheita, jotka kiinnostavat sinua.",
+    "municipalities": "Paikkakunnat",
+    "topics": "Aiheet",
+    "allTopics": "Kaikki aiheet",
+    "institutionHint": "Voit myös seurata instituutioita ja organisaatioita heidän profiilisivuiltaan — seuraa virallisia julkaisuja tai topicia erikseen.",
+    "ready": "Valmis"
+  },
+  "filters": {
+    "scope": {
+      "all": "Kaikki",
+      "local": "Paikallinen",
+      "national": "Valtakunnallinen",
+      "european": "EU"
+    },
+    "municipalityLabel": "Kunta:",
+    "allMunicipalities": "Kaikki",
+    "topicsLabel": "Aiheet:",
+    "clearFilters": "Tyhjennä suodattimet"
+  },
+  "threadForm": {
+    "collapsed": "Mistä haluaisit keskustella?",
+    "title": "Otsikko",
+    "titlePlaceholder": "Mistä haluaisit keskustella?",
+    "content": "Sisältö",
+    "contentPlaceholder": "Kerro tarkemmin aiheesta...",
+    "scope": "Laajuus",
+    "scopeLocal": "Paikallinen",
+    "scopeLocalDesc": "Kunta, kylä tai alue",
+    "scopeNational": "Valtakunnallinen",
+    "scopeNationalDesc": "Koko Suomi",
+    "scopeEuropean": "EU",
+    "scopeEuropeanDesc": "Euroopan laajuinen",
+    "location": "Paikkakunta",
+    "locationPlaceholder": "Hae kuntaa, kaupunkia tai kylää...",
+    "tags": "Aiheet",
+    "customTag": "muu...",
+    "publish": "Julkaise",
+    "publishing": "Julkaistaan...",
+    "preview": "Esikatselu",
+    "markdown": "Markdown tuettu",
+    "imageUpload": "Lisää kuva",
+    "imageError": "Vain JPEG, PNG, WebP ja GIF sallittu (max 5MB)",
+    "suggestedTags": ["liikenne", "koulutus", "terveys", "ympäristö", "asuminen", "kulttuuri", "talous", "turvallisuus", "sosiaalipalvelut", "infrastruktuuri"]
+  },
+  "institutionalBox": {
+    "documents": "Asiakirjat",
+    "timeline": "Aikajana",
+    "faq": "UKK",
+    "contact": "Yhteystiedot",
+    "source": "Lähde",
+    "aiGenerated": "AI-generoitu yhteenveto",
+    "official": "Virallinen tieto"
+  },
+  "thread": {
+    "notFound": "Keskustelua ei löytynyt",
+    "backToAgora": "Takaisin Agoraan",
+    "returnToAgora": "Palaa Agoraan",
+    "officialChannel": "Virallinen kanava",
+    "posted": "Julkaistu {{time}}",
+    "discussion": "Keskustelu",
+    "shareThoughts": "Jaa ajatuksesi...",
+    "posting": "Lähetetään...",
+    "postReply": "Lähetä vastaus",
+    "noReplies": "Ei vielä vastauksia. Ole ensimmäinen keskusteluun osallistuja.",
+    "endOfDiscussion": "Keskustelu päättyy",
+    "sort": "Järjestys:"
+  },
+  "municipality": {
+    "defaultName": "Kunta",
+    "discussions_one": "{{count}} keskustelu",
+    "discussions_other": "{{count}} keskustelua",
+    "loadError": "Keskustelujen lataaminen epäonnistui",
+    "noDiscussions": "Ei keskusteluja tässä kunnassa",
+    "goToAgora": "Siirry Agoraan"
+  },
+  "topics": {
+    "title": "Aiheet",
+    "subtitle": "Selaa ja seuraa kiinnostavia aiheita. Seuraamasi aiheet näkyvät feedissäsi.",
+    "otherTopics": "Muut aiheet"
+  },
+  "tag": {
+    "threads": "keskustelua",
+    "thread_one": "{{count}} keskustelu",
+    "thread_other": "{{count}} keskustelua",
+    "relatedTags": "Liittyvät aiheet",
+    "noThreads": "Ei vielä keskusteluja tällä aiheella.",
+    "notFound": "Tagia ei löytynyt",
+    "showing": "Näytetään {{shown}} / {{total}} keskustelua"
+  }
+}

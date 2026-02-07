@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { MapPin, Building2, Globe, Hash, Plus, X, Loader2, ChevronUp, Image as ImageIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useCreateThread } from '../../hooks/useApi'
 import { LocationSearch } from '../common/LocationSearch'
 import { api } from '../../lib/api'
@@ -20,12 +21,6 @@ const suggestedTags = [
   'kulttuuri', 'talous', 'turvallisuus', 'sosiaalipalvelut', 'infrastruktuuri'
 ]
 
-const scopeOptions: { value: Scope; icon: React.ElementType; label: string }[] = [
-  { value: 'local', icon: MapPin, label: 'Paikallinen' },
-  { value: 'national', icon: Building2, label: 'Valtakunnallinen' },
-  { value: 'european', icon: Globe, label: 'EU' }
-]
-
 interface UploadedImage {
   url: string
   thumbnailUrl: string
@@ -34,10 +29,17 @@ interface UploadedImage {
 }
 
 export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }: InlineThreadFormProps) {
+  const { t } = useTranslation('agora')
   const createThreadMutation = useCreateThread()
   const formRef = useRef<HTMLDivElement>(null)
   const titleInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+
+  const scopeOptions: { value: Scope; icon: React.ElementType; label: string }[] = [
+    { value: 'local', icon: MapPin, label: t('threadForm.scopeLocal') },
+    { value: 'national', icon: Building2, label: t('threadForm.scopeNational') },
+    { value: 'european', icon: Globe, label: t('threadForm.scopeEuropean') }
+  ]
 
   // Is this a prefilled municipality context (municipality page)?
   const isPrefilled = !!(municipalityId && municipalityName)
@@ -99,13 +101,13 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
     if (!allowedTypes.includes(file.type)) {
-      setError('Vain JPEG, PNG, WebP ja GIF sallittu')
+      setError(t('threadForm.imageError'))
       return
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      setError('Kuva saa olla max 5MB')
+      setError(t('threadForm.imageError'))
       return
     }
 
@@ -121,7 +123,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
         height: result.height
       })
     } catch (err) {
-      setError('Kuvan lataus epäonnistui')
+      setError(t('threadForm.imageError'))
       console.error('Image upload failed:', err)
     } finally {
       setIsUploadingImage(false)
@@ -231,7 +233,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
           <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
             <Plus className="w-4 h-4 text-blue-600" />
           </div>
-          <span className="flex-1 text-gray-500 group-hover:text-gray-700 transition-colors">Aloita uusi keskustelu...</span>
+          <span className="flex-1 text-gray-500 group-hover:text-gray-700 transition-colors">{t('threadForm.collapsed')}</span>
         </button>
       ) : (
         /* Expanded state */
@@ -278,7 +280,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
               onChange={setSelectedLocation}
               country="FI"
               types={['municipality', 'village', 'city']}
-              placeholder="Hae kuntaa, kaupunkia tai kylää..."
+              placeholder={t('threadForm.locationPlaceholder')}
             />
           )}
 
@@ -302,7 +304,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Otsikko"
+            placeholder={t('threadForm.title')}
             className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base font-medium placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-colors"
             maxLength={500}
           />
@@ -311,7 +313,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Kerro tarkemmin aiheesta..."
+            placeholder={t('threadForm.contentPlaceholder')}
             rows={4}
             className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white resize-none transition-colors"
           />
@@ -331,7 +333,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
               <div className="relative inline-block">
                 <img
                   src={uploadedImage.thumbnailUrl}
-                  alt="Esikatselu"
+                  alt={t('threadForm.preview')}
                   className="h-24 rounded-lg border border-gray-200 object-cover"
                 />
                 <button
@@ -384,7 +386,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
                   value={customTag}
                   onChange={(e) => setCustomTag(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomTag())}
-                  placeholder="muu..."
+                  placeholder={t('threadForm.customTag')}
                   className="w-16 bg-transparent border-0 p-0 text-xs focus:ring-0 focus:outline-none"
                 />
               </div>
@@ -432,7 +434,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
               className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {isSubmitting ? 'Julkaistaan...' : 'Julkaise'}
+              {isSubmitting ? t('threadForm.publishing') : t('threadForm.publish')}
             </button>
           </div>
         </div>

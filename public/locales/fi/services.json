@@ -1,0 +1,19 @@
+{
+  "title": "Palvelut",
+  "subtitle": "Hyödyllisiä integraatioita — valinnaisia, ei ydinasia",
+  "provider": "Tarjoaja",
+  "category": "Kategoria",
+  "description": "Kuvaus",
+  "visitService": "Avaa palvelu",
+  "noEngagement": "Ei algoritmisia suosituksia. Ei sitoutumisen optimointia.",
+  "noEngagementSub": "Vain hyödyllisiä palveluita, kun niitä tarvitset.",
+  "explanation": "Palvelut täydentävät Eulesiaa, mutta eivät määritä sitä. Kansalaisydin (Agora, Klubit, Koti) toimii itsenäisesti. Palvelut ovat valinnaisia integraatioita, jotka kunnioittavat yksityisyyttäsi.",
+  "allServicesShown": "Kaikki palvelut näytetty",
+  "categories": {
+    "recreation": "Vapaa-aika",
+    "community": "Yhteisö",
+    "culture": "Kulttuuri",
+    "transport": "Liikenne",
+    "media": "Media"
+  }
+}

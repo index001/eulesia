@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bell, Shield, X, Search, MessageSquare, Check, Trash2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../hooks/useAuth'
 import { SearchBar } from '../common/SearchBar'
+import { formatRelativeTimeShort } from '../../lib/formatTime'
 import {
   useNotifications,
   useUnreadNotificationCount,
@@ -12,20 +14,6 @@ import {
 } from '../../hooks/useApi'
 import type { AppNotification } from '../../lib/api'
 
-function timeAgo(dateStr: string): string {
-  const now = Date.now()
-  const date = new Date(dateStr).getTime()
-  const seconds = Math.floor((now - date) / 1000)
-
-  if (seconds < 60) return 'juuri nyt'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes} min`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} h`
-  const days = Math.floor(hours / 24)
-  return `${days} pv`
-}
-
 function NotificationItem({
   notification,
   onNavigate
@@ -33,6 +21,7 @@ function NotificationItem({
   notification: AppNotification
   onNavigate: (notification: AppNotification) => void
 }) {
+  const { t } = useTranslation()
   const deleteNotification = useDeleteNotification()
 
   return (
@@ -60,7 +49,7 @@ function NotificationItem({
         {notification.body && (
           <p className="text-xs text-gray-500 truncate mt-0.5">{notification.body}</p>
         )}
-        <p className="text-xs text-gray-400 mt-1">{timeAgo(notification.createdAt)}</p>
+        <p className="text-xs text-gray-400 mt-1">{formatRelativeTimeShort(notification.createdAt)}</p>
       </div>
       <div className="flex items-center gap-1 flex-shrink-0">
         {!notification.read && (
@@ -72,7 +61,7 @@ function NotificationItem({
             deleteNotification.mutate(notification.id)
           }}
           className="p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-          title="Poista"
+          title={t('actions.delete')}
         >
           <Trash2 className="w-3 h-3 text-gray-400" />
         </button>
@@ -82,6 +71,7 @@ function NotificationItem({
 }
 
 export function TopBar() {
+  const { t } = useTranslation()
   const { currentUser } = useAuth()
   const [showNotifications, setShowNotifications] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
@@ -133,7 +123,7 @@ export function TopBar() {
 
         {/* Search bar - desktop */}
         <div className="hidden md:block flex-1 max-w-md mx-4">
-          <SearchBar placeholder="Hae käyttäjiä, keskusteluja, paikkoja..." />
+          <SearchBar placeholder={t('search.placeholder')} />
         </div>
 
         {/* Right section */}
@@ -164,16 +154,16 @@ export function TopBar() {
             {showNotifications && (
               <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900">Ilmoitukset</h3>
+                  <h3 className="font-semibold text-gray-900">{t('notifications.title')}</h3>
                   <div className="flex items-center gap-1">
                     {unreadCount > 0 && (
                       <button
                         onClick={() => markAllRead.mutate()}
                         className="p-1 hover:bg-gray-100 rounded text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                        title="Merkitse kaikki luetuiksi"
+                        title={t('notifications.markAllReadTitle')}
                       >
                         <Check className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Merkitse luetuksi</span>
+                        <span className="hidden sm:inline">{t('notifications.markAllRead')}</span>
                       </button>
                     )}
                     <button
@@ -198,8 +188,8 @@ export function TopBar() {
                 ) : (
                   <div className="p-8 text-center">
                     <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Ei ilmoituksia</p>
-                    <p className="text-xs text-gray-400 mt-1">Vastaukset ja maininnat näkyvät täällä</p>
+                    <p className="text-sm text-gray-500">{t('notifications.empty')}</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('notifications.emptyHint')}</p>
                   </div>
                 )}
               </div>
@@ -223,7 +213,7 @@ export function TopBar() {
             {/* Verified identity indicator */}
             <div className="hidden sm:flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
               <Shield className="w-3 h-3" />
-              <span>Verified</span>
+              <span>{t('verified')}</span>
             </div>
           </Link>
         </div>
@@ -243,7 +233,7 @@ export function TopBar() {
               <div className="flex-1">
                 <SearchBar
                   autoFocus
-                  placeholder="Hae..."
+                  placeholder={t('search.placeholderShort')}
                   onClose={() => setShowMobileSearch(false)}
                 />
               </div>

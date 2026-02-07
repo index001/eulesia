@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, Plus, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout'
@@ -23,6 +24,7 @@ function transformClub(club: ApiClub) {
 }
 
 export function ClubsPage() {
+  const { t } = useTranslation('clubs')
   const navigate = useNavigate()
   const { currentUser } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
@@ -74,9 +76,9 @@ export function ClubsPage() {
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Clubs</h1>
+            <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-600 mt-1">
-              Community spaces for shared interests — citizen self-organization
+              {t('subtitle')}
             </p>
           </div>
           {currentUser && (
@@ -85,7 +87,7 @@ export function ClubsPage() {
               className="flex items-center gap-1 px-3 py-1.5 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              New Club
+              {t('newClub')}
             </button>
           )}
         </div>
@@ -96,45 +98,45 @@ export function ClubsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl w-full max-w-md">
             <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">Create New Club</h3>
+              <h3 className="font-semibold text-gray-900">{t('create.title')}</h3>
               <button onClick={() => setShowCreateForm(false)} className="p-1 hover:bg-gray-100 rounded">
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
             <form onSubmit={handleCreateClub} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Club Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.name')} *</label>
                 <input
                   type="text"
                   value={newClubName}
                   onChange={(e) => setNewClubName(e.target.value)}
-                  placeholder="e.g., Helsinki Urban Gardeners"
+                  placeholder={t('create.namePlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.description')}</label>
                 <textarea
                   value={newClubDescription}
                   onChange={(e) => setNewClubDescription(e.target.value)}
-                  placeholder="What is this club about?"
+                  placeholder={t('create.descriptionPlaceholder')}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.category')}</label>
                 <select
                   value={newClubCategory}
                   onChange={(e) => setNewClubCategory(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 >
-                  <option value="">Select a category</option>
+                  <option value="">{t('create.selectCategory')}</option>
                   {categories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
-                  <option value="Other">Other</option>
+                  <option value="Other">{t('create.otherCategory')}</option>
                 </select>
               </div>
               <div className="flex gap-2 pt-2">
@@ -143,14 +145,14 @@ export function ClubsPage() {
                   onClick={() => setShowCreateForm(false)}
                   className="flex-1 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  Cancel
+                  {t('common:actions.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={createClubMutation.isPending || !newClubName.trim()}
                   className="flex-1 bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {createClubMutation.isPending ? 'Creating...' : 'Create Club'}
+                  {createClubMutation.isPending ? t('create.creating') : t('create.create')}
                 </button>
               </div>
             </form>
@@ -165,7 +167,7 @@ export function ClubsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search clubs..."
+            placeholder={t('search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -182,7 +184,7 @@ export function ClubsPage() {
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            All
+            {t('allCategories')}
           </button>
           {categories.map(category => (
             <button
@@ -210,8 +212,8 @@ export function ClubsPage() {
 
         {error && (
           <div className="text-center py-12 text-red-600">
-            <p>Failed to load clubs</p>
-            <p className="text-sm mt-1">{error instanceof Error ? error.message : 'Unknown error'}</p>
+            <p>{t('failedToLoad')}</p>
+            <p className="text-sm mt-1">{error instanceof Error ? error.message : t('common:errors.unknown')}</p>
           </div>
         )}
 
@@ -225,7 +227,7 @@ export function ClubsPage() {
 
         {!isLoading && !error && clubs.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            <p>No clubs match your search</p>
+            <p>{t('noClubs')}</p>
             <button
               onClick={() => {
                 setSearchQuery('')
@@ -233,13 +235,13 @@ export function ClubsPage() {
               }}
               className="mt-2 text-teal-600 hover:underline text-sm"
             >
-              Clear filters
+              {t('clearFilters')}
             </button>
           </div>
         )}
 
         {!isLoading && clubs.length > 0 && (
-          <ContentEndMarker message="All clubs shown" />
+          <ContentEndMarker message={t('allClubsShown')} />
         )}
       </div>
     </Layout>

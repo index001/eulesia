@@ -1,4 +1,5 @@
 import { UserPlus, UserCheck, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useSubscribe, useUnsubscribe, useSubscriptionCheck } from '../../hooks/useApi'
 import { useAuth } from '../../hooks/useAuth'
 import type { EntityType } from '../../lib/api'
@@ -18,6 +19,7 @@ export function FollowButton({
   variant = 'default',
   className = ''
 }: FollowButtonProps) {
+  const { t } = useTranslation()
   const { currentUser } = useAuth()
   const { data: subscription, isLoading: checkLoading } = useSubscriptionCheck(entityType, entityId)
   const subscribeMutation = useSubscribe()
@@ -92,7 +94,7 @@ export function FollowButton({
       ) : (
         <UserPlus className={iconSizes[size]} />
       )}
-      <span>{isSubscribed ? 'Following' : 'Follow'}</span>
+      <span>{isSubscribed ? t('actions.following') : t('actions.follow')}</span>
     </button>
   )
 }

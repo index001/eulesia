@@ -1,5 +1,6 @@
 import { FileText, Calendar, HelpCircle, Mail, ChevronDown, ChevronUp, Bot, Building2, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { InstitutionalContext } from '../../types'
 
 interface InstitutionalContextBoxProps {
@@ -10,6 +11,7 @@ interface InstitutionalContextBoxProps {
 }
 
 export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitutionName, sourceUrl }: InstitutionalContextBoxProps) {
+  const { t } = useTranslation('agora')
   const [expandedSection, setExpandedSection] = useState<string | null>('timeline')
 
   const toggleSection = (section: string) => {
@@ -27,12 +29,12 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
           <>
             <h3 className="font-semibold text-purple-900 flex items-center gap-2">
               <Bot className="w-4 h-4" />
-              Tekoälytiivistelmä virallisista lähteistä
+              {t('institutionalBox.aiGenerated')}
             </h3>
             <p className="text-xs text-purple-700 mt-0.5">
               {sourceInstitutionName
-                ? `Lähde: ${sourceInstitutionName}`
-                : 'Lähde: virallinen tiedote'}
+                ? `${t('institutionalBox.source')}: ${sourceInstitutionName}`
+                : `${t('institutionalBox.source')}: virallinen tiedote`}
               {sourceUrl && (
                 <a
                   href={sourceUrl}
@@ -41,7 +43,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
                   className="ml-2 inline-flex items-center gap-0.5 text-purple-600 hover:text-purple-800 underline"
                 >
                   <ExternalLink className="w-3 h-3" />
-                  Alkuperäinen lähde
+                  {t('institutionalBox.source')}
                 </a>
               )}
             </p>
@@ -50,7 +52,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
           <>
             <h3 className="font-semibold text-violet-900 flex items-center gap-2">
               <Building2 className="w-4 h-4" />
-              Virallinen tieto{sourceInstitutionName ? ` — ${sourceInstitutionName}` : ''}
+              {t('institutionalBox.official')}{sourceInstitutionName ? ` — ${sourceInstitutionName}` : ''}
             </h3>
             <p className="text-xs text-violet-700 mt-0.5">
               Instituution julkaisema virallinen tieto
@@ -69,7 +71,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
             >
               <span className="flex items-center gap-2 font-medium text-violet-900">
                 <FileText className="w-4 h-4" />
-                Related Documents ({docs.length})
+                {t('institutionalBox.documents')} ({docs.length})
               </span>
               {expandedSection === 'docs' ? (
                 <ChevronUp className="w-4 h-4 text-violet-600" />
@@ -104,7 +106,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
             >
               <span className="flex items-center gap-2 font-medium text-violet-900">
                 <Calendar className="w-4 h-4" />
-                Timeline
+                {t('institutionalBox.timeline')}
               </span>
               {expandedSection === 'timeline' ? (
                 <ChevronUp className="w-4 h-4 text-violet-600" />
@@ -158,7 +160,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
             >
               <span className="flex items-center gap-2 font-medium text-violet-900">
                 <HelpCircle className="w-4 h-4" />
-                FAQ ({faq.length})
+                {t('institutionalBox.faq')} ({faq.length})
               </span>
               {expandedSection === 'faq' ? (
                 <ChevronUp className="w-4 h-4 text-violet-600" />
@@ -185,7 +187,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
           <div className="px-4 py-3">
             <div className="flex items-center gap-2 text-sm">
               <Mail className="w-4 h-4 text-violet-600" />
-              <span className="text-violet-700">Contact:</span>
+              <span className="text-violet-700">{t('institutionalBox.contact')}:</span>
               <a href={`mailto:${context.contact}`} className="text-violet-900 hover:underline">
                 {context.contact}
               </a>

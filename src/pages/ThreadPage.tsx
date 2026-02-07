@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Building2, ChevronDown } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ActorBadge, ScopeBadge, TagList, ContentEndMarker } from '../components/common'
@@ -8,18 +9,8 @@ import { CommentThread } from '../components/agora/CommentThread'
 import { ThreadVoteButtons } from '../components/agora/ThreadVoteButtons'
 import { useThread, useAddComment, useVoteComment, useVoteThread, type CommentSort } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
+import { formatRelativeTime } from '../lib/formatTime'
 import type { Comment as ApiComment, UserSummary } from '../lib/api'
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
 
 // Transform API user to component format
 function transformAuthor(author: UserSummary) {
@@ -52,18 +43,19 @@ function transformComment(comment: ApiComment) {
   }
 }
 
-const sortOptions: { value: CommentSort; label: string }[] = [
-  { value: 'best', label: 'Best' },
-  { value: 'new', label: 'New' },
-  { value: 'old', label: 'Old' },
-  { value: 'controversial', label: 'Controversial' }
-]
-
 export function ThreadPage() {
+  const { t } = useTranslation(['agora', 'common'])
   const { threadId } = useParams<{ threadId: string }>()
   const { currentUser } = useAuth()
   const [sort, setSort] = useState<CommentSort>('best')
   const [showSortMenu, setShowSortMenu] = useState(false)
+
+  const sortOptions: { value: CommentSort; label: string }[] = [
+    { value: 'best', label: t('commentSort.best') },
+    { value: 'new', label: t('commentSort.new') },
+    { value: 'old', label: t('commentSort.old') },
+    { value: 'controversial', label: t('commentSort.controversial') }
+  ]
 
   const { data: thread, isLoading, error } = useThread(threadId || '', sort)
   const addCommentMutation = useAddComment(threadId || '', sort)
@@ -122,9 +114,9 @@ export function ThreadPage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">Thread not found</p>
+          <p className="text-gray-500">{t('thread.notFound')}</p>
           <Link to="/agora" className="text-blue-600 hover:underline mt-2 inline-block">
-            Return to Agora
+            {t('thread.returnToAgora')}
           </Link>
         </div>
       </Layout>
@@ -144,7 +136,7 @@ export function ThreadPage() {
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Agora
+          {t('thread.backToAgora')}
         </Link>
       </div>
 
@@ -154,7 +146,7 @@ export function ThreadPage() {
         {isInstitutional && (
           <div className="flex items-center gap-1.5 text-sm text-violet-700 mb-3">
             <Building2 className="w-4 h-4" />
-            <span className="font-medium">Official channel</span>
+            <span className="font-medium">{t('thread.officialChannel')}</span>
           </div>
         )}
 
@@ -165,7 +157,7 @@ export function ThreadPage() {
             municipalityName={thread.municipality?.name}
           />
           <span className="text-xs text-gray-500">
-            Posted {formatDate(thread.createdAt)}
+            {t('thread.posted', { time: formatRelativeTime(thread.createdAt) })}
           </span>
         </div>
 
@@ -253,7 +245,7 @@ export function ThreadPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">
-              Discussion ({comments.length} {comments.length === 1 ? 'reply' : 'replies'})
+              {t('thread.discussion')} ({t('replies', { count: comments.length })})
             </h2>
 
             {/* Sort dropdown */}
@@ -262,7 +254,7 @@ export function ThreadPage() {
                 onClick={() => setShowSortMenu(!showSortMenu)}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                Sort: {sortOptions.find(o => o.value === sort)?.label}
+                {t('thread.sort')} {sortOptions.find(o => o.value === sort)?.label}
                 <ChevronDown className="w-4 h-4" />
               </button>
 
@@ -298,7 +290,7 @@ export function ThreadPage() {
             <textarea
               value={commentContent}
               onChange={(e) => setCommentContent(e.target.value)}
-              placeholder="Share your thoughts..."
+              placeholder={t('thread.shareThoughts')}
               className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
             />
@@ -308,7 +300,7 @@ export function ThreadPage() {
                 disabled={!commentContent.trim() || isSubmitting}
                 className="bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Posting...' : 'Post reply'}
+                {isSubmitting ? t('thread.posting') : t('thread.postReply')}
               </button>
             </div>
           </div>
@@ -322,12 +314,12 @@ export function ThreadPage() {
             />
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <p>No replies yet. Be the first to contribute to this discussion.</p>
+              <p>{t('thread.noReplies')}</p>
             </div>
           )}
 
           {/* End marker */}
-          <ContentEndMarker message="End of discussion" />
+          <ContentEndMarker message={t('thread.endOfDiscussion')} />
         </div>
       </div>
     </Layout>

@@ -1,9 +1,11 @@
 import { ArrowLeft, Globe, Code, Users, Building2, MessageSquare, Shield, Sparkles, BookOpen, Scale, Landmark, FlaskConical, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { useAuth } from '../hooks/useAuth'
 
 function PublicHeader() {
+  const { t } = useTranslation('about')
   return (
     <header className="bg-blue-900 px-4 py-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -16,13 +18,14 @@ function PublicHeader() {
         to="/"
         className="text-blue-200 hover:text-white text-sm transition-colors"
       >
-        Kirjaudu sisään
+        {t('signIn')}
       </Link>
     </header>
   )
 }
 
 function AboutContent() {
+  const { t } = useTranslation('about')
   const { isAuthenticated } = useAuth()
 
   return (
@@ -35,7 +38,7 @@ function AboutContent() {
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Takaisin
+            {t('back')}
           </Link>
         </div>
       )}
@@ -48,16 +51,15 @@ function AboutContent() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Eulesia</h1>
-            <p className="text-blue-200 text-sm">Eurooppalainen kansalaisinfrastruktuuri</p>
+            <p className="text-blue-200 text-sm">{t('heroSubtitle')}</p>
           </div>
         </div>
         <p className="text-blue-100 leading-relaxed">
-          Eulesia on sosiaalinen media, joka on suunniteltu kansalaisinfrastruktuuriksi
-          kaupallisen median sijaan. Julkinen tila, ei yksityinen alusta.
+          {t('heroDescription')}
         </p>
         <div className="mt-4 inline-flex items-center gap-2 bg-blue-800/60 text-blue-200 text-xs px-3 py-1.5 rounded-full">
           <Sparkles className="w-3 h-3" />
-          Projekti on alkuvaiheessa &mdash; kehitys on aktiivista
+          {t('earlyStage')}
         </div>
       </div>
 
@@ -68,21 +70,15 @@ function AboutContent() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-blue-600" />
-              Mikä on Eulesia?
+              {t('whatIs.title')}
             </h2>
           </div>
           <div className="p-4 space-y-3">
             <p className="text-sm text-gray-700 leading-relaxed">
-              Yhteiskunnallinen keskustelu on siirtynyt kaupallisille alustoille, jotka on
-              suunniteltu huomion kaappaamiseen ja mainosmyyntiin &mdash; eivät demokraattiseen
-              keskusteluun. Kunnat tiedottavat Facebookissa, kansalaiset keskustelevat Redditissä,
-              mutta näiden alustojen kannustinrakenteet eivät palvele kansalaiskeskustelua.
+              {t('whatIs.p1')}
             </p>
             <p className="text-sm text-gray-700 leading-relaxed">
-              Eulesia on vastaus tähän ongelmaan: sosiaalinen media, jossa on tutut toiminnot
-              (syötteet, viestit, yhteisöt, keskustelut), mutta joka on rakennettu alusta asti
-              kansalaistoiminnan ehdoilla. Nimi viittaa antiikin agoraan &mdash; julkiseen tilaan,
-              jossa yhteisistä asioista keskusteltiin yhteisten sääntöjen alla.
+              {t('whatIs.p2')}
             </p>
           </div>
         </div>
@@ -92,22 +88,15 @@ function AboutContent() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-blue-600" />
-              Miksi tämä on tarpeen?
+              {t('whyNeeded.title')}
             </h2>
           </div>
           <div className="p-4 space-y-3">
             <p className="text-sm text-gray-700 leading-relaxed">
-              Kun julkiset instituutiot luottavat kaupallisiin alustoihin kansalaisten
-              tavoittamisessa, ne luovuttavat osan digitaalisesta julkisesta tilasta yksityisille
-              toimijoille. Kunnan Facebook-sivu toimii Metan käyttöehdoilla, ei demokraattisella
-              mandaatilla.
+              {t('whyNeeded.p1')}
             </p>
             <p className="text-sm text-gray-700 leading-relaxed">
-              Olemassa olevat osallisuusalustat (kuten Decidim tai CONSUL) tarjoavat
-              rakenteita osallistuvaan demokratiaan, mutta niistä puuttuu arjen sosiaalinen
-              vuorovaikutus. Kaupalliset alustat taas tarjoavat sosiaalisen toimijuuden, mutta
-              ilman kansalaisrakennetta. Eulesia yhdistää molemmat: sosiaalisen toimijuuden
-              ja kansalaisuuden.
+              {t('whyNeeded.p2')}
             </p>
           </div>
         </div>
@@ -117,7 +106,7 @@ function AboutContent() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <Globe className="w-4 h-4 text-blue-600" />
-              Neljä tilaa
+              {t('fourSpaces.title')}
             </h2>
           </div>
           <div className="p-4 space-y-4">
@@ -126,11 +115,9 @@ function AboutContent() {
                 <Landmark className="w-4 h-4 text-blue-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Agora</h3>
+                <h3 className="font-medium text-gray-900">{t('fourSpaces.agora')}</h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  Julkinen kansalaiskeskustelu, joka on jäsennetty hallinnollisen tason mukaan:
-                  paikallinen, kansallinen, eurooppalainen. Keskustelu ankkuroituu todellisiin
-                  päätöksentekoprosesseihin.
+                  {t('fourSpaces.agoraDesc')}
                 </p>
               </div>
             </div>
@@ -140,10 +127,9 @@ function AboutContent() {
                 <Users className="w-4 h-4 text-violet-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Klubit</h3>
+                <h3 className="font-medium text-gray-900">{t('fourSpaces.clubs')}</h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  Kansalaisyhteiskunnan ja kiinnostusryhmien tiloja, joissa ihmiset voivat
-                  järjestäytyä vapaasti ilman institutionaalista välittäjää.
+                  {t('fourSpaces.clubsDesc')}
                 </p>
               </div>
             </div>
@@ -153,10 +139,9 @@ function AboutContent() {
                 <Shield className="w-4 h-4 text-teal-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Koti</h3>
+                <h3 className="font-medium text-gray-900">{t('fourSpaces.home')}</h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  Yksityinen viestintä ja omat tilat. Henkilökohtainen alue, jonka sisältöä
-                  ei käytetä mainontaan tai profilointiin.
+                  {t('fourSpaces.homeDesc')}
                 </p>
               </div>
             </div>
@@ -166,10 +151,9 @@ function AboutContent() {
                 <Building2 className="w-4 h-4 text-amber-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Palvelut</h3>
+                <h3 className="font-medium text-gray-900">{t('fourSpaces.services')}</h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  Ekosysteemikerros käytännön kansalaistoiminnoille ilman
-                  huomiotalouden logiikkaa.
+                  {t('fourSpaces.servicesDesc')}
                 </p>
               </div>
             </div>
@@ -181,46 +165,29 @@ function AboutContent() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <Scale className="w-4 h-4 text-blue-600" />
-              Suunnitteluperiaatteet
+              {t('principles.title')}
             </h2>
           </div>
           <div className="p-4 space-y-3">
             <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">Todennettu identiteetti</p>
-              <p className="text-xs text-gray-600 mt-1">
-                Yksi henkilö, yksi tili. Osallistuminen omalla nimellä, kuten agoralla.
-                Tavoitteena integraatio eurooppalaiseen digitaaliseen identiteettilompakkoon (EUDI).
-              </p>
+              <p className="font-medium text-gray-900 text-sm">{t('principles.identity')}</p>
+              <p className="text-xs text-gray-600 mt-1">{t('principles.identityDesc')}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">Institutionaalinen läsnäolo</p>
-              <p className="text-xs text-gray-600 mt-1">
-                Julkiset instituutiot osallistuvat kansalaistoimijoina, eivät mainostajina.
-                Kunnan osallistuessa keskusteluun näkyviin tulevat viralliset asiakirjat,
-                aikataulut ja yhteystiedot.
-              </p>
+              <p className="font-medium text-gray-900 text-sm">{t('principles.institutional')}</p>
+              <p className="text-xs text-gray-600 mt-1">{t('principles.institutionalDesc')}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">Ei huomiotaloutta</p>
-              <p className="text-xs text-gray-600 mt-1">
-                Ei algoritmista syötettä, ei loputonta scrollausta, ei sitoutumismittareita.
-                Sisältö näkyy aikajärjestyksessä tai käyttäjän valitsemassa järjestyksessä.
-                Arvolupaus ei ole dopamiini vaan vaikuttavuus.
-              </p>
+              <p className="font-medium text-gray-900 text-sm">{t('principles.noAttention')}</p>
+              <p className="text-xs text-gray-600 mt-1">{t('principles.noAttentionDesc')}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">Sosiaalinen toimijuus</p>
-              <p className="text-xs text-gray-600 mt-1">
-                Kansalaiset voivat järjestäytyä ja keskustella vapaasti ilman, että kaikki
-                toiminta kulkee institutionaalisten prosessien kautta.
-              </p>
+              <p className="font-medium text-gray-900 text-sm">{t('principles.socialAgency')}</p>
+              <p className="text-xs text-gray-600 mt-1">{t('principles.socialAgencyDesc')}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">Käyttäjäkeskeinen tietosuoja</p>
-              <p className="text-xs text-gray-600 mt-1">
-                Ei mainontaa, ei käyttäytymisen seurantaa, ei datan myyntiä. GDPR
-                sisäänrakennettuna, ei jälkikäteen lisättynä.
-              </p>
+              <p className="font-medium text-gray-900 text-sm">{t('principles.privacy')}</p>
+              <p className="text-xs text-gray-600 mt-1">{t('principles.privacyDesc')}</p>
             </div>
           </div>
         </div>
@@ -230,20 +197,15 @@ function AboutContent() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-blue-600" />
-              Automaattinen kansalaissisältö
+              {t('automated.title')}
             </h2>
           </div>
           <div className="p-4 space-y-3">
             <p className="text-sm text-gray-700 leading-relaxed">
-              Kunnallisten kokousten pöytäkirjat haetaan automaattisesti, tiivistetään
-              tekoälyllä (eurooppalainen Mistral-kielimalli) ja julkaistaan keskustelunavauksina.
-              Tiivistelmät ovat pääsykerros virallisiin asiakirjoihin, eivät niiden korvike &mdash;
-              alkuperäislähteisiin on aina suora linkki.
+              {t('automated.p1')}
             </p>
             <p className="text-sm text-gray-700 leading-relaxed">
-              Tämä ratkaisee kansalaisalustojen perusongelman: sisällön puutteen alussa.
-              Uudet käyttäjät kohtaavat heti aitoa kansalaissisältöä, ja keskustelu alkaa
-              kun päätökset ovat vielä valmisteilla &mdash; ei vasta niiden jälkeen.
+              {t('automated.p2')}
             </p>
           </div>
         </div>
@@ -253,26 +215,20 @@ function AboutContent() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <FlaskConical className="w-4 h-4 text-blue-600" />
-              Projektin tilanne ja osallistuminen
+              {t('project.title')}
             </h2>
           </div>
           <div className="p-4 space-y-3">
             <p className="text-sm text-gray-700 leading-relaxed">
-              Eulesia on alkuvaiheessa oleva tutkimus- ja kehitysprojekti. Toimiva prototyyppi
-              on olemassa ja sitä kehitetään iteratiivisesti pilottikäyttäjien palautteen pohjalta.
-              Suunnitteluperiaatteet on johdettu alustahallinnan tutkimuskirjallisuudesta.
+              {t('project.p1')}
             </p>
             <p className="text-sm text-gray-700 leading-relaxed">
-              Kehitys etenee usealla rinnakkaisella raiteella: tutkimusrahoitus, vapaaehtoinen
-              kehitystyö ja yhteisön rakentaminen. Hallintomalli on vielä avoin &mdash; mahdollisuuksia
-              ovat mm. itsenäinen säätiö, yhdistys tai muu julkista etua palveleva organisaatiomuoto.
+              {t('project.p2')}
             </p>
             <div className="bg-blue-50 rounded-lg p-3 mt-2">
-              <p className="text-sm text-blue-900 font-medium">Tule mukaan kehittämään</p>
+              <p className="text-sm text-blue-900 font-medium">{t('project.ctaTitle')}</p>
               <p className="text-xs text-blue-700 mt-1">
-                Projektiin pääsee mukaan Eulesian sisällä &mdash; liity keskusteluun, anna
-                palautetta, tai osallistu kehitystyöhön. Alkuvaiheen käyttäjillä on
-                merkittävä rooli alustan suunnan muodostamisessa.
+                {t('project.ctaDesc')}
               </p>
             </div>
           </div>
@@ -281,25 +237,25 @@ function AboutContent() {
         {/* What we're not */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h2 className="font-semibold text-gray-900">Mitä Eulesia ei ole</h2>
+            <h2 className="font-semibold text-gray-900">{t('whatNot.title')}</h2>
           </div>
           <div className="p-4">
             <ul className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-red-500 mt-0.5 flex-shrink-0">&#x2715;</span>
-                <span>Ei osakkeenomistajille tilivelvollinen (vrt. Meta, X)</span>
+                <span>{t('whatNot.notShareholder')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-red-500 mt-0.5 flex-shrink-0">&#x2715;</span>
-                <span>Ei mainosrahoitteinen &mdash; ei käyttäytymisdataan perustuvaa liiketoimintamallia</span>
+                <span>{t('whatNot.notAdFunded')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-red-500 mt-0.5 flex-shrink-0">&#x2715;</span>
-                <span>Ei yksipuolisia sääntömuutoksia yksityisten toimijoiden toimesta</span>
+                <span>{t('whatNot.notUnilateral')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-red-500 mt-0.5 flex-shrink-0">&#x2715;</span>
-                <span>Ei optimoitu sitoutumiselle, huomiolle tai riippuvuudelle</span>
+                <span>{t('whatNot.notEngagement')}</span>
               </li>
             </ul>
           </div>
@@ -310,15 +266,12 @@ function AboutContent() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-blue-600" />
-              Tutkimustausta
+              {t('research.title')}
             </h2>
           </div>
           <div className="p-4 space-y-3">
             <p className="text-sm text-gray-700 leading-relaxed">
-              Eulesian suunnittelu perustuu Design Science Research -metodologiaan.
-              Kuusi suunnitteluvaatimusta on johdettu normatiivisella synteesillä
-              alustahallinnan tutkimuskirjallisuudesta. Projektia kehitetään
-              akateemisen tutkimuksen rinnalla Tampereen yliopistossa.
+              {t('research.description')}
             </p>
           </div>
         </div>
@@ -328,14 +281,12 @@ function AboutContent() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <Code className="w-4 h-4 text-blue-600" />
-              Avoin lähdekoodi
+              {t('openSource.title')}
             </h2>
           </div>
           <div className="p-4">
             <p className="text-sm text-gray-700 mb-3">
-              Eulesian koodi on avointa lähdekoodia. Kuka tahansa voi tarkastella,
-              auditoida ja osallistua alustan kehitykseen. Läpinäkyvyys on keskeinen
-              periaate.
+              {t('openSource.description')}
             </p>
             <a
               href="https://github.com/markussjoberg/eulesia"
@@ -343,7 +294,7 @@ function AboutContent() {
               rel="noopener noreferrer"
               className="text-sm text-blue-600 hover:underline"
             >
-              Näytä GitHubissa →
+              {t('openSource.viewOnGithub')}
             </a>
           </div>
         </div>
@@ -352,10 +303,9 @@ function AboutContent() {
         <div className="bg-blue-50 rounded-xl p-4 flex items-center gap-3">
           <span className="text-3xl">🇪🇺</span>
           <div>
-            <p className="font-medium text-blue-900">Eurooppalainen digitaalinen julkinen infrastruktuuri</p>
+            <p className="font-medium text-blue-900">{t('euAlignment.title')}</p>
             <p className="text-sm text-blue-700 mt-1">
-              Suunniteltu EU:n arvojen mukaisesti: yksityisyys, ihmisarvo,
-              demokraattinen hallinto. Linjassa GDPR:n, DSA:n ja EUDI-lompakkokehyksen kanssa.
+              {t('euAlignment.description')}
             </p>
           </div>
         </div>
@@ -363,16 +313,15 @@ function AboutContent() {
         {/* CTA for non-authenticated */}
         {!isAuthenticated && (
           <div className="bg-blue-900 rounded-xl p-5 text-center">
-            <h3 className="text-white font-semibold mb-2">Kiinnostaako?</h3>
+            <h3 className="text-white font-semibold mb-2">{t('cta.title')}</h3>
             <p className="text-blue-200 text-sm mb-4">
-              Eulesia on tällä hetkellä kutsuvaiheessa. Jos tunnet jonkun joka on
-              jo mukana, pyydä kutsukoodi.
+              {t('cta.description')}
             </p>
             <Link
               to="/"
               className="inline-flex items-center gap-2 bg-white text-blue-900 px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-blue-50 transition-colors"
             >
-              Kirjautumissivulle
+              {t('cta.button')}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

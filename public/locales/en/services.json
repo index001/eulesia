@@ -1,0 +1,19 @@
+{
+  "title": "Services",
+  "subtitle": "Useful integrations — optional, not the core",
+  "provider": "Provider",
+  "category": "Category",
+  "description": "Description",
+  "visitService": "Visit Service",
+  "noEngagement": "No algorithmic recommendations. No engagement optimization.",
+  "noEngagementSub": "Just useful services, when you need them.",
+  "explanation": "Services complement Eulesia but don't define it. The civic core (Agora, Clubs, Home) operates independently. Services are optional integrations that respect your privacy.",
+  "allServicesShown": "All services shown",
+  "categories": {
+    "recreation": "Recreation",
+    "community": "Community",
+    "culture": "Culture",
+    "transport": "Transport",
+    "media": "Media"
+  }
+}

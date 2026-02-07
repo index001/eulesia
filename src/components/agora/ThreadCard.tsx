@@ -1,10 +1,12 @@
 import { MessageSquare, Clock, Building2, Bot, FileText } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { Thread, User } from '../../types'
 import { ActorBadge } from '../common/ActorBadge'
 import { ScopeBadge } from '../common/ScopeBadge'
 import { TagList } from '../common/TagList'
 import { ThreadVoteButtons } from './ThreadVoteButtons'
+import { formatRelativeTime } from '../../lib/formatTime'
 
 interface ThreadCardProps {
   thread: Thread & { score?: number; userVote?: number }
@@ -13,29 +15,8 @@ interface ThreadCardProps {
   isVoting?: boolean
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) {
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-    if (diffHours === 0) {
-      const diffMins = Math.floor(diffMs / (1000 * 60))
-      return `${diffMins}m ago`
-    }
-    return `${diffHours}h ago`
-  } else if (diffDays === 1) {
-    return 'Yesterday'
-  } else if (diffDays < 7) {
-    return `${diffDays} days ago`
-  } else {
-    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-  }
-}
-
 export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadCardProps) {
+  const { t } = useTranslation('agora')
   const isInstitutional = author.role === 'institution'
   const hasInstitutionalContext = !!thread.institutionalContext
   const isAiGenerated = thread.aiGenerated || thread.source === 'minutes_import'
@@ -83,7 +64,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
             <div className="flex items-center gap-1.5 text-xs text-purple-700 mb-2">
               <Bot className="w-3.5 h-3.5" />
               <span className="font-medium">
-                AI-tiivistelmä{sourceInstitutionName ? ` — lähde: ${sourceInstitutionName}` : ''}
+                {sourceInstitutionName ? t('aiSummarySource', { source: sourceInstitutionName }) : t('aiSummary')}
               </span>
               {thread.sourceUrl && (
                 <a
@@ -94,7 +75,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
                   className="ml-1 flex items-center gap-0.5 text-purple-500 hover:text-purple-700 underline"
                 >
                   <FileText className="w-3 h-3" />
-                  Alkuperäinen
+                  {t('original')}
                 </a>
               )}
             </div>
@@ -104,7 +85,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
           {isMinutesSummary && (
             <div className="flex items-center gap-1.5 text-xs text-purple-700 mb-2">
               <Bot className="w-3.5 h-3.5" />
-              <span className="font-medium">Pöytäkirjayhteenveto</span>
+              <span className="font-medium">{t('minutesSummary')}</span>
               {thread.sourceUrl && (
                 <a
                   href={thread.sourceUrl}
@@ -114,7 +95,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
                   className="ml-1 flex items-center gap-0.5 text-purple-500 hover:text-purple-700 underline"
                 >
                   <FileText className="w-3 h-3" />
-                  Alkuperäinen
+                  {t('original')}
                 </a>
               )}
             </div>
@@ -124,7 +105,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
           {isInstitutional && !isAiGenerated && (
             <div className="flex items-center gap-1.5 text-xs text-violet-700 mb-2">
               <Building2 className="w-3.5 h-3.5" />
-              <span className="font-medium">Virallinen tieto — {author.institutionName || author.name}</span>
+              <span className="font-medium">{t('officialInfo', { name: author.institutionName || author.name })}</span>
             </div>
           )}
 
@@ -138,7 +119,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
             <div className="flex items-center gap-3 text-xs text-gray-500">
               <span className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
-                {formatDate(thread.updatedAt)}
+                {formatRelativeTime(thread.updatedAt)}
               </span>
             </div>
           </div>
@@ -164,7 +145,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
 
             <div className="flex items-center gap-1 text-sm text-gray-500">
               <MessageSquare className="w-4 h-4" />
-              <span>{thread.replyCount} replies</span>
+              <span>{t('replies', { count: thread.replyCount })}</span>
             </div>
           </div>
 
@@ -172,7 +153,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
           {hasInstitutionalContext && (
             <div className="mt-3 pt-3 border-t border-violet-100 text-xs text-violet-600 flex items-center gap-1">
               <span>📋</span>
-              <span>Includes official documents, timeline & FAQ</span>
+              <span>{t('institutionalContext')}</span>
             </div>
           )}
         </Link>

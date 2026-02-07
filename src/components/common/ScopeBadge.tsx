@@ -1,5 +1,6 @@
 import { MapPin, Building2, Globe } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { Scope } from '../../types'
 
 interface ScopeBadgeProps {
@@ -12,27 +13,28 @@ interface ScopeBadgeProps {
 const scopeConfig = {
   local: {
     icon: MapPin,
-    label: 'Paikallinen',
+    tKey: 'scope.local',
     color: 'text-blue-700 bg-blue-50'
   },
   national: {
     icon: Building2,
-    label: 'Valtakunnallinen',
+    tKey: 'scope.national',
     color: 'text-amber-700 bg-amber-50'
   },
   european: {
     icon: Globe,
-    label: 'EU',
+    tKey: 'scope.european',
     color: 'text-emerald-700 bg-emerald-50'
   }
 }
 
 export function ScopeBadge({ scope, municipalityName, municipalityId, countryName }: ScopeBadgeProps) {
+  const { t } = useTranslation()
   const config = scopeConfig[scope]
   const Icon = config.icon
 
   // Determine display label
-  let displayLabel = config.label
+  let displayLabel = t(config.tKey)
   if (scope === 'local' && municipalityName) {
     displayLabel = municipalityName
   } else if (scope === 'national' && countryName) {

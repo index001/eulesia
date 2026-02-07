@@ -1,15 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Users, Shield, MessageSquare, Pin, ScrollText, X, Send } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ActorBadge, ContentEndMarker, FollowButton } from '../components/common'
 import { useClub, useJoinClub, useLeaveClub, useCreateClubThread } from '../hooks/useApi'
+import { formatRelativeTime } from '../lib/formatTime'
 import type { UserSummary, ClubThread } from '../lib/api'
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-}
 
 // Transform API user to component format
 function transformUser(user: UserSummary) {
@@ -26,6 +23,7 @@ function transformUser(user: UserSummary) {
 }
 
 export function ClubViewPage() {
+  const { t } = useTranslation('clubs')
   const { clubId } = useParams<{ clubId: string }>()
   const { data: club, isLoading, error } = useClub(clubId || '')
   const joinClubMutation = useJoinClub()
@@ -83,9 +81,9 @@ export function ClubViewPage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">Club not found</p>
+          <p className="text-gray-500">{t('clubNotFound')}</p>
           <Link to="/clubs" className="text-teal-600 hover:underline mt-2 inline-block">
-            Return to Clubs
+            {t('returnToClubs')}
           </Link>
         </div>
       </Layout>
@@ -106,7 +104,7 @@ export function ClubViewPage() {
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Clubs
+          {t('backToClubs')}
         </Link>
       </div>
 
@@ -131,11 +129,11 @@ export function ClubViewPage() {
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4" />
-            <span>{club.memberCount.toLocaleString()} members</span>
+            <span>{t('members', { count: club.memberCount })}</span>
           </div>
           <div className="flex items-center gap-1">
             <MessageSquare className="w-4 h-4" />
-            <span>{threads.length} threads</span>
+            <span>{t('threads', { count: threads.length })}</span>
           </div>
         </div>
 
@@ -147,7 +145,7 @@ export function ClubViewPage() {
               disabled={leaveClubMutation.isPending}
               className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors disabled:opacity-50"
             >
-              {leaveClubMutation.isPending ? 'Leaving...' : 'Leave Club'}
+              {leaveClubMutation.isPending ? t('leaving') : t('leave')}
             </button>
           ) : (
             <button
@@ -155,7 +153,7 @@ export function ClubViewPage() {
               disabled={joinClubMutation.isPending}
               className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50"
             >
-              {joinClubMutation.isPending ? 'Joining...' : 'Join Club'}
+              {joinClubMutation.isPending ? t('joining') : t('join')}
             </button>
           )}
           {clubId && (
@@ -171,7 +169,7 @@ export function ClubViewPage() {
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
               <ScrollText className="w-4 h-4 text-gray-600" />
-              <h2 className="font-semibold text-gray-900">Community Rules</h2>
+              <h2 className="font-semibold text-gray-900">{t('rules')}</h2>
             </div>
             <div className="p-4">
               <ol className="space-y-2">
@@ -191,7 +189,7 @@ export function ClubViewPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <Shield className="w-4 h-4 text-teal-600" />
-              Moderators
+              {t('moderators')}
             </h3>
             <div className="space-y-2">
               {moderators.map(mod => (
@@ -206,15 +204,15 @@ export function ClubViewPage() {
           <div className="bg-amber-50 rounded-xl border border-amber-200 overflow-hidden">
             <div className="px-4 py-2 bg-amber-100 border-b border-amber-200 flex items-center gap-2 text-amber-800">
               <Pin className="w-4 h-4" />
-              <span className="text-sm font-medium">Pinned</span>
+              <span className="text-sm font-medium">{t('pinnedThread')}</span>
             </div>
             <Link to={`/clubs/${club.id}/thread/${pinnedThread.id}`} className="block p-4 hover:bg-amber-100/50 transition-colors">
               <h3 className="font-semibold text-gray-900 mb-1">{pinnedThread.title}</h3>
               <p className="text-sm text-gray-600 line-clamp-2">{pinnedThread.content.substring(0, 150)}...</p>
               <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
-                <span>{pinnedThread.replyCount} replies</span>
+                <span>{t('replies', { count: pinnedThread.replyCount })}</span>
                 <span>·</span>
-                <span>Updated {formatDate(pinnedThread.updatedAt)}</span>
+                <span>{formatRelativeTime(pinnedThread.updatedAt)}</span>
               </div>
             </Link>
           </div>
@@ -222,7 +220,7 @@ export function ClubViewPage() {
 
         {/* Threads */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Discussions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('discussions')}</h2>
 
           {regularThreads.length > 0 ? (
             <div className="space-y-3">
@@ -243,7 +241,7 @@ export function ClubViewPage() {
                         <MessageSquare className="w-3.5 h-3.5" />
                         {thread.replyCount}
                       </span>
-                      <span>{formatDate(thread.updatedAt)}</span>
+                      <span>{formatRelativeTime(thread.updatedAt)}</span>
                     </div>
                   </div>
                 </Link>
@@ -251,7 +249,7 @@ export function ClubViewPage() {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <p>No discussions yet</p>
+              <p>{t('noThreads')}</p>
             </div>
           )}
 
@@ -261,7 +259,7 @@ export function ClubViewPage() {
               {showNewThreadForm ? (
                 <div className="mt-4 bg-white rounded-xl border border-gray-200 p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900">New Discussion</h3>
+                    <h3 className="font-semibold text-gray-900">{t('newDiscussion')}</h3>
                     <button
                       onClick={() => setShowNewThreadForm(false)}
                       className="p-1 hover:bg-gray-100 rounded"
@@ -271,13 +269,13 @@ export function ClubViewPage() {
                   </div>
                   <input
                     type="text"
-                    placeholder="Discussion title"
+                    placeholder={t('discussionTitle')}
                     value={newThreadTitle}
                     onChange={(e) => setNewThreadTitle(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   <textarea
-                    placeholder="What do you want to discuss?"
+                    placeholder={t('discussionContent')}
                     value={newThreadContent}
                     onChange={(e) => setNewThreadContent(e.target.value)}
                     rows={4}
@@ -288,7 +286,7 @@ export function ClubViewPage() {
                       onClick={() => setShowNewThreadForm(false)}
                       className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
                     >
-                      Cancel
+                      {t('common:actions.cancel')}
                     </button>
                     <button
                       onClick={handleCreateThread}
@@ -296,7 +294,7 @@ export function ClubViewPage() {
                       className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Send className="w-4 h-4" />
-                      {createThreadMutation.isPending ? 'Posting...' : 'Post Discussion'}
+                      {createThreadMutation.isPending ? t('posting') : t('postDiscussion')}
                     </button>
                   </div>
                 </div>
@@ -305,13 +303,13 @@ export function ClubViewPage() {
                   onClick={() => setShowNewThreadForm(true)}
                   className="mt-4 w-full bg-gray-100 text-gray-700 px-4 py-3 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors"
                 >
-                  Start a new discussion
+                  {t('startDiscussion')}
                 </button>
               )}
             </>
           )}
 
-          <ContentEndMarker message="All discussions shown" />
+          <ContentEndMarker message={t('allDiscussionsShown')} />
         </div>
       </div>
     </Layout>

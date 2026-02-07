@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, X, User, MessageSquare, MapPin, Building2, Hash, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useSearch } from '../../hooks/useApi'
@@ -11,7 +12,8 @@ interface SearchBarProps {
   onClose?: () => void
 }
 
-export function SearchBar({ className = '', placeholder = 'Hae...', autoFocus = false, onClose }: SearchBarProps) {
+export function SearchBar({ className = '', placeholder, autoFocus = false, onClose }: SearchBarProps) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -66,6 +68,7 @@ export function SearchBar({ className = '', placeholder = 'Hae...', autoFocus = 
     results.threads.length > 0 ||
     results.places.length > 0 ||
     results.municipalities.length > 0 ||
+    results.locations.length > 0 ||
     results.tags.length > 0
   )
 
@@ -80,7 +83,7 @@ export function SearchBar({ className = '', placeholder = 'Hae...', autoFocus = 
           value={query}
           onChange={handleInputChange}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('search.placeholderShort')}
           autoFocus={autoFocus}
           className="w-full pl-9 pr-8 py-2 bg-gray-100 border-0 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
         />
@@ -105,7 +108,7 @@ export function SearchBar({ className = '', placeholder = 'Hae...', autoFocus = 
             <SearchResultsList results={results} onResultClick={handleResultClick} />
           ) : query.length >= 2 ? (
             <div className="py-8 text-center text-gray-500 text-sm">
-              Ei tuloksia haulle "{query}"
+              {t('search.noResults', { query })}
             </div>
           ) : null}
         </div>
@@ -120,11 +123,13 @@ interface SearchResultsListProps {
 }
 
 function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="py-2">
       {/* Users */}
       {results.users.length > 0 && (
-        <ResultSection title="Käyttäjät" icon={User}>
+        <ResultSection title={t('search.users')} icon={User}>
           {results.users.map(user => (
             <Link
               key={user.id}
@@ -148,7 +153,7 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
               </div>
               {user.role === 'institution' && (
                 <span className="text-xs bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded">
-                  {user.institutionType === 'municipality' ? 'Kunta' : 'Virasto'}
+                  {user.institutionType === 'municipality' ? t('search.municipality') : t('search.agency')}
                 </span>
               )}
             </Link>
@@ -158,7 +163,7 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
 
       {/* Municipalities */}
       {results.municipalities.length > 0 && (
-        <ResultSection title="Kunnat" icon={Building2}>
+        <ResultSection title={t('search.municipalities')} icon={Building2}>
           {results.municipalities.map(m => (
             <Link
               key={m.id}
@@ -180,7 +185,7 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
 
       {/* Threads */}
       {results.threads.length > 0 && (
-        <ResultSection title="Keskustelut" icon={MessageSquare}>
+        <ResultSection title={t('search.threads')} icon={MessageSquare}>
           {results.threads.map(thread => (
             <Link
               key={thread.id}
@@ -198,7 +203,7 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
                   </>
                 )}
                 <span>·</span>
-                <span>{thread.replyCount} vastausta</span>
+                <span>{t('search.replies', { count: thread.replyCount })}</span>
               </div>
             </Link>
           ))}
@@ -207,7 +212,7 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
 
       {/* Places */}
       {results.places.length > 0 && (
-        <ResultSection title="Paikat" icon={MapPin}>
+        <ResultSection title={t('search.places')} icon={MapPin}>
           {results.places.map(place => (
             <Link
               key={place.id}
@@ -233,7 +238,7 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
 
       {/* Tags */}
       {results.tags.length > 0 && (
-        <ResultSection title="Aiheet" icon={Hash}>
+        <ResultSection title={t('search.topics')} icon={Hash}>
           <div className="px-4 py-2 flex flex-wrap gap-2">
             {results.tags.map(tag => (
               <Link
@@ -254,7 +259,7 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
       {/* Processing time */}
       {results.processingTimeMs && (
         <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-100">
-          Haku kesti {results.processingTimeMs}ms
+          {t('search.processingTime', { ms: results.processingTimeMs })}
         </div>
       )}
     </div>

@@ -1,11 +1,13 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Home, Globe, Lock, MessageSquare, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { useHome } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import type { Room } from '../lib/api'
 
 export function UserHomePage() {
+  const { t } = useTranslation('home')
   const { userId } = useParams<{ userId: string }>()
   const { currentUser } = useAuth()
   const { data: homeData, isLoading, error } = useHome(userId || '')
@@ -24,12 +26,12 @@ export function UserHomePage() {
     return (
       <Layout>
         <div className="px-4 py-12 text-center">
-          <p className="text-gray-500 mb-4">Kotisivua ei voitu ladata</p>
+          <p className="text-gray-500 mb-4">{t('userHome.loadError')}</p>
           <button
             onClick={() => window.history.back()}
             className="text-teal-600 hover:underline"
           >
-            Takaisin
+            {t('common:actions.back')}
           </button>
         </div>
       </Layout>
@@ -41,9 +43,9 @@ export function UserHomePage() {
     return (
       <Layout>
         <div className="px-4 py-12 text-center">
-          <p className="text-gray-600 mb-4">Tämä on oma kotisivusi</p>
+          <p className="text-gray-600 mb-4">{t('userHome.ownHomeRedirect')}</p>
           <Link to="/home" className="text-teal-600 hover:underline">
-            Siirry kotisivulle
+            {t('userHome.goToHome')}
           </Link>
         </div>
       </Layout>
@@ -69,7 +71,7 @@ export function UserHomePage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">{homeData.owner.name}</h1>
-            <p className="text-sm text-teal-100">Kotisivu</p>
+            <p className="text-sm text-teal-100">{t('userHome.homePageTitle')}</p>
           </div>
         </div>
       </div>
@@ -80,7 +82,7 @@ export function UserHomePage() {
           <div>
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Globe className="w-4 h-4" />
-              Avoimet huoneet
+              {t('userHome.publicRooms')}
             </h2>
             <div className="space-y-2">
               {publicRooms.map((room: Room) => (
@@ -95,7 +97,7 @@ export function UserHomePage() {
           <div>
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Lock className="w-4 h-4" />
-              Yksityiset huoneet
+              {t('userHome.accessibleRooms')}
             </h2>
             <div className="space-y-2">
               {accessiblePrivateRooms.map((room: Room) => (
@@ -108,7 +110,7 @@ export function UserHomePage() {
         {publicRooms.length === 0 && accessiblePrivateRooms.length === 0 && (
           <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
             <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600">Ei näytettäviä huoneita</p>
+            <p className="text-gray-600">{t('userHome.noRooms')}</p>
           </div>
         )}
       </div>
@@ -117,6 +119,8 @@ export function UserHomePage() {
 }
 
 function RoomCard({ room }: { room: Room }) {
+  const { t } = useTranslation('home')
+
   return (
     <Link
       to={`/home/room/${room.id}`}
@@ -141,7 +145,7 @@ function RoomCard({ room }: { room: Room }) {
       </div>
       <div className="flex items-center gap-2">
         {room.messageCount > 0 && (
-          <span className="text-xs text-gray-500">{room.messageCount} viestiä</span>
+          <span className="text-xs text-gray-500">{t('userHome.messages', { count: room.messageCount })}</span>
         )}
         <ChevronRight className="w-5 h-5 text-gray-400" />
       </div>

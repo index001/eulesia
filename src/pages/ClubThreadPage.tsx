@@ -1,22 +1,13 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Users, ChevronDown, Lock } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ActorBadge, ContentEndMarker } from '../components/common'
 import { CommentThread } from '../components/agora/CommentThread'
 import { useClubThread, useAddClubComment } from '../hooks/useApi'
+import { formatRelativeTime } from '../lib/formatTime'
 import type { Comment as ApiComment, UserSummary } from '../lib/api'
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('fi-FI', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
 
 // Transform API user to component format
 function transformAuthor(author: UserSummary) {
@@ -51,17 +42,18 @@ function transformComment(comment: ApiComment) {
 
 type CommentSort = 'best' | 'new' | 'old' | 'controversial'
 
-const sortOptions: { value: CommentSort; label: string }[] = [
-  { value: 'best', label: 'Parhaat' },
-  { value: 'new', label: 'Uusimmat' },
-  { value: 'old', label: 'Vanhimmat' },
-  { value: 'controversial', label: 'Kiistanalaiset' }
-]
-
 export function ClubThreadPage() {
+  const { t } = useTranslation(['clubs', 'agora', 'common'])
   const { clubId, threadId } = useParams<{ clubId: string; threadId: string }>()
   const [sort, setSort] = useState<CommentSort>('best')
   const [showSortMenu, setShowSortMenu] = useState(false)
+
+  const sortOptions: { value: CommentSort; label: string }[] = [
+    { value: 'best', label: t('agora:commentSort.best') },
+    { value: 'new', label: t('agora:commentSort.new') },
+    { value: 'old', label: t('agora:commentSort.old') },
+    { value: 'controversial', label: t('agora:commentSort.controversial') }
+  ]
 
   const { data: thread, isLoading, error } = useClubThread(clubId || '', threadId || '')
   const addCommentMutation = useAddClubComment(clubId || '', threadId || '')
@@ -110,9 +102,9 @@ export function ClubThreadPage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">Ketjua ei löytynyt tai sinulla ei ole oikeuksia</p>
+          <p className="text-gray-500">{t('clubs:threadNotFound')}</p>
           <Link to={`/clubs/${clubId}`} className="text-blue-600 hover:underline mt-2 inline-block">
-            Takaisin kerhoon
+            {t('clubs:backToClub')}
           </Link>
         </div>
       </Layout>
@@ -131,7 +123,7 @@ export function ClubThreadPage() {
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Takaisin kerhoon
+          {t('clubs:backToClub')}
         </Link>
       </div>
 
@@ -140,9 +132,9 @@ export function ClubThreadPage() {
         {/* Club indicator */}
         <div className="flex items-center gap-2 text-sm text-purple-700 mb-3">
           <Users className="w-4 h-4" />
-          <span className="font-medium">Kerhoketju</span>
+          <span className="font-medium">{t('clubs:clubThread')}</span>
           <Lock className="w-3 h-3 text-gray-400" />
-          <span className="text-xs text-gray-500">Vain jasenille</span>
+          <span className="text-xs text-gray-500">{t('clubs:membersOnly')}</span>
         </div>
 
         {/* Title */}
@@ -152,7 +144,7 @@ export function ClubThreadPage() {
 
         {/* Meta */}
         <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
-          <span>Julkaistu {formatDate(thread.createdAt)}</span>
+          <span>{t('clubs:published', { time: formatRelativeTime(thread.createdAt) })}</span>
         </div>
 
         {/* Author */}
@@ -181,7 +173,7 @@ export function ClubThreadPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">
-              Keskustelu ({comments.length} {comments.length === 1 ? 'vastaus' : 'vastausta'})
+              {t('clubs:discussion', { count: comments.length })}
             </h2>
 
             {/* Sort dropdown */}
@@ -190,7 +182,7 @@ export function ClubThreadPage() {
                 onClick={() => setShowSortMenu(!showSortMenu)}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                Jarjestys: {sortOptions.find(o => o.value === sort)?.label}
+                {t('clubs:sort', { label: sortOptions.find(o => o.value === sort)?.label })}
                 <ChevronDown className="w-4 h-4" />
               </button>
 
@@ -226,7 +218,7 @@ export function ClubThreadPage() {
             <textarea
               value={commentContent}
               onChange={(e) => setCommentContent(e.target.value)}
-              placeholder="Kirjoita kommentti..."
+              placeholder={t('clubs:thread.writeComment')}
               className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               rows={3}
             />
@@ -236,7 +228,7 @@ export function ClubThreadPage() {
                 disabled={!commentContent.trim() || isSubmitting}
                 className="bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Lähetetään...' : 'Lähetä vastaus'}
+                {isSubmitting ? t('clubs:submitting') : t('clubs:submitReply')}
               </button>
             </div>
           </div>
@@ -250,12 +242,12 @@ export function ClubThreadPage() {
             />
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <p>Ei vielä vastauksia. Ole ensimmäinen!</p>
+              <p>{t('clubs:noReplies')}</p>
             </div>
           )}
 
           {/* End marker */}
-          <ContentEndMarker message="Keskustelun loppu" />
+          <ContentEndMarker message={t('clubs:endOfDiscussion')} />
         </div>
       </div>
     </Layout>
