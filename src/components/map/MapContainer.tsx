@@ -41,13 +41,14 @@ const typeColors: Record<string, string> = {
 }
 
 // Custom cluster icon that shows dominant type color
-function createClusterIcon(cluster: L.MarkerCluster) {
-  const markers = cluster.getAllChildMarkers()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createClusterIcon(cluster: any) {
+  const markers = cluster.getAllChildMarkers() as L.Marker[]
   const count = markers.length
 
   // Count types
   const typeCounts: Record<string, number> = {}
-  markers.forEach(m => {
+  markers.forEach((m: L.Marker) => {
     const type = (m.options as { pointType?: string }).pointType || 'place'
     typeCounts[type] = (typeCounts[type] || 0) + 1
   })
