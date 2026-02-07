@@ -16,7 +16,8 @@
     "import:minutes": "tsx src/services/import/run-minutes-import.ts",
     "import:ministry": "tsx src/services/import/run-ministry-import.ts",
     "discover:municipalities": "tsx src/services/import/discover-municipalities.ts",
-    "create-invites": "tsx src/scripts/create-invites.ts"
+    "create-invites": "tsx src/scripts/create-invites.ts",
+    "fix:coords": "tsx src/scripts/fix-municipality-coords.ts"
   },
   "dependencies": {
     "argon2": "^0.40.0",

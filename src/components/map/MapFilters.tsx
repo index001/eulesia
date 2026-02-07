@@ -45,7 +45,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
 
   return (
     <>
-      <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-2 flex items-center gap-2">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-white rounded-lg shadow-lg p-2 flex items-center gap-2">
         {/* Type toggles */}
         <div className="flex gap-1">
           {typeFilters.map(({ type, icon: Icon, labelKey, color }) => {
