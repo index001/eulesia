@@ -6,7 +6,8 @@
  */
 
 import { db, users, threads, threadTags, places, municipalities, locations } from '../../db/index.js'
-import { sql } from 'drizzle-orm'
+import { sql, eq } from 'drizzle-orm'
+import { MINUTE_SOURCES } from '../import/fetchers/index.js'
 import {
   initializeIndexes,
   indexUsers,
@@ -59,6 +60,9 @@ export async function fullSync(): Promise<{
   // Sync places
   const placeDocs = await syncPlaces()
   console.log(`  Indexed ${placeDocs} places`)
+
+  // Ensure all configured municipalities exist in DB
+  await ensureConfiguredMunicipalities()
 
   // Sync municipalities
   const municipalityDocs = await syncMunicipalities()
@@ -256,6 +260,38 @@ async function syncTags(): Promise<number> {
 
   await indexTags(docs)
   return docs.length
+}
+
+/**
+ * Ensure all municipalities from MINUTE_SOURCES exist in the database.
+ * This pre-seeds municipalities so they appear in search before any import runs.
+ */
+async function ensureConfiguredMunicipalities(): Promise<void> {
+  const uniqueNames = [...new Set(MINUTE_SOURCES.map(s => s.municipality))]
+  let created = 0
+
+  for (const name of uniqueNames) {
+    const normalized = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+
+    const existing = await db
+      .select({ id: municipalities.id })
+      .from(municipalities)
+      .where(eq(municipalities.name, normalized))
+      .limit(1)
+
+    if (existing.length === 0) {
+      await db.insert(municipalities).values({
+        name: normalized,
+        nameFi: normalized,
+        country: 'FI'
+      })
+      created++
+    }
+  }
+
+  if (created > 0) {
+    console.log(`  Pre-seeded ${created} municipalities from import sources`)
+  }
 }
 
 /**
