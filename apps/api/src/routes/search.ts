@@ -73,6 +73,8 @@ router.get('/', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRe
             displayName: loc.displayName,
             type: loc.type,
             country: loc.country,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
             contentCount: loc.contentCount,
             parentName: loc.parent?.name
           })
