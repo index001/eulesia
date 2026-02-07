@@ -214,11 +214,7 @@ function AppRoutes() {
 
       <Route
         path="/about"
-        element={
-          <ProtectedRoute>
-            <AboutPage />
-          </ProtectedRoute>
-        }
+        element={<AboutPage />}
       />
 
       <Route

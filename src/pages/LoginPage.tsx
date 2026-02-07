@@ -96,11 +96,11 @@ export function LoginPage() {
         <div className="max-w-md mx-auto w-full">
           {/* Tagline */}
           <h1 className="text-white text-3xl font-bold mb-3">
-            Civic space for the digital age
+            Digitaalisen ajan kansalaistila
           </h1>
           <p className="text-blue-200 text-lg mb-8">
-            Public infrastructure, not private platform. Real identity, not anonymity.
-            Deliberation, not distraction.
+            Julkinen infrastruktuuri, ei yksityinen alusta. Todellinen identiteetti,
+            ei anonymiteetti. Keskustelu, ei häiriö.
           </p>
 
           {/* Login/Register card */}
@@ -407,11 +407,11 @@ export function LoginPage() {
           <div className="mt-6 bg-blue-800/50 rounded-xl p-4 border border-blue-700">
             <h3 className="text-white font-medium flex items-center gap-2 mb-2">
               <Lock className="w-4 h-4" />
-              Invite-only beta
+              Kutsuvaihe
             </h3>
             <p className="text-blue-200 text-sm">
-              Eulesia grows through personal invitations. Each member can invite 5 others,
-              building a trust network of engaged citizens.
+              Eulesia kasvaa henkilökohtaisten kutsujen kautta. Jokainen jäsen voi kutsua
+              5 muuta, rakentaen luottamusverkoston aktiivisista kansalaisista.
             </p>
           </div>
         </div>
@@ -421,7 +421,7 @@ export function LoginPage() {
       <div className="bg-white px-6 py-8">
         <div className="max-w-md mx-auto">
           <h3 className="text-gray-900 font-semibold mb-4 text-center">
-            What makes Eulesia different
+            Mikä tekee Eulesiasta erilaisen
           </h3>
 
           <div className="space-y-4">
@@ -430,9 +430,9 @@ export function LoginPage() {
                 <CheckCircle className="w-4 h-4 text-green-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">No attention economy</h4>
+                <h4 className="font-medium text-gray-900 text-sm">Ei huomiotaloutta</h4>
                 <p className="text-gray-500 text-sm">
-                  No algorithmic feed, no infinite scroll, no engagement metrics. Your time is yours.
+                  Ei algoritmista syötettä, ei loputonta scrollausta, ei sitoutumismittareita. Aikasi on omaasi.
                 </p>
               </div>
             </div>
@@ -442,9 +442,9 @@ export function LoginPage() {
                 <Building2 className="w-4 h-4 text-violet-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">Institutions as participants</h4>
+                <h4 className="font-medium text-gray-900 text-sm">Instituutiot osallistujina</h4>
                 <p className="text-gray-500 text-sm">
-                  Public institutions join as civic actors, not advertisers or "verified brands."
+                  Julkiset instituutiot osallistuvat kansalaistoimijoina, eivät mainostajina tai "vahvistettuina brändeinä".
                 </p>
               </div>
             </div>
@@ -454,18 +454,28 @@ export function LoginPage() {
                 <Users className="w-4 h-4 text-teal-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">Social, not surveillance</h4>
+                <h4 className="font-medium text-gray-900 text-sm">Sosiaalinen, ei valvontaa</h4>
                 <p className="text-gray-500 text-sm">
-                  Connect with communities and neighbors. No data harvesting, no ad targeting.
+                  Yhteys yhteisöihin ja naapureihin. Ei datan keruuta, ei mainoskohdennusta.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* EU alignment */}
-          <div className="mt-6 pt-4 border-t border-gray-200 flex items-center justify-center gap-2 text-sm text-gray-500">
-            <span className="text-lg">🇪🇺</span>
-            <span>European Digital Public Infrastructure</span>
+          {/* EU alignment + about link */}
+          <div className="mt-6 pt-4 border-t border-gray-200 space-y-3">
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+              <span className="text-lg">🇪🇺</span>
+              <span>Eurooppalainen digitaalinen julkinen infrastruktuuri</span>
+            </div>
+            <div className="text-center">
+              <a
+                href="/about"
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Lue lisää Eulesiasta →
+              </a>
+            </div>
           </div>
         </div>
       </div>
