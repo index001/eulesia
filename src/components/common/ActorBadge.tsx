@@ -21,11 +21,19 @@ export function ActorBadge({ user, showName = true, size = 'md' }: ActorBadgePro
 
   return (
     <Link to={`/user/${user.id}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity" onClick={(e) => e.stopPropagation()}>
-      <div
-        className={`${sizeClasses[size]} ${avatarColor} rounded-full flex items-center justify-center text-white font-medium`}
-      >
-        {user.avatarInitials}
-      </div>
+      {user.avatarUrl ? (
+        <img
+          src={user.avatarUrl}
+          alt=""
+          className={`${sizeClasses[size]} rounded-full object-cover`}
+        />
+      ) : (
+        <div
+          className={`${sizeClasses[size]} ${avatarColor} rounded-full flex items-center justify-center text-white font-medium`}
+        >
+          {user.avatarInitials}
+        </div>
+      )}
 
       {showName && (
         <div className="flex flex-col">

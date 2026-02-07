@@ -1,14 +1,16 @@
 /**
  * Ministry Content Import Service
  *
- * Imports press releases, decisions, and legal announcements from
- * Finnish government institutions and creates AI-summarized
- * Agora threads for civic discussion.
+ * Imports government decisions from valtioneuvosto.fi and creates
+ * AI-summarized Agora threads for civic discussion.
  *
- * Sources:
- * - Valtioneuvosto (Finnish Government)
- * - Eduskunta (Parliament)
- * - Finlex (Legislation)
+ * Primary source: valtioneuvosto.fi/paatokset (session-based scraping)
+ * - Covers ALL ministries from a single source
+ * - ~20-30 decisions per week across 12 ministries
+ * - Rich metadata: ministry, minister, reference numbers, PDFs
+ *
+ * Secondary source: RSS feeds (press releases from individual ministries)
+ * - Kept as supplementary for press releases that aren't formal decisions
  */
 
 import { db, threads, threadTags, users, institutionTopics } from '../../db/index.js'
@@ -16,11 +18,13 @@ import { eq, and } from 'drizzle-orm'
 import { parseFeed, fetchArticleContent, type FeedItem } from './feeds.js'
 import { generateMinistrySummary } from './mistral.js'
 import { renderMarkdown } from '../../utils/markdown.js'
+import { fetchRecentSessions, fetchDecision, type VnSession, type VnDecision } from './valtioneuvosto.js'
 
 // ============================================
-// MINISTRY SOURCE CONFIGURATION
+// CONFIGURATION
 // ============================================
 
+/** RSS sources — kept as supplementary for press releases */
 export interface MinistrySource {
   name: string
   feedUrl: string
@@ -33,7 +37,7 @@ export const MINISTRY_SOURCES: MinistrySource[] = [
     name: 'Valtioneuvosto',
     feedUrl: 'https://valtioneuvosto.fi/en/staattiset-feedit-en/-/asset_publisher/LOmkEPY4nk2s/rss',
     contentType: 'press',
-    language: 'en'  // English feed, AI translates to Finnish
+    language: 'en'
   },
   {
     name: 'STM',
@@ -44,13 +48,15 @@ export const MINISTRY_SOURCES: MinistrySource[] = [
 ]
 
 // ============================================
-// IMPORT LOGIC
+// SHARED HELPERS
 // ============================================
 
 export interface ImportOptions {
   sources?: string[]   // Filter by source names
   dryRun?: boolean
-  limit?: number       // Max items per source
+  limit?: number       // Max items per source / sessions to check
+  skipRss?: boolean    // Skip RSS sources, only fetch VN decisions
+  skipVn?: boolean     // Skip VN decisions, only fetch RSS
 }
 
 export interface ImportResult {
@@ -60,9 +66,6 @@ export interface ImportResult {
   threads: { id: string; title: string; source: string }[]
 }
 
-/**
- * Get or create the system bot user for AI-generated content
- */
 async function getOrCreateBotUser(): Promise<string> {
   const existing = await db
     .select({ id: users.id })
@@ -92,9 +95,6 @@ async function getOrCreateBotUser(): Promise<string> {
   return botUser.id
 }
 
-/**
- * Find institution user by name for source attribution
- */
 async function findInstitutionByName(name: string): Promise<string | null> {
   const [institution] = await db
     .select({ id: users.id })
@@ -108,9 +108,6 @@ async function findInstitutionByName(name: string): Promise<string | null> {
   return institution?.id || null
 }
 
-/**
- * Get topic tag for an institution (from institution_topics table)
- */
 async function getInstitutionTopicTag(institutionId: string): Promise<string | null> {
   const [topic] = await db
     .select({ topicTag: institutionTopics.topicTag })
@@ -121,9 +118,6 @@ async function getInstitutionTopicTag(institutionId: string): Promise<string | n
   return topic?.topicTag || null
 }
 
-/**
- * Check if content has already been imported
- */
 async function isAlreadyImported(sourceId: string): Promise<boolean> {
   const existing = await db
     .select({ id: threads.id })
@@ -137,26 +131,188 @@ async function isAlreadyImported(sourceId: string): Promise<boolean> {
   return existing.length > 0
 }
 
+// ============================================
+// MAIN IMPORT: valtioneuvosto.fi decisions
+// ============================================
+
 /**
- * Import content from Finnish ministry and government sources
+ * Import government decisions from valtioneuvosto.fi sessions.
+ * This is the primary import source — covers all 12 ministries.
  */
-export async function importMinistryContent(options: ImportOptions = {}): Promise<ImportResult> {
-  const {
-    sources: filterSources,
-    dryRun = false,
-    limit = 10
-  } = options
+async function importVnDecisions(
+  botUserId: string,
+  result: ImportResult,
+  options: { dryRun: boolean; limit: number }
+): Promise<void> {
+  const { dryRun, limit } = options
 
-  console.log('🏛️ Starting ministry content import...')
-  console.log(`   Dry run: ${dryRun}`)
-  console.log(`   Limit per source: ${limit}`)
+  console.log('\n🏛️  Valtioneuvosto.fi — päätökset')
+  console.log(`   Fetching last ${limit} sessions...`)
 
-  const result: ImportResult = {
-    imported: 0,
-    skipped: 0,
-    errors: [],
-    threads: []
+  const sessions = await fetchRecentSessions(limit)
+  console.log(`   Found ${sessions.length} sessions`)
+
+  for (const session of sessions) {
+    console.log(`\n📋 ${session.title} (${session.decisions.length} päätöstä)`)
+
+    for (const decLink of session.decisions) {
+      const sourceId = `vn-decision-${decLink.decisionId}`
+
+      if (!dryRun && await isAlreadyImported(sourceId)) {
+        result.skipped++
+        continue
+      }
+
+      console.log(`   📄 ${decLink.ministry}: ${decLink.title.slice(0, 60)}`)
+
+      if (dryRun) {
+        result.imported++
+        continue
+      }
+
+      try {
+        // Fetch full decision content
+        const decision = await fetchDecision(decLink.decisionId, decLink.ministry)
+        if (!decision || !decision.content || decision.content.length < 30) {
+          result.errors.push(`${sourceId}: No content extracted`)
+          continue
+        }
+
+        // Build original text for AI processing
+        const originalText = [
+          `Ministeriö: ${decision.ministry}`,
+          decision.minister ? `Ministeri: ${decision.minister}` : '',
+          decision.reference ? `Viite: ${decision.reference}` : '',
+          `Istunto: ${decision.sessionType} ${decision.sessionDate}`,
+          '',
+          decision.content
+        ].filter(Boolean).join('\n')
+
+        // Generate AI summary
+        const summary = await generateMinistrySummary(
+          originalText,
+          decision.ministry || 'Valtioneuvosto',
+          'decision'
+        )
+
+        // Build thread content
+        const content = buildVnThreadContent(summary, decision)
+        const contentHtml = renderMarkdown(content)
+
+        // Look up source institution
+        const institutionName = decision.ministry || 'Valtioneuvosto'
+        const sourceInstitutionId = await findInstitutionByName(institutionName)
+        const topicTag = sourceInstitutionId ? await getInstitutionTopicTag(sourceInstitutionId) : null
+
+        // Create thread
+        const [thread] = await db
+          .insert(threads)
+          .values({
+            title: summary.title,
+            content,
+            contentHtml,
+            authorId: botUserId,
+            scope: 'national',
+            source: 'rss_import',
+            sourceUrl: decision.sourceUrl,
+            sourceId,
+            sourceInstitutionId,
+            aiGenerated: true,
+            aiModel: 'mistral-large-latest',
+            originalContent: originalText.slice(0, 50000),
+            institutionalContext: {
+              type: 'decision',
+              institution: institutionName,
+              ministry: decision.ministry,
+              minister: decision.minister,
+              reference: decision.reference,
+              sessionType: decision.sessionType,
+              sessionDate: decision.sessionDate,
+              decisionId: decision.decisionId,
+              publishedAt: parseFinDate(decision.sessionDate)?.toISOString() || new Date().toISOString(),
+              importedAt: new Date().toISOString()
+            }
+          })
+          .returning({ id: threads.id })
+
+        // Add tags
+        const allTags = [...summary.tags, 'päätös', institutionName.toLowerCase()]
+        if (topicTag) allTags.push(topicTag)
+        const uniqueTags = [...new Set(allTags)].slice(0, 10)
+
+        for (const tag of uniqueTags) {
+          await db.insert(threadTags).values({
+            threadId: thread.id,
+            tag: tag.toLowerCase()
+          }).onConflictDoNothing()
+        }
+
+        result.imported++
+        result.threads.push({
+          id: thread.id,
+          title: summary.title,
+          source: institutionName
+        })
+
+        console.log(`   ✅ ${summary.title}`)
+
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        result.errors.push(`${sourceId}: ${msg}`)
+        console.log(`   ❌ ${msg}`)
+      }
+
+      // Rate limit between AI calls
+      await new Promise(r => setTimeout(r, 1000))
+    }
   }
+}
+
+function buildVnThreadContent(
+  summary: { summary: string; keyPoints: string[]; discussionPrompt: string },
+  decision: VnDecision
+): string {
+  const meta = [
+    decision.ministry ? `**Ministeriö:** ${decision.ministry}` : '',
+    decision.minister ? `**Ministeri:** ${decision.minister}` : '',
+    decision.reference ? `**Viite:** ${decision.reference}` : '',
+    decision.sessionType ? `**Istunto:** ${decision.sessionType} ${decision.sessionDate}` : ''
+  ].filter(Boolean).join('\n')
+
+  return `${summary.summary}
+
+---
+
+${meta}
+
+**Keskeiset kohdat:**
+${summary.keyPoints.map(p => `- ${p}`).join('\n')}
+
+---
+
+*${summary.discussionPrompt}*
+
+---
+🤖 *Tämä on AI-generoitu yhteenveto valtioneuvoston päätöksestä. [Alkuperäinen päätös →](${decision.sourceUrl})*`
+}
+
+/** Parse Finnish date format "5.2.2026" to Date */
+function parseFinDate(dateStr: string): Date | null {
+  const match = dateStr.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/)
+  if (!match) return null
+  return new Date(parseInt(match[3]), parseInt(match[2]) - 1, parseInt(match[1]))
+}
+
+// ============================================
+// SECONDARY: RSS feed import
+// ============================================
+
+async function importRssFeeds(
+  botUserId: string,
+  result: ImportResult,
+  options: { dryRun: boolean; limit: number; filterSources?: string[] }
+): Promise<void> {
+  const { dryRun, limit, filterSources } = options
 
   let sources = MINISTRY_SOURCES
   if (filterSources?.length) {
@@ -164,27 +320,31 @@ export async function importMinistryContent(options: ImportOptions = {}): Promis
     sources = sources.filter(s => filterLower.includes(s.name.toLowerCase()))
   }
 
-  console.log(`   Processing ${sources.length} sources`)
-
-  const botUserId = dryRun ? 'dry-run-id' : await getOrCreateBotUser()
-
   for (const source of sources) {
-    console.log(`\n📰 ${source.name} (${source.contentType})`)
+    console.log(`\n📰 RSS: ${source.name} (${source.contentType})`)
 
     try {
       const feed = await parseFeed(source.feedUrl, limit)
       console.log(`   Feed: ${feed.title} — ${feed.items.length} items`)
 
-      for (const item of feed.items) {
+      // Filter out items older than 30 days
+      const maxAge = 30 * 24 * 60 * 60 * 1000
+      const cutoff = new Date(Date.now() - maxAge)
+      const recentItems = feed.items.filter(item => item.pubDate >= cutoff)
+      const oldItems = feed.items.length - recentItems.length
+      if (oldItems > 0) {
+        console.log(`   ⏭️  Filtered out ${oldItems} items older than 30 days`)
+      }
+
+      for (const item of recentItems) {
         const sourceId = `ministry-${source.name.toLowerCase()}-${hashId(item.id)}`
 
         if (!dryRun && await isAlreadyImported(sourceId)) {
-          console.log(`   ⏭️  Already imported: ${item.title.slice(0, 50)}`)
           result.skipped++
           continue
         }
 
-        console.log(`   📄 Processing: ${item.title.slice(0, 60)}`)
+        console.log(`   📄 ${item.title.slice(0, 60)}`)
 
         if (dryRun) {
           result.imported++
@@ -192,7 +352,6 @@ export async function importMinistryContent(options: ImportOptions = {}): Promis
         }
 
         try {
-          // Get full article content if description is short
           let fullContent = item.description
           if (fullContent.length < 500 && item.link) {
             try {
@@ -202,22 +361,18 @@ export async function importMinistryContent(options: ImportOptions = {}): Promis
             }
           }
 
-          // Generate AI summary
           const summary = await generateMinistrySummary(
             fullContent,
             source.name,
             source.contentType
           )
 
-          // Build thread content
-          const content = buildThreadContent(summary, item, source)
+          const content = buildRssThreadContent(summary, item, source)
           const contentHtml = renderMarkdown(content)
 
-          // Look up source institution for attribution
           const sourceInstitutionId = await findInstitutionByName(source.name)
           const topicTag = sourceInstitutionId ? await getInstitutionTopicTag(sourceInstitutionId) : null
 
-          // Create thread
           const [thread] = await db
             .insert(threads)
             .values({
@@ -243,7 +398,6 @@ export async function importMinistryContent(options: ImportOptions = {}): Promis
             })
             .returning({ id: threads.id })
 
-          // Add tags (include institution topic tag if available)
           const allTags = [...summary.tags, source.contentType, source.name.toLowerCase()]
           if (topicTag) allTags.push(topicTag)
           const uniqueTags = [...new Set(allTags)].slice(0, 10)
@@ -262,15 +416,14 @@ export async function importMinistryContent(options: ImportOptions = {}): Promis
             source: source.name
           })
 
-          console.log(`   ✅ Created thread: ${summary.title}`)
+          console.log(`   ✅ ${summary.title}`)
 
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err)
           result.errors.push(`${sourceId}: ${msg}`)
-          console.log(`   ❌ Error: ${msg}`)
+          console.log(`   ❌ ${msg}`)
         }
 
-        // Rate limit between items
         await new Promise(r => setTimeout(r, 1000))
       }
 
@@ -280,16 +433,9 @@ export async function importMinistryContent(options: ImportOptions = {}): Promis
       console.log(`   ❌ Source error: ${msg}`)
     }
   }
-
-  console.log('\n✅ Ministry import complete:')
-  console.log(`   Imported: ${result.imported}`)
-  console.log(`   Skipped: ${result.skipped}`)
-  console.log(`   Errors: ${result.errors.length}`)
-
-  return result
 }
 
-function buildThreadContent(
+function buildRssThreadContent(
   summary: { summary: string; keyPoints: string[]; discussionPrompt: string },
   item: FeedItem,
   source: MinistrySource
@@ -309,15 +455,124 @@ ${summary.keyPoints.map(p => `- ${p}`).join('\n')}
 🤖 *Tämä on AI-generoitu yhteenveto ${source.name}n tiedotteesta. [Alkuperäinen lähde →](${item.link})*`
 }
 
+// ============================================
+// MAIN ENTRY POINT
+// ============================================
+
 /**
- * Create a short hash from a string for sourceId
+ * Import content from Finnish ministry and government sources.
+ * Primary: valtioneuvosto.fi decisions (all ministries)
+ * Secondary: RSS feeds (press releases)
  */
+export async function importMinistryContent(options: ImportOptions = {}): Promise<ImportResult> {
+  const {
+    sources: filterSources,
+    dryRun = false,
+    limit = 5,
+    skipRss = false,
+    skipVn = false
+  } = options
+
+  console.log('🏛️ Starting ministry content import...')
+  console.log(`   Dry run: ${dryRun}`)
+  console.log(`   VN sessions: ${skipVn ? 'SKIP' : limit}`)
+  console.log(`   RSS feeds: ${skipRss ? 'SKIP' : 'enabled'}`)
+
+  const result: ImportResult = {
+    imported: 0,
+    skipped: 0,
+    errors: [],
+    threads: []
+  }
+
+  const botUserId = dryRun ? 'dry-run-id' : await getOrCreateBotUser()
+
+  // Primary: valtioneuvosto.fi decisions
+  if (!skipVn) {
+    try {
+      await importVnDecisions(botUserId, result, { dryRun, limit })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      result.errors.push(`VN decisions: ${msg}`)
+      console.log(`\n❌ VN decisions error: ${msg}`)
+    }
+  }
+
+  // Secondary: RSS feeds
+  if (!skipRss) {
+    try {
+      await importRssFeeds(botUserId, result, { dryRun, limit: 10, filterSources })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      result.errors.push(`RSS feeds: ${msg}`)
+      console.log(`\n❌ RSS error: ${msg}`)
+    }
+  }
+
+  console.log('\n✅ Ministry import complete:')
+  console.log(`   Imported: ${result.imported}`)
+  console.log(`   Skipped: ${result.skipped}`)
+  console.log(`   Errors: ${result.errors.length}`)
+
+  return result
+}
+
+// ============================================
+// CLEANUP
+// ============================================
+
+/**
+ * Remove old ministry-imported threads where the original content
+ * was published before the given cutoff date.
+ */
+export async function cleanOldMinistryThreads(options: { dryRun?: boolean; cutoffDate?: Date } = {}): Promise<number> {
+  const { dryRun = false, cutoffDate = new Date('2025-01-01') } = options
+
+  console.log(`🧹 Cleaning ministry threads published before ${cutoffDate.toISOString().slice(0, 10)}...`)
+  console.log(`   Dry run: ${dryRun}`)
+
+  const oldThreads = await db
+    .select({ id: threads.id, title: threads.title, sourceId: threads.sourceId, context: threads.institutionalContext })
+    .from(threads)
+    .where(eq(threads.source, 'rss_import'))
+
+  const toDelete = oldThreads.filter(t => {
+    const ctx = t.context as { publishedAt?: string } | null
+    if (!ctx?.publishedAt) return false
+    return new Date(ctx.publishedAt) < cutoffDate
+  })
+
+  console.log(`   Found ${toDelete.length} threads to remove (of ${oldThreads.length} total rss_import threads)`)
+
+  if (dryRun) {
+    for (const t of toDelete) {
+      const ctx = t.context as { publishedAt?: string } | null
+      console.log(`   🗑️  Would delete: ${t.title?.slice(0, 60)} (${ctx?.publishedAt?.slice(0, 10)})`)
+    }
+    return toDelete.length
+  }
+
+  for (const t of toDelete) {
+    await db.delete(threadTags).where(eq(threadTags.threadId, t.id))
+    await db.delete(threads).where(eq(threads.id, t.id))
+    const ctx = t.context as { publishedAt?: string } | null
+    console.log(`   🗑️  Deleted: ${t.title?.slice(0, 60)} (${ctx?.publishedAt?.slice(0, 10)})`)
+  }
+
+  console.log(`\n✅ Cleaned ${toDelete.length} old threads`)
+  return toDelete.length
+}
+
+// ============================================
+// UTILS
+// ============================================
+
 function hashId(str: string): string {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i)
     hash = ((hash << 5) - hash) + char
-    hash |= 0 // Convert to 32-bit integer
+    hash |= 0
   }
   return Math.abs(hash).toString(36)
 }

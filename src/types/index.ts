@@ -11,6 +11,7 @@ export interface User {
   role: UserRole
   verified: boolean // Always true in Eulesia
   municipality?: string
+  avatarUrl?: string
   avatarInitials: string
   institutionType?: InstitutionType
   institutionName?: string

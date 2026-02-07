@@ -952,6 +952,7 @@ export interface SearchUserResult {
   name: string
   username: string
   role: 'citizen' | 'institution' | 'admin'
+  avatarUrl?: string
   institutionType?: string
   institutionName?: string
   municipalityName?: string

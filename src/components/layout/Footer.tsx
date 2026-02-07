@@ -9,25 +9,22 @@ export function Footer() {
             <div className="w-6 h-6 bg-blue-800 rounded flex items-center justify-center">
               <span className="text-white font-bold text-xs">E</span>
             </div>
-            <span className="font-medium text-gray-900">Eulesia Foundation</span>
+            <span className="font-medium text-gray-900">Eulesia</span>
             <span className="text-gray-400">·</span>
-            <span>Helsinki</span>
+            <span>Suomi</span>
           </div>
 
           <div className="flex items-center gap-4">
             <Link to="/about" className="hover:text-gray-900 transition-colors">
-              About
-            </Link>
-            <Link to="/governance" className="hover:text-gray-900 transition-colors">
-              Governance
+              Tietoa
             </Link>
             <span className="text-gray-400">·</span>
-            <span className="text-gray-500">Open source · Not for profit</span>
+            <span className="text-gray-500">Avoin lähdekoodi · Ei voittoa tavoitteleva</span>
           </div>
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
-          Civic infrastructure for the public good. Your data is not the product.
+          Kansalaisinfrastruktuuria yhteiseksi hyväksi. Datasi ei ole tuote.
         </div>
       </div>
     </footer>

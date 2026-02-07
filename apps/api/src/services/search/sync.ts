@@ -96,6 +96,7 @@ async function syncUsers(): Promise<number> {
       name: users.name,
       username: users.username,
       role: users.role,
+      avatarUrl: users.avatarUrl,
       institutionType: users.institutionType,
       institutionName: users.institutionName,
       createdAt: users.createdAt
@@ -109,6 +110,7 @@ async function syncUsers(): Promise<number> {
       name: u.name,
       username: u.username,
       role: u.role as 'citizen' | 'institution' | 'admin',
+      avatarUrl: u.avatarUrl || undefined,
       institutionType: u.institutionType || undefined,
       institutionName: u.institutionName || undefined,
       createdAt: u.createdAt?.toISOString() || new Date().toISOString()

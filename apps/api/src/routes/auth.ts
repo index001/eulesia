@@ -143,6 +143,7 @@ router.post('/register', asyncHandler(async (req, res: Response) => {
       name: newUser.name,
       username: newUser.username,
       role: (newUser.role as 'citizen' | 'institution' | 'admin') || 'citizen',
+      avatarUrl: newUser.avatarUrl || undefined,
       institutionType: newUser.institutionType || undefined,
       institutionName: newUser.institutionName || undefined,
       createdAt: newUser.createdAt?.toISOString() || new Date().toISOString()

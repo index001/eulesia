@@ -29,6 +29,7 @@ export interface UserDocument {
   name: string
   username: string
   role: 'citizen' | 'institution' | 'admin'
+  avatarUrl?: string
   institutionType?: string
   institutionName?: string
   municipalityName?: string
@@ -272,7 +273,7 @@ export async function search(query: string, options?: {
         indexUid: INDEXES.USERS,
         q: query,
         limit,
-        attributesToRetrieve: ['id', 'name', 'username', 'role', 'institutionType', 'institutionName', 'municipalityName']
+        attributesToRetrieve: ['id', 'name', 'username', 'role', 'avatarUrl', 'institutionType', 'institutionName', 'municipalityName']
       },
       {
         indexUid: INDEXES.THREADS,

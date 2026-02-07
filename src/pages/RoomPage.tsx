@@ -15,6 +15,7 @@ function transformUser(user: UserSummary) {
     name: user.name,
     role: user.role,
     verified: true,
+    avatarUrl: user.avatarUrl,
     avatarInitials: user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
     institutionType: user.institutionType as 'municipality' | 'agency' | 'ministry' | undefined,
     institutionName: user.institutionName

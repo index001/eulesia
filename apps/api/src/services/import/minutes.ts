@@ -5,9 +5,12 @@
  * AI-summarized Agora threads for civic discussion.
  *
  * Supported systems:
- * - CloudNC (most common)
- * - Tweb
- * - Dynasty
+ * - CloudNC (~24 municipalities + welfare regions)
+ * - Dynasty (~40-50 municipalities)
+ * - Tweb (~15-20 municipalities)
+ *
+ * Each system has its own fetcher in ./fetchers/ implementing the
+ * MinuteFetcher interface. This module orchestrates the import pipeline.
  *
  * Based on work from github.com/Explories/rautalampi-news
  */
@@ -16,139 +19,16 @@ import { db, threads, threadTags, municipalities, users } from '../../db/index.j
 import { eq, and } from 'drizzle-orm'
 import { editorialGate, writeArticle, verifyArticle } from './mistral.js'
 import { renderMarkdown } from '../../utils/markdown.js'
+import { fetchers, MINUTE_SOURCES } from './fetchers/index.js'
+import type { MinuteSource } from './fetchers/index.js'
 
-// Rate limiting
-const RATE_LIMIT_MS = 2000
-let lastRequestTime = 0
+// Re-export for backwards compatibility
+export { MINUTE_SOURCES }
+export type { MinuteSource }
 
+// Rate limiting for AI calls
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-async function rateLimitedFetch(url: string): Promise<Response> {
-  const now = Date.now()
-  const timeSinceLastRequest = now - lastRequestTime
-  if (timeSinceLastRequest < RATE_LIMIT_MS) {
-    await sleep(RATE_LIMIT_MS - timeSinceLastRequest)
-  }
-  lastRequestTime = Date.now()
-  return fetch(url)
-}
-
-// ============================================
-// MINUTES SOURCE CONFIGURATION
-// ============================================
-
-export interface MinuteSource {
-  municipality: string
-  type: 'cloudnc' | 'tweb' | 'dynasty' | 'pdf'
-  url: string
-}
-
-// CloudNC municipalities
-export const CLOUDNC_SOURCES: MinuteSource[] = [
-  'rautalampi', 'tampere', 'jyvaskyla', 'mikkeli', 'rovaniemi',
-  'kajaani', 'pori', 'hollola', 'tuusula', 'jarvenpaa'
-].map(m => ({
-  municipality: m.charAt(0).toUpperCase() + m.slice(1),
-  type: 'cloudnc' as const,
-  url: `https://${m}.cloudnc.fi/fi-FI`
-}))
-
-// All sources combined
-export const MINUTE_SOURCES: MinuteSource[] = [
-  ...CLOUDNC_SOURCES
-  // Add TWEB_SOURCES, DYNASTY_SOURCES later
-]
-
-// ============================================
-// MEETING LISTING FETCHERS
-// ============================================
-
-interface Meeting {
-  id: string
-  pageUrl: string
-  title: string
-  date?: string
-  organ?: string  // e.g., "Kunnanhallitus", "Valtuusto"
-}
-
-/**
- * Fetch meeting list from CloudNC system
- */
-async function fetchCloudNCMeetings(baseUrl: string): Promise<Meeting[]> {
-  const response = await rateLimitedFetch(baseUrl)
-  const html = await response.text()
-
-  const meetings: Meeting[] = []
-
-  // CloudNC pattern: href='/fi-FI/Toimielimet/Organ/Kokous_DATE'
-  // Match: Organ - Kokous DATE Pöytäkirja (skip Esityslista)
-  const regex = /href='([^']*\/Kokous_[^']+)'[^>]*>([^<]+Pöytäkirja)/gi
-  let match
-
-  while ((match = regex.exec(html)) !== null) {
-    const href = match[1]
-    const title = match[2].trim()
-
-    // Extract organ and date from title
-    const parts = title.split(' - ')
-    const organ = parts[0]?.trim()
-
-    // Create unique ID from path
-    const pathParts = href.split('/')
-    const id = pathParts[pathParts.length - 1]  // e.g., "Kokous_1912026"
-
-    meetings.push({
-      id,
-      pageUrl: new URL(href, baseUrl).toString(),
-      title,
-      organ
-    })
-  }
-
-  console.log(`   Found ${meetings.length} pöytäkirjat`)
-  return meetings.slice(0, 10)  // Limit to 10 most recent
-}
-
-/**
- * Extract PDF URL from CloudNC meeting page
- */
-async function extractCloudNCPdfUrl(pageUrl: string): Promise<string | null> {
-  const response = await rateLimitedFetch(pageUrl)
-  const html = await response.text()
-
-  // Look for download button with /download/noname/ pattern
-  // Pattern: href="/download/noname/{GUID}/ID"
-  const pdfMatch = html.match(/href="(\/download\/noname\/\{[^}]+\}\/\d+)"/i)
-  if (pdfMatch) {
-    const baseUrl = new URL(pageUrl)
-    return `${baseUrl.origin}${pdfMatch[1]}`
-  }
-
-  return null
-}
-
-/**
- * Download and extract text from PDF using pdf-parse
- */
-async function extractTextFromPdf(pdfUrl: string): Promise<string> {
-  console.log(`   Downloading PDF: ${pdfUrl}`)
-
-  const response = await rateLimitedFetch(pdfUrl)
-  if (!response.ok) {
-    throw new Error(`Failed to download PDF: ${response.status}`)
-  }
-
-  const arrayBuffer = await response.arrayBuffer()
-
-  // pdf-parse v2: PDFParse class takes LoadParameters in constructor
-  const { PDFParse } = await import('pdf-parse')
-  const parser = new PDFParse({ data: arrayBuffer })
-  const result = await parser.getText()
-
-  console.log(`   Extracted ${result.text.length} characters from PDF`)
-  return result.text
 }
 
 // ============================================
@@ -172,7 +52,6 @@ export interface ImportResult {
  * Get or create the system bot user for AI-generated content
  */
 async function getOrCreateBotUser(): Promise<string> {
-  // Check if bot user exists
   const existing = await db
     .select({ id: users.id })
     .from(users)
@@ -183,7 +62,6 @@ async function getOrCreateBotUser(): Promise<string> {
     return existing[0].id
   }
 
-  // Create bot user
   const [botUser] = await db
     .insert(users)
     .values({
@@ -282,17 +160,16 @@ export async function importMinutes(options: ImportOptions = {}): Promise<Import
   for (const source of sources) {
     console.log(`\n🏛️  ${source.municipality} (${source.type})`)
 
+    // Look up fetcher for this source type
+    const fetcher = fetchers[source.type]
+    if (!fetcher) {
+      console.log(`   ⚠️  ${source.type} not supported`)
+      continue
+    }
+
     try {
-      // Fetch meeting list
-      let meetings: Meeting[] = []
-
-      if (source.type === 'cloudnc') {
-        meetings = await fetchCloudNCMeetings(source.url)
-      } else {
-        console.log(`   ⚠️  ${source.type} not yet implemented`)
-        continue
-      }
-
+      // Fetch meeting list via fetcher
+      const meetings = await fetcher.fetchMeetings(source)
       console.log(`   Found ${meetings.length} meetings`)
 
       // Process meetings
@@ -314,19 +191,10 @@ export async function importMinutes(options: ImportOptions = {}): Promise<Import
         }
 
         try {
-          // Get PDF URL
-          const pdfUrl = await extractCloudNCPdfUrl(meeting.pageUrl)
-          if (!pdfUrl) {
-            result.errors.push(`No PDF found for ${sourceId}`)
-            continue
-          }
-
-          // Extract text from PDF
-          let originalText: string
-          try {
-            originalText = await extractTextFromPdf(pdfUrl)
-          } catch (err) {
-            result.errors.push(`PDF parsing not available: ${sourceId}`)
+          // Extract content via fetcher (handles PDF/HTML per system)
+          const originalText = await fetcher.extractContent(meeting, source)
+          if (!originalText) {
+            result.errors.push(`No content found for ${sourceId}`)
             continue
           }
 
@@ -353,6 +221,9 @@ export async function importMinutes(options: ImportOptions = {}): Promise<Import
           if (skippedItems.length > 0) {
             console.log(`   ⏭️  Filtered: ${skippedItems.map(i => i.title).join(', ')}`)
           }
+
+          // Construct source URL for article footer
+          const sourceUrl = meeting.pageUrl
 
           // Process each newsworthy item as a separate thread
           for (const item of newsworthyItems) {
@@ -405,7 +276,7 @@ ${article.keyPoints.map(p => `- ${p}`).join('\n')}
 *${article.discussionPrompt}*
 
 ---
-🤖 *Tämä on AI-generoitu yhteenveto kunnan pöytäkirjasta (${item.itemNumber}). [Näytä alkuperäinen →](${pdfUrl})*`
+🤖 *Tämä on AI-generoitu yhteenveto kunnan pöytäkirjasta (${item.itemNumber}). [Näytä alkuperäinen →](${sourceUrl})*`
 
               const contentHtml = renderMarkdown(content)
 
@@ -420,7 +291,7 @@ ${article.keyPoints.map(p => `- ${p}`).join('\n')}
                   scope: 'local',
                   municipalityId,
                   source: 'minutes_import',
-                  sourceUrl: pdfUrl,
+                  sourceUrl,
                   sourceId: itemSourceId,
                   aiGenerated: true,
                   aiModel: 'mistral-large-latest',

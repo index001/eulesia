@@ -260,8 +260,7 @@ function AboutContent() {
             <p className="text-sm text-gray-700 leading-relaxed">
               Eulesia on alkuvaiheessa oleva tutkimus- ja kehitysprojekti. Toimiva prototyyppi
               on olemassa ja sitä kehitetään iteratiivisesti pilottikäyttäjien palautteen pohjalta.
-              Projekti pohjautuu akateemiseen tutkimukseen, ja sen suunnitteluperiaatteet on
-              johdettu alustahallinnan tutkimuskirjallisuudesta.
+              Suunnitteluperiaatteet on johdettu alustahallinnan tutkimuskirjallisuudesta.
             </p>
             <p className="text-sm text-gray-700 leading-relaxed">
               Kehitys etenee usealla rinnakkaisella raiteella: tutkimusrahoitus, vapaaehtoinen
@@ -318,13 +317,8 @@ function AboutContent() {
             <p className="text-sm text-gray-700 leading-relaxed">
               Eulesian suunnittelu perustuu Design Science Research -metodologiaan.
               Kuusi suunnitteluvaatimusta on johdettu normatiivisella synteesillä
-              alustahallinnan tutkimuskirjallisuudesta. Projekti on dokumentoitu
-              akateemisessa julkaisussa (MIPRO 2026).
-            </p>
-            <p className="text-sm text-gray-600 italic">
-              Sjöberg, M. (2026). "Reclaiming the Digital Agora: A Design Science Approach
-              to Identity-Based Civic Infrastructure Beyond the Attention Economy."
-              MIPRO 2026, Opatija.
+              alustahallinnan tutkimuskirjallisuudesta. Projektia kehitetään
+              akateemisen tutkimuksen rinnalla Tampereen yliopistossa.
             </p>
           </div>
         </div>

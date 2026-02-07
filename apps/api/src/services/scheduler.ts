@@ -56,7 +56,7 @@ async function runMinistryImport(): Promise<void> {
   console.log('🕐 Starting scheduled ministry import...')
 
   try {
-    const result = await importMinistryContent({ limit: 10 })
+    const result = await importMinistryContent({ limit: 3 })
     console.log(`✅ Scheduled ministry import complete: ${result.imported} imported, ${result.skipped} skipped, ${result.errors.length} errors`)
 
     if (result.errors.length > 0) {
