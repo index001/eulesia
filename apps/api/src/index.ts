@@ -154,6 +154,26 @@ io.on('connection', (socket) => {
 // Export io for use in routes
 export { io }
 
+// Run pending migrations before starting
+async function runMigrations() {
+  const { db } = await import('./db/index.js')
+  const { sql } = await import('drizzle-orm')
+  try {
+    // 0009: language field (idempotent)
+    await db.execute(sql`ALTER TABLE "threads" ADD COLUMN IF NOT EXISTS "language" varchar(10)`)
+    await db.execute(sql`ALTER TABLE "comments" ADD COLUMN IF NOT EXISTS "language" varchar(10)`)
+    await db.execute(sql`ALTER TABLE "club_threads" ADD COLUMN IF NOT EXISTS "language" varchar(10)`)
+    await db.execute(sql`ALTER TABLE "club_comments" ADD COLUMN IF NOT EXISTS "language" varchar(10)`)
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS "threads_language_idx" ON "threads" ("language")`)
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS "club_threads_language_idx" ON "club_threads" ("language")`)
+    console.log('Migrations OK')
+  } catch (error) {
+    console.error('Migration error:', error)
+  }
+}
+
+runMigrations()
+
 // Start server
 const PORT = parseInt(env.PORT)
 httpServer.listen(PORT, () => {
