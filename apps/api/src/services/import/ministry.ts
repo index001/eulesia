@@ -18,7 +18,7 @@ import { eq, and } from 'drizzle-orm'
 import { parseFeed, fetchArticleContent, type FeedItem } from './feeds.js'
 import { generateMinistrySummary } from './mistral.js'
 import { renderMarkdown } from '../../utils/markdown.js'
-import { fetchRecentSessions, fetchDecision, type VnSession, type VnDecision } from './valtioneuvosto.js'
+import { fetchRecentSessions, fetchDecision, type VnDecision } from './valtioneuvosto.js'
 
 // ============================================
 // CONFIGURATION

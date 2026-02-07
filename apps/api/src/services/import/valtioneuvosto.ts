@@ -79,7 +79,7 @@ export interface VnDecision {
 // Ministry name mapping (h4 headings → short names)
 // ============================================
 
-const MINISTRY_SHORT: Record<string, string> = {
+export const MINISTRY_SHORT: Record<string, string> = {
   'valtioneuvoston kanslia': 'VNK',
   'ulkoministeriö': 'UM',
   'oikeusministeriö': 'OM',
