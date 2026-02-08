@@ -27,11 +27,6 @@ import { getOrCreateBotUser, getOrCreateInstitution, resolveLocationForMunicipal
 export { MINUTE_SOURCES }
 export type { MinuteSource }
 
-// Rate limiting for AI calls
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 // ============================================
 // IMPORT LOGIC
 // ============================================
@@ -316,8 +311,6 @@ ${article.keyPoints.map(p => `- ${p}`).join('\n')}
               console.log(`   ❌ Item error: ${msg}`)
             }
 
-            // Rate limit between AI calls
-            await sleep(1000)
           }
 
         } catch (err) {
@@ -325,9 +318,6 @@ ${article.keyPoints.map(p => `- ${p}`).join('\n')}
           result.errors.push(`${sourceId}: ${msg}`)
           console.log(`   ❌ Error: ${msg}`)
         }
-
-        // Rate limit between meetings
-        await sleep(1000)
       }
 
     } catch (err) {

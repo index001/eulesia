@@ -46,7 +46,42 @@ export interface SummaryResult {
 }
 
 /**
- * Helper: call Mistral API
+ * Rate limiting configuration.
+ *
+ * Currently using Mistral free tier which allows ~2 requests/minute.
+ * The pipeline runs slowly but continuously — each municipality's
+ * minutes take ~10-15 minutes to fully process.
+ *
+ * When upgrading to a paid Mistral plan:
+ *  1. Reduce API_CALL_DELAY_MS to 1_000 (1s) or even 500
+ *  2. The retry logic will still handle any occasional 429s
+ *  3. A full municipality import will then take seconds, not minutes
+ */
+const API_CALL_DELAY_MS = 35_000 // 35s between calls → safe under 2 req/min (free tier)
+const MAX_RETRIES = 5
+let lastCallTime = 0
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
+ * Wait until enough time has passed since the last API call.
+ * Enforces a global rate limit across all Mistral calls.
+ */
+async function waitForRateLimit(): Promise<void> {
+  const now = Date.now()
+  const elapsed = now - lastCallTime
+  if (elapsed < API_CALL_DELAY_MS) {
+    const waitMs = API_CALL_DELAY_MS - elapsed
+    console.log(`   ⏳ Rate limit: waiting ${Math.ceil(waitMs / 1000)}s...`)
+    await sleep(waitMs)
+  }
+}
+
+/**
+ * Helper: call Mistral API with retry and rate limiting.
+ * Handles 429 (rate limited) and 5xx errors with exponential backoff.
  */
 async function callMistral(messages: MistralMessage[], options?: {
   temperature?: number
@@ -57,34 +92,55 @@ async function callMistral(messages: MistralMessage[], options?: {
     throw new Error('MISTRAL_API_KEY not configured')
   }
 
-  const response = await fetch(MISTRAL_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: 'mistral-large-latest',
-      messages,
-      temperature: options?.temperature ?? 0.3,
-      max_tokens: options?.maxTokens ?? 2000,
-      response_format: { type: 'json_object' }
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    // Respect global rate limit
+    await waitForRateLimit()
+
+    lastCallTime = Date.now()
+
+    const response = await fetch(MISTRAL_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'mistral-large-latest',
+        messages,
+        temperature: options?.temperature ?? 0.3,
+        max_tokens: options?.maxTokens ?? 2000,
+        response_format: { type: 'json_object' }
+      })
     })
-  })
 
-  if (!response.ok) {
+    if (response.ok) {
+      const data = await response.json() as MistralResponse
+      const content = data.choices[0]?.message?.content
+
+      if (!content) {
+        throw new Error('Empty response from Mistral')
+      }
+
+      return content
+    }
+
+    // Retry on rate limit (429) or server errors (5xx)
+    const status = response.status
+    if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+      const retryAfter = response.headers.get('retry-after')
+      const backoffMs = retryAfter
+        ? parseInt(retryAfter, 10) * 1000
+        : Math.min(60_000 * Math.pow(2, attempt), 300_000) // 60s, 120s, 240s, 300s, 300s
+      console.log(`   ⏳ Mistral ${status} — retry ${attempt + 1}/${MAX_RETRIES} in ${Math.ceil(backoffMs / 1000)}s`)
+      await sleep(backoffMs)
+      continue
+    }
+
     const errorText = await response.text()
-    throw new Error(`Mistral API error: ${response.status} - ${errorText}`)
+    throw new Error(`Mistral API error: ${status} - ${errorText}`)
   }
 
-  const data = await response.json() as MistralResponse
-  const content = data.choices[0]?.message?.content
-
-  if (!content) {
-    throw new Error('Empty response from Mistral')
-  }
-
-  return content
+  throw new Error(`Mistral API: max retries (${MAX_RETRIES}) exceeded`)
 }
 
 // ============================================
