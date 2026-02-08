@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save } from 'lucide-react'
+import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { ActorBadge } from '../components/common'
@@ -8,7 +8,8 @@ import { useRoom, useSendRoomMessage, useUpdateRoom, useDeleteRoom, useInviteToR
 import { useAuth } from '../hooks/useAuth'
 import { useSocket } from '../hooks/useSocket'
 import { formatRelativeTime } from '../lib/formatTime'
-import type { RoomMessage, UserSummary } from '../lib/api'
+import { api } from '../lib/api'
+import type { RoomMessage, UserSummary, SearchUserResult } from '../lib/api'
 
 // Transform API user to component format
 function transformUser(user: UserSummary) {
@@ -50,7 +51,11 @@ export function RoomPage() {
   const [showInvite, setShowInvite] = useState(false)
   const [editName, setEditName] = useState('')
   const [editDescription, setEditDescription] = useState('')
-  const [inviteUsername, setInviteUsername] = useState('')
+  const [inviteSearch, setInviteSearch] = useState('')
+  const [inviteResults, setInviteResults] = useState<SearchUserResult[]>([])
+  const [selectedUser, setSelectedUser] = useState<SearchUserResult | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const settingsRef = useRef<HTMLButtonElement>(null)
 
@@ -101,11 +106,43 @@ export function RoomPage() {
     }
   }
 
+  const handleInviteSearch = useCallback((query: string) => {
+    setInviteSearch(query)
+    setSelectedUser(null)
+
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+
+    if (query.trim().length < 2) {
+      setInviteResults([])
+      return
+    }
+
+    searchTimerRef.current = setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        const results = await api.searchUsers(query.trim(), 5)
+        // Filter out current user and existing members
+        const memberIds = new Set([
+          currentUser?.id,
+          ...roomData?.members.map(m => m.id) || [],
+          roomData?.owner.id
+        ])
+        setInviteResults(results.filter(u => !memberIds.has(u.id)))
+      } catch {
+        setInviteResults([])
+      } finally {
+        setIsSearching(false)
+      }
+    }, 300)
+  }, [currentUser?.id, roomData?.members, roomData?.owner.id])
+
   const handleInvite = async () => {
-    if (!inviteUsername.trim()) return
+    if (!selectedUser) return
     try {
-      await inviteToRoomMutation.mutateAsync(inviteUsername.trim())
-      setInviteUsername('')
+      await inviteToRoomMutation.mutateAsync(selectedUser.id)
+      setInviteSearch('')
+      setInviteResults([])
+      setSelectedUser(null)
       setShowInvite(false)
     } catch (err) {
       console.error('Failed to send invitation:', err)
@@ -311,33 +348,87 @@ export function RoomPage() {
           <div className="bg-white rounded-xl w-full max-w-md">
             <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
               <h3 className="font-semibold text-gray-900">{t('room.inviteTitle')}</h3>
-              <button onClick={() => setShowInvite(false)} className="p-1 hover:bg-gray-100 rounded">
+              <button onClick={() => { setShowInvite(false); setInviteSearch(''); setInviteResults([]); setSelectedUser(null) }} className="p-1 hover:bg-gray-100 rounded">
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
             <div className="p-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('room.invitePlaceholder')}</label>
-              <input
-                type="text"
-                value={inviteUsername}
-                onChange={(e) => setInviteUsername(e.target.value)}
-                placeholder={t('room.invitePlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('room.inviteSearchLabel')}</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={inviteSearch}
+                  onChange={(e) => handleInviteSearch(e.target.value)}
+                  placeholder={t('room.invitePlaceholder')}
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+                  autoFocus
+                />
+              </div>
+
+              {/* Search results */}
+              {inviteSearch.trim().length >= 2 && (
+                <div className="mt-2 border border-gray-200 rounded-lg overflow-hidden">
+                  {isSearching ? (
+                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                      {t('room.inviteSearching')}
+                    </div>
+                  ) : inviteResults.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                      {t('room.inviteNoResults')}
+                    </div>
+                  ) : (
+                    inviteResults.map(user => (
+                      <button
+                        key={user.id}
+                        onClick={() => setSelectedUser(user)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
+                          selectedUser?.id === user.id ? 'bg-teal-50 border-l-2 border-teal-600' : ''
+                        }`}
+                      >
+                        {user.avatarUrl ? (
+                          <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
+                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                          {user.institutionName && (
+                            <p className="text-xs text-gray-500 truncate">{user.institutionName}</p>
+                          )}
+                          {user.municipalityName && !user.institutionName && (
+                            <p className="text-xs text-gray-500 truncate">{user.municipalityName}</p>
+                          )}
+                        </div>
+                        {selectedUser?.id === user.id && (
+                          <div className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+
               <p className="text-xs text-gray-500 mt-2">
                 {t('room.inviteHint')}
               </p>
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
               <button
-                onClick={() => setShowInvite(false)}
+                onClick={() => { setShowInvite(false); setInviteSearch(''); setInviteResults([]); setSelectedUser(null) }}
                 className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
               >
                 {t('common:actions.cancel')}
               </button>
               <button
                 onClick={handleInvite}
-                disabled={inviteToRoomMutation.isPending || !inviteUsername.trim()}
+                disabled={inviteToRoomMutation.isPending || !selectedUser}
                 className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
               >
                 <UserPlus className="w-4 h-4" />

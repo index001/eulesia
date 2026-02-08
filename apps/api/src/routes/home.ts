@@ -30,10 +30,7 @@ const sendMessageSchema = z.object({
 })
 
 const inviteSchema = z.object({
-  userId: z.string().uuid().optional(),
-  username: z.string().min(1).max(255).optional()
-}).refine(data => data.userId || data.username, {
-  message: 'Either userId or username must be provided'
+  userId: z.string().uuid()
 })
 
 // Helper to format user summary
@@ -434,24 +431,12 @@ router.post('/rooms/:roomId/invite', authMiddleware, asyncHandler(async (req: Au
     throw new AppError(400, 'Can only invite to private rooms')
   }
 
-  // Find user by userId or username
-  let invitee: typeof users.$inferSelect | undefined
-
-  if (data.userId) {
-    const [found] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, data.userId))
-      .limit(1)
-    invitee = found
-  } else if (data.username) {
-    const [found] = await db
-      .select()
-      .from(users)
-      .where(eq(users.name, data.username))
-      .limit(1)
-    invitee = found
-  }
+  // Find user by userId
+  const [invitee] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, data.userId))
+    .limit(1)
 
   if (!invitee) {
     throw new AppError(404, 'User not found')
