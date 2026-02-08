@@ -44,115 +44,123 @@ function formatUserSummary(user: typeof users.$inferSelect) {
   }
 }
 
-// GET /home/:userId - Get user's home (public view)
-router.get('/:userId', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const { userId } = req.params
-  const currentUserId = req.user?.id
+// ============================================================
+// INVITATIONS — must be before /:userId catch-all
+// ============================================================
 
-  // Get user
-  const [homeOwner] = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1)
+// GET /home/invitations - Get user's pending invitations
+router.get('/invitations', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
 
-  if (!homeOwner) {
-    throw new AppError(404, 'User not found')
-  }
-
-  // Get rooms (public ones, or all if viewing own home)
-  const isOwnHome = currentUserId === userId
-
-  let roomsQuery = db
+  const invitations = await db
     .select({
+      invitation: roomInvitations,
       room: rooms,
-      messageCount: sql<number>`(SELECT count(*)::int FROM room_messages WHERE room_id = ${rooms.id})`
+      inviter: users
     })
-    .from(rooms)
-    .where(eq(rooms.ownerId, userId))
-    .orderBy(desc(rooms.isPinned), rooms.sortOrder, desc(rooms.updatedAt))
-
-  const userRooms = await roomsQuery
-
-  // Filter rooms based on visibility and membership
-  const accessibleRooms = await Promise.all(
-    userRooms.map(async ({ room, messageCount }) => {
-      // Public rooms are always visible
-      if (room.visibility === 'public') {
-        return { ...room, messageCount, canAccess: true }
-      }
-
-      // Private rooms: check if current user is owner or member
-      if (isOwnHome) {
-        return { ...room, messageCount, canAccess: true }
-      }
-
-      if (currentUserId) {
-        const [membership] = await db
-          .select()
-          .from(roomMembers)
-          .where(and(
-            eq(roomMembers.roomId, room.id),
-            eq(roomMembers.userId, currentUserId)
-          ))
-          .limit(1)
-
-        if (membership) {
-          return { ...room, messageCount, canAccess: true }
-        }
-      }
-
-      // Show that room exists but can't access
-      return {
-        id: room.id,
-        name: room.name,
-        visibility: room.visibility,
-        isPinned: room.isPinned,
-        canAccess: false
-      }
-    })
-  )
-
-  // Get recent activity (user's threads and comments)
-  const recentThreads = await db
-    .select({
-      id: threads.id,
-      title: threads.title,
-      scope: threads.scope,
-      createdAt: threads.createdAt
-    })
-    .from(threads)
-    .where(eq(threads.authorId, userId))
-    .orderBy(desc(threads.createdAt))
-    .limit(5)
-
-  // Get user's club memberships
-  const userClubs = await db
-    .select({
-      club: {
-        id: clubs.id,
-        name: clubs.name,
-        slug: clubs.slug
-      }
-    })
-    .from(clubMembers)
-    .innerJoin(clubs, eq(clubMembers.clubId, clubs.id))
-    .where(eq(clubMembers.userId, userId))
-    .limit(5)
+    .from(roomInvitations)
+    .innerJoin(rooms, eq(roomInvitations.roomId, rooms.id))
+    .innerJoin(users, eq(roomInvitations.inviterId, users.id))
+    .where(and(
+      eq(roomInvitations.inviteeId, userId),
+      eq(roomInvitations.status, 'pending')
+    ))
+    .orderBy(desc(roomInvitations.createdAt))
 
   res.json({
     success: true,
-    data: {
-      owner: formatUserSummary(homeOwner),
-      rooms: accessibleRooms,
-      recentActivity: {
-        threads: recentThreads,
-        clubs: userClubs.map(c => c.club)
+    data: invitations.map(({ invitation, room, inviter }) => ({
+      ...invitation,
+      room: {
+        id: room.id,
+        name: room.name,
+        description: room.description
       },
-      isOwnHome
-    }
+      inviter: formatUserSummary(inviter)
+    }))
   })
 }))
+
+// POST /home/invitations/:invitationId/accept - Accept invitation
+router.post('/invitations/:invitationId/accept', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { invitationId } = req.params
+
+  const [invitation] = await db
+    .select()
+    .from(roomInvitations)
+    .where(eq(roomInvitations.id, invitationId))
+    .limit(1)
+
+  if (!invitation) {
+    throw new AppError(404, 'Invitation not found')
+  }
+
+  if (invitation.inviteeId !== userId) {
+    throw new AppError(403, 'This invitation is not for you')
+  }
+
+  if (invitation.status !== 'pending') {
+    throw new AppError(400, 'Invitation already processed')
+  }
+
+  // Update invitation status
+  await db
+    .update(roomInvitations)
+    .set({ status: 'accepted' })
+    .where(eq(roomInvitations.id, invitationId))
+
+  // Add as member
+  await db
+    .insert(roomMembers)
+    .values({
+      roomId: invitation.roomId,
+      userId
+    })
+
+  res.json({
+    success: true,
+    data: { accepted: true }
+  })
+}))
+
+// POST /home/invitations/:invitationId/decline - Decline invitation
+router.post('/invitations/:invitationId/decline', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { invitationId } = req.params
+
+  const [invitation] = await db
+    .select()
+    .from(roomInvitations)
+    .where(eq(roomInvitations.id, invitationId))
+    .limit(1)
+
+  if (!invitation) {
+    throw new AppError(404, 'Invitation not found')
+  }
+
+  if (invitation.inviteeId !== userId) {
+    throw new AppError(403, 'This invitation is not for you')
+  }
+
+  if (invitation.status !== 'pending') {
+    throw new AppError(400, 'Invitation already processed')
+  }
+
+  await db
+    .update(roomInvitations)
+    .set({ status: 'declined' })
+    .where(eq(roomInvitations.id, invitationId))
+
+  res.json({
+    success: true,
+    data: { declined: true }
+  })
+}))
+
+// ============================================================
+// ROOMS — /rooms/* routes before /:userId catch-all
+// ============================================================
 
 // POST /home/rooms - Create a new room
 router.post('/rooms', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
@@ -489,116 +497,6 @@ router.post('/rooms/:roomId/invite', authMiddleware, asyncHandler(async (req: Au
   })
 }))
 
-// GET /home/invitations - Get user's pending invitations
-router.get('/invitations', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id
-
-  const invitations = await db
-    .select({
-      invitation: roomInvitations,
-      room: rooms,
-      inviter: users
-    })
-    .from(roomInvitations)
-    .innerJoin(rooms, eq(roomInvitations.roomId, rooms.id))
-    .innerJoin(users, eq(roomInvitations.inviterId, users.id))
-    .where(and(
-      eq(roomInvitations.inviteeId, userId),
-      eq(roomInvitations.status, 'pending')
-    ))
-    .orderBy(desc(roomInvitations.createdAt))
-
-  res.json({
-    success: true,
-    data: invitations.map(({ invitation, room, inviter }) => ({
-      ...invitation,
-      room: {
-        id: room.id,
-        name: room.name,
-        description: room.description
-      },
-      inviter: formatUserSummary(inviter)
-    }))
-  })
-}))
-
-// POST /home/invitations/:invitationId/accept - Accept invitation
-router.post('/invitations/:invitationId/accept', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id
-  const { invitationId } = req.params
-
-  const [invitation] = await db
-    .select()
-    .from(roomInvitations)
-    .where(eq(roomInvitations.id, invitationId))
-    .limit(1)
-
-  if (!invitation) {
-    throw new AppError(404, 'Invitation not found')
-  }
-
-  if (invitation.inviteeId !== userId) {
-    throw new AppError(403, 'This invitation is not for you')
-  }
-
-  if (invitation.status !== 'pending') {
-    throw new AppError(400, 'Invitation already processed')
-  }
-
-  // Update invitation status
-  await db
-    .update(roomInvitations)
-    .set({ status: 'accepted' })
-    .where(eq(roomInvitations.id, invitationId))
-
-  // Add as member
-  await db
-    .insert(roomMembers)
-    .values({
-      roomId: invitation.roomId,
-      userId
-    })
-
-  res.json({
-    success: true,
-    data: { accepted: true }
-  })
-}))
-
-// POST /home/invitations/:invitationId/decline - Decline invitation
-router.post('/invitations/:invitationId/decline', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id
-  const { invitationId } = req.params
-
-  const [invitation] = await db
-    .select()
-    .from(roomInvitations)
-    .where(eq(roomInvitations.id, invitationId))
-    .limit(1)
-
-  if (!invitation) {
-    throw new AppError(404, 'Invitation not found')
-  }
-
-  if (invitation.inviteeId !== userId) {
-    throw new AppError(403, 'This invitation is not for you')
-  }
-
-  if (invitation.status !== 'pending') {
-    throw new AppError(400, 'Invitation already processed')
-  }
-
-  await db
-    .update(roomInvitations)
-    .set({ status: 'declined' })
-    .where(eq(roomInvitations.id, invitationId))
-
-  res.json({
-    success: true,
-    data: { declined: true }
-  })
-}))
-
 // DELETE /home/rooms/:roomId/members/:userId - Remove member (owner only) or leave room
 router.delete('/rooms/:roomId/members/:memberId', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id
@@ -631,6 +529,121 @@ router.delete('/rooms/:roomId/members/:memberId', authMiddleware, asyncHandler(a
   res.json({
     success: true,
     data: { removed: true }
+  })
+}))
+
+// ============================================================
+// CATCH-ALL: /:userId — must be LAST to avoid matching
+// /invitations, /rooms, etc.
+// ============================================================
+
+// GET /home/:userId - Get user's home (public view)
+router.get('/:userId', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { userId } = req.params
+  const currentUserId = req.user?.id
+
+  // Get user
+  const [homeOwner] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
+  if (!homeOwner) {
+    throw new AppError(404, 'User not found')
+  }
+
+  // Get rooms (public ones, or all if viewing own home)
+  const isOwnHome = currentUserId === userId
+
+  let roomsQuery = db
+    .select({
+      room: rooms,
+      messageCount: sql<number>`(SELECT count(*)::int FROM room_messages WHERE room_id = ${rooms.id})`
+    })
+    .from(rooms)
+    .where(eq(rooms.ownerId, userId))
+    .orderBy(desc(rooms.isPinned), rooms.sortOrder, desc(rooms.updatedAt))
+
+  const userRooms = await roomsQuery
+
+  // Filter rooms based on visibility and membership
+  const accessibleRooms = await Promise.all(
+    userRooms.map(async ({ room, messageCount }) => {
+      // Public rooms are always visible
+      if (room.visibility === 'public') {
+        return { ...room, messageCount, canAccess: true }
+      }
+
+      // Private rooms: check if current user is owner or member
+      if (isOwnHome) {
+        return { ...room, messageCount, canAccess: true }
+      }
+
+      if (currentUserId) {
+        const [membership] = await db
+          .select()
+          .from(roomMembers)
+          .where(and(
+            eq(roomMembers.roomId, room.id),
+            eq(roomMembers.userId, currentUserId)
+          ))
+          .limit(1)
+
+        if (membership) {
+          return { ...room, messageCount, canAccess: true }
+        }
+      }
+
+      // Show that room exists but can't access
+      return {
+        id: room.id,
+        name: room.name,
+        visibility: room.visibility,
+        isPinned: room.isPinned,
+        canAccess: false
+      }
+    })
+  )
+
+  // Get recent activity (user's threads and comments)
+  const recentThreads = await db
+    .select({
+      id: threads.id,
+      title: threads.title,
+      scope: threads.scope,
+      createdAt: threads.createdAt
+    })
+    .from(threads)
+    .where(eq(threads.authorId, userId))
+    .orderBy(desc(threads.createdAt))
+    .limit(5)
+
+  // Get user's club memberships
+  const userClubs = await db
+    .select({
+      club: {
+        id: clubs.id,
+        name: clubs.name,
+        slug: clubs.slug
+      }
+    })
+    .from(clubMembers)
+    .innerJoin(clubs, eq(clubMembers.clubId, clubs.id))
+    .where(eq(clubMembers.userId, userId))
+    .limit(5)
+
+  res.json({
+    success: true,
+    data: {
+      owner: formatUserSummary(homeOwner),
+      rooms: accessibleRooms,
+      recentActivity: {
+        threads: recentThreads,
+        clubs: userClubs.map(c => c.club)
+      },
+      isOwnHome
+    }
   })
 }))
 
