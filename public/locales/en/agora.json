@@ -6,9 +6,9 @@
   "editSubscriptions": "Edit subscriptions",
   "replies_one": "{{count}} reply",
   "replies_other": "{{count}} replies",
-  "aiSummary": "AI summary",
-  "aiSummarySource": "AI summary — source: {{source}}",
-  "minutesSummary": "Meeting minutes summary",
+  "aiSummary": "Automated summary",
+  "aiSummarySource": "Automated summary — {{source}}",
+  "minutesSummary": "Automated summary — meeting minutes",
   "original": "Original",
   "officialInfo": "Official information — {{name}}",
   "institutionalContext": "Includes official documents, timeline & FAQ",
@@ -74,7 +74,7 @@
     "faq": "FAQ",
     "contact": "Contact",
     "source": "Source",
-    "aiGenerated": "AI-generated summary",
+    "aiGenerated": "Automated summary — Eulesia Bot",
     "official": "Official information"
   },
   "thread": {

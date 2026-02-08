@@ -6,9 +6,9 @@
   "editSubscriptions": "Muokkaa seuraamisia",
   "replies_one": "{{count}} vastaus",
   "replies_other": "{{count}} vastausta",
-  "aiSummary": "AI-tiivistelmä",
-  "aiSummarySource": "AI-tiivistelmä — lähde: {{source}}",
-  "minutesSummary": "Pöytäkirjayhteenveto",
+  "aiSummary": "Automatisoitu yhteenveto",
+  "aiSummarySource": "Automatisoitu yhteenveto — {{source}}",
+  "minutesSummary": "Automatisoitu yhteenveto — pöytäkirja",
   "original": "Alkuperäinen",
   "officialInfo": "Virallinen tieto — {{name}}",
   "institutionalContext": "Sisältää viralliset asiakirjat, aikajana ja UKK",
@@ -74,7 +74,7 @@
     "faq": "UKK",
     "contact": "Yhteystiedot",
     "source": "Lähde",
-    "aiGenerated": "AI-generoitu yhteenveto",
+    "aiGenerated": "Automatisoitu yhteenveto — Eulesia Bot",
     "official": "Virallinen tieto"
   },
   "thread": {

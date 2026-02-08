@@ -11,11 +11,12 @@
  * - European Parliament
  */
 
-import { db, threads, threadTags, users, institutionTopics } from '../../db/index.js'
+import { db, threads, threadTags } from '../../db/index.js'
 import { eq, and } from 'drizzle-orm'
 import { parseFeed, fetchArticleContent, type FeedItem } from './feeds.js'
 import { generateEuSummary } from './mistral.js'
 import { renderMarkdown } from '../../utils/markdown.js'
+import { getOrCreateBotUser, getOrCreateInstitution, getInstitutionTopicTag } from './institutions.js'
 
 // ============================================
 // EU SOURCE CONFIGURATION
@@ -61,66 +62,7 @@ export interface ImportResult {
   threads: { id: string; title: string; source: string }[]
 }
 
-/**
- * Get or create the system bot user
- */
-async function getOrCreateBotUser(): Promise<string> {
-  const existing = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.username, 'eulesia-bot'))
-    .limit(1)
-
-  if (existing.length > 0) {
-    return existing[0].id
-  }
-
-  const [botUser] = await db
-    .insert(users)
-    .values({
-      username: 'eulesia-bot',
-      name: 'Eulesia Bot',
-      email: 'bot@eulesia.eu',
-      role: 'institution',
-      institutionType: 'agency',
-      institutionName: 'Eulesia',
-      identityVerified: true,
-      identityProvider: 'system',
-      identityLevel: 'high'
-    })
-    .returning({ id: users.id })
-
-  return botUser.id
-}
-
-/**
- * Find institution user by name for source attribution
- */
-async function findInstitutionByName(name: string): Promise<string | null> {
-  const [institution] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(and(
-      eq(users.role, 'institution'),
-      eq(users.institutionName, name)
-    ))
-    .limit(1)
-
-  return institution?.id || null
-}
-
-/**
- * Get topic tag for an institution (from institution_topics table)
- */
-async function getInstitutionTopicTag(institutionId: string): Promise<string | null> {
-  const [topic] = await db
-    .select({ topicTag: institutionTopics.topicTag })
-    .from(institutionTopics)
-    .where(eq(institutionTopics.institutionId, institutionId))
-    .limit(1)
-
-  return topic?.topicTag || null
-}
+// Bot user and institution helpers imported from ./institutions.ts
 
 /**
  * Check if content has already been imported
@@ -214,9 +156,9 @@ export async function importEuContent(options: ImportOptions = {}): Promise<Impo
           const content = buildThreadContent(summary, item, source)
           const contentHtml = renderMarkdown(content)
 
-          // Look up source institution for attribution
-          const sourceInstitutionId = await findInstitutionByName(source.institution)
-          const topicTag = sourceInstitutionId ? await getInstitutionTopicTag(sourceInstitutionId) : null
+          // Get or create source institution placeholder
+          const sourceInstitutionId = await getOrCreateInstitution(source.institution, 'agency')
+          const topicTag = await getInstitutionTopicTag(sourceInstitutionId)
 
           // Create thread
           const [thread] = await db
@@ -308,7 +250,7 @@ ${summary.keyPoints.map(p => `- ${p}`).join('\n')}
 *${summary.discussionPrompt}*
 
 ---
-🤖 *Tämä on AI-generoitu yhteenveto ${source.institution}n julkaisusta. [Alkuperäinen lähde →](${item.link})*`
+🤖 *Tämä on automatisoitu yhteenveto ${source.institution}n julkaisusta. [Alkuperäinen lähde →](${item.link})*`
 }
 
 /**

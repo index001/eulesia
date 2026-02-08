@@ -15,12 +15,13 @@
  * Based on work from github.com/Explories/rautalampi-news
  */
 
-import { db, threads, threadTags, municipalities, users } from '../../db/index.js'
+import { db, threads, threadTags, municipalities } from '../../db/index.js'
 import { eq, and } from 'drizzle-orm'
 import { editorialGate, writeArticle, verifyArticle } from './mistral.js'
 import { renderMarkdown } from '../../utils/markdown.js'
 import { fetchers, MINUTE_SOURCES } from './fetchers/index.js'
 import type { MinuteSource } from './fetchers/index.js'
+import { getOrCreateBotUser, getOrCreateInstitution } from './institutions.js'
 
 // Re-export for backwards compatibility
 export { MINUTE_SOURCES }
@@ -48,37 +49,7 @@ export interface ImportResult {
   threads: { id: string; title: string; municipality: string }[]
 }
 
-/**
- * Get or create the system bot user for AI-generated content
- */
-async function getOrCreateBotUser(): Promise<string> {
-  const existing = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.username, 'eulesia-bot'))
-    .limit(1)
-
-  if (existing.length > 0) {
-    return existing[0].id
-  }
-
-  const [botUser] = await db
-    .insert(users)
-    .values({
-      username: 'eulesia-bot',
-      name: 'Eulesia Bot',
-      email: 'bot@eulesia.eu',
-      role: 'institution',
-      institutionType: 'agency',
-      institutionName: 'Eulesia',
-      identityVerified: true,
-      identityProvider: 'system',
-      identityLevel: 'high'
-    })
-    .returning({ id: users.id })
-
-  return botUser.id
-}
+// Bot user and institution helpers imported from ./institutions.ts
 
 /**
  * Get municipality ID by name, or create if not exists
@@ -198,8 +169,13 @@ export async function importMinutes(options: ImportOptions = {}): Promise<Import
             continue
           }
 
-          // Get municipality ID
+          // Get municipality ID and institution placeholder
           const municipalityId = await getOrCreateMunicipality(source.municipality)
+          const sourceInstitutionId = await getOrCreateInstitution(
+            source.municipality.charAt(0).toUpperCase() + source.municipality.slice(1).toLowerCase(),
+            'municipality',
+            { municipalityName: source.municipality }
+          )
 
           // ============================================
           // 3-STAGE AGENTIC PIPELINE
@@ -276,7 +252,7 @@ ${article.keyPoints.map(p => `- ${p}`).join('\n')}
 *${article.discussionPrompt}*
 
 ---
-🤖 *Tämä on AI-generoitu yhteenveto kunnan pöytäkirjasta (${item.itemNumber}). [Näytä alkuperäinen →](${sourceUrl})*`
+🤖 *Tämä on automatisoitu yhteenveto kunnan pöytäkirjasta (${item.itemNumber}). [Näytä alkuperäinen →](${sourceUrl})*`
 
               const contentHtml = renderMarkdown(content)
 
@@ -290,6 +266,7 @@ ${article.keyPoints.map(p => `- ${p}`).join('\n')}
                   authorId: botUserId,
                   scope: 'local',
                   municipalityId,
+                  sourceInstitutionId,
                   source: 'minutes_import',
                   sourceUrl,
                   sourceId: itemSourceId,

@@ -13,12 +13,13 @@
  * - Kept as supplementary for press releases that aren't formal decisions
  */
 
-import { db, threads, threadTags, users, institutionTopics } from '../../db/index.js'
+import { db, threads, threadTags } from '../../db/index.js'
 import { eq, and } from 'drizzle-orm'
 import { parseFeed, fetchArticleContent, type FeedItem } from './feeds.js'
 import { generateMinistrySummary } from './mistral.js'
 import { renderMarkdown } from '../../utils/markdown.js'
 import { fetchRecentSessions, fetchDecision, type VnDecision } from './valtioneuvosto.js'
+import { getOrCreateBotUser, getOrCreateInstitution, getInstitutionTopicTag } from './institutions.js'
 
 // ============================================
 // CONFIGURATION
@@ -66,57 +67,7 @@ export interface ImportResult {
   threads: { id: string; title: string; source: string }[]
 }
 
-async function getOrCreateBotUser(): Promise<string> {
-  const existing = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.username, 'eulesia-bot'))
-    .limit(1)
-
-  if (existing.length > 0) {
-    return existing[0].id
-  }
-
-  const [botUser] = await db
-    .insert(users)
-    .values({
-      username: 'eulesia-bot',
-      name: 'Eulesia Bot',
-      email: 'bot@eulesia.eu',
-      role: 'institution',
-      institutionType: 'agency',
-      institutionName: 'Eulesia',
-      identityVerified: true,
-      identityProvider: 'system',
-      identityLevel: 'high'
-    })
-    .returning({ id: users.id })
-
-  return botUser.id
-}
-
-async function findInstitutionByName(name: string): Promise<string | null> {
-  const [institution] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(and(
-      eq(users.role, 'institution'),
-      eq(users.institutionName, name)
-    ))
-    .limit(1)
-
-  return institution?.id || null
-}
-
-async function getInstitutionTopicTag(institutionId: string): Promise<string | null> {
-  const [topic] = await db
-    .select({ topicTag: institutionTopics.topicTag })
-    .from(institutionTopics)
-    .where(eq(institutionTopics.institutionId, institutionId))
-    .limit(1)
-
-  return topic?.topicTag || null
-}
+// Bot user and institution helpers imported from ./institutions.ts
 
 async function isAlreadyImported(sourceId: string): Promise<boolean> {
   const existing = await db
@@ -199,10 +150,10 @@ async function importVnDecisions(
         const content = buildVnThreadContent(summary, decision)
         const contentHtml = renderMarkdown(content)
 
-        // Look up source institution
+        // Get or create source institution placeholder
         const institutionName = decision.ministry || 'Valtioneuvosto'
-        const sourceInstitutionId = await findInstitutionByName(institutionName)
-        const topicTag = sourceInstitutionId ? await getInstitutionTopicTag(sourceInstitutionId) : null
+        const sourceInstitutionId = await getOrCreateInstitution(institutionName, 'ministry')
+        const topicTag = await getInstitutionTopicTag(sourceInstitutionId)
 
         // Create thread
         const [thread] = await db
@@ -293,7 +244,7 @@ ${summary.keyPoints.map(p => `- ${p}`).join('\n')}
 *${summary.discussionPrompt}*
 
 ---
-🤖 *Tämä on AI-generoitu yhteenveto valtioneuvoston päätöksestä. [Alkuperäinen päätös →](${decision.sourceUrl})*`
+🤖 *Tämä on automatisoitu yhteenveto valtioneuvoston päätöksestä. [Alkuperäinen päätös →](${decision.sourceUrl})*`
 }
 
 /** Parse Finnish date format "5.2.2026" to Date */
@@ -370,8 +321,8 @@ async function importRssFeeds(
           const content = buildRssThreadContent(summary, item, source)
           const contentHtml = renderMarkdown(content)
 
-          const sourceInstitutionId = await findInstitutionByName(source.name)
-          const topicTag = sourceInstitutionId ? await getInstitutionTopicTag(sourceInstitutionId) : null
+          const sourceInstitutionId = await getOrCreateInstitution(source.name, 'ministry')
+          const topicTag = await getInstitutionTopicTag(sourceInstitutionId)
 
           const [thread] = await db
             .insert(threads)
@@ -452,7 +403,7 @@ ${summary.keyPoints.map(p => `- ${p}`).join('\n')}
 *${summary.discussionPrompt}*
 
 ---
-🤖 *Tämä on AI-generoitu yhteenveto ${source.name}n tiedotteesta. [Alkuperäinen lähde →](${item.link})*`
+🤖 *Tämä on automatisoitu yhteenveto ${source.name}n tiedotteesta. [Alkuperäinen lähde →](${item.link})*`
 }
 
 // ============================================

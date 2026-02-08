@@ -34,7 +34,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
             <p className="text-xs text-purple-700 mt-0.5">
               {sourceInstitutionName
                 ? `${t('institutionalBox.source')}: ${sourceInstitutionName}`
-                : `${t('institutionalBox.source')}: virallinen tiedote`}
+                : `${t('institutionalBox.source')}: julkinen lähde`}
               {sourceUrl && (
                 <a
                   href={sourceUrl}
@@ -55,7 +55,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
               {t('institutionalBox.official')}{sourceInstitutionName ? ` — ${sourceInstitutionName}` : ''}
             </h3>
             <p className="text-xs text-violet-700 mt-0.5">
-              Instituution julkaisema virallinen tieto
+              {t('institutionalBox.official')}{sourceInstitutionName ? ` — ${sourceInstitutionName}` : ''}
             </p>
           </>
         )}

@@ -1,0 +1,200 @@
+/**
+ * Shared Institution & Bot User Helpers
+ *
+ * Centralizes bot user creation and institution placeholder account management.
+ * All import services (ministry, minutes, EU) use these shared helpers.
+ *
+ * Institution placeholder accounts are created for each data source
+ * (ministry, municipality, EU body) so users can follow specific institutions.
+ * These accounts are marked with identityProvider='eulesia-bot' and can be
+ * "taken over" by the real institution later.
+ */
+
+import { db, users, institutionTopics, municipalities } from '../../db/index.js'
+import { eq, and } from 'drizzle-orm'
+
+// ============================================
+// BOT USER
+// ============================================
+
+/**
+ * Get or create the system bot user (eulesia-bot).
+ * This is the author of all AI-generated threads.
+ */
+export async function getOrCreateBotUser(): Promise<string> {
+  const existing = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.username, 'eulesia-bot'))
+    .limit(1)
+
+  if (existing.length > 0) {
+    return existing[0].id
+  }
+
+  const [botUser] = await db
+    .insert(users)
+    .values({
+      username: 'eulesia-bot',
+      name: 'Eulesia Bot',
+      email: 'bot@eulesia.eu',
+      role: 'institution',
+      institutionType: 'agency',
+      institutionName: 'Eulesia',
+      identityVerified: true,
+      identityProvider: 'system',
+      identityLevel: 'high'
+    })
+    .returning({ id: users.id })
+
+  return botUser.id
+}
+
+// ============================================
+// INSTITUTION PLACEHOLDER ACCOUNTS
+// ============================================
+
+type InstitutionType = 'municipality' | 'ministry' | 'agency'
+
+interface InstitutionOptions {
+  /** Municipality ID to link to (for municipal institutions) */
+  municipalityId?: string
+  /** Municipality name — auto-creates municipality record if municipalityId not provided */
+  municipalityName?: string
+}
+
+/**
+ * Slugify a name for use as username.
+ * Handles Finnish characters (ä→a, ö→o, å→a) and special chars.
+ */
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/ä/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/å/g, 'a')
+    .replace(/ü/g, 'u')
+    .replace(/é/g, 'e')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40)
+}
+
+/**
+ * Get or create an institution placeholder account.
+ *
+ * These accounts represent real institutions (ministries, municipalities, EU bodies)
+ * on the platform. The bot posts on their behalf via sourceInstitutionId.
+ *
+ * Users can follow these institutions directly. When the real institution
+ * joins, they can take over the account (identityProvider changes from
+ * 'eulesia-bot' to their actual identity).
+ *
+ * @param name - Display name of the institution (e.g. "Valtiovarainministeriö")
+ * @param type - Institution type: 'ministry', 'municipality', or 'agency'
+ * @param options - Additional options (municipalityId, etc.)
+ * @returns The institution user ID
+ */
+export async function getOrCreateInstitution(
+  name: string,
+  type: InstitutionType,
+  options: InstitutionOptions = {}
+): Promise<string> {
+  // First check by institutionName (canonical lookup)
+  const existing = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(
+      eq(users.role, 'institution'),
+      eq(users.institutionName, name)
+    ))
+    .limit(1)
+
+  if (existing.length > 0) {
+    return existing[0].id
+  }
+
+  // Resolve municipality ID if municipality name is provided
+  let municipalityId = options.municipalityId
+  if (!municipalityId && options.municipalityName && type === 'municipality') {
+    municipalityId = await getOrCreateMunicipalityRecord(options.municipalityName)
+  }
+
+  // Generate a unique username
+  const slug = slugify(name)
+  const username = `inst-${slug}`
+
+  // Check if username already taken (edge case)
+  const usernameExists = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1)
+
+  const finalUsername = usernameExists.length > 0
+    ? `${username}-${Date.now().toString(36).slice(-4)}`
+    : username
+
+  const [institution] = await db
+    .insert(users)
+    .values({
+      username: finalUsername,
+      name,
+      institutionName: name,
+      role: 'institution',
+      institutionType: type,
+      municipalityId,
+      identityVerified: false,
+      identityProvider: 'eulesia-bot',
+      identityLevel: 'basic'
+    })
+    .returning({ id: users.id })
+
+  console.log(`  Created institution placeholder: ${name} (@${finalUsername})`)
+  return institution.id
+}
+
+/**
+ * Get or create a municipality record by name.
+ */
+async function getOrCreateMunicipalityRecord(name: string): Promise<string> {
+  const normalized = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+
+  const existing = await db
+    .select({ id: municipalities.id })
+    .from(municipalities)
+    .where(eq(municipalities.name, normalized))
+    .limit(1)
+
+  if (existing.length > 0) {
+    return existing[0].id
+  }
+
+  const [created] = await db
+    .insert(municipalities)
+    .values({
+      name: normalized,
+      nameFi: normalized,
+      country: 'FI'
+    })
+    .returning({ id: municipalities.id })
+
+  return created.id
+}
+
+// ============================================
+// TOPIC TAG HELPERS
+// ============================================
+
+/**
+ * Get the topic tag associated with an institution.
+ */
+export async function getInstitutionTopicTag(institutionId: string): Promise<string | null> {
+  const [topic] = await db
+    .select({ topicTag: institutionTopics.topicTag })
+    .from(institutionTopics)
+    .where(eq(institutionTopics.institutionId, institutionId))
+    .limit(1)
+
+  return topic?.topicTag || null
+}
