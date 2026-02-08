@@ -167,8 +167,9 @@ export const dynastyFetcher: MinuteFetcher = {
       const protocolMatch = row.match(/page=meeting&(?:amp;)?id=(\d+)/)
       if (!protocolMatch) continue
 
-      // Check for icon_protocol to confirm it's a finalized protocol
-      if (!row.includes('icon_protocol')) continue
+      // Check for protocol indicator: icon_protocol (older), 'protocol' CSS class (newer), or Pöytäkirja link text
+      const isProtocol = row.includes('icon_protocol') || /class='[^']*\bprotocol\b/.test(row) || /class="[^"]*\bprotocol\b/.test(row)
+      if (!isProtocol) continue
 
       const meetingId = protocolMatch[1]
 
