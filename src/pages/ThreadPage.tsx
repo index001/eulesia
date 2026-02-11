@@ -48,6 +48,13 @@ export function ThreadPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditHistory, setShowEditHistory] = useState(false)
 
+  // Memoize sanitized HTML to prevent re-render layout shift (e.g. images reloading)
+  // Must be called before any early returns to maintain consistent hook call order
+  const sanitizedContentHtml = useMemo(
+    () => thread?.contentHtml ? sanitizeContent(thread.contentHtml) : null,
+    [thread?.contentHtml]
+  )
+
   const handleThreadVote = (value: number) => {
     if (!currentUser || !threadId) return
     voteThreadMutation.mutate({ threadId, value })
@@ -160,12 +167,6 @@ export function ThreadPage() {
   const author = transformAuthor(thread.author)
   const isInstitutional = thread.author.role === 'institution'
   const comments = thread.comments?.map(transformComment) || []
-
-  // Memoize sanitized HTML to prevent re-render layout shift (e.g. images reloading)
-  const sanitizedContentHtml = useMemo(
-    () => thread.contentHtml ? sanitizeContent(thread.contentHtml) : null,
-    [thread.contentHtml]
-  )
 
   return (
     <Layout>
