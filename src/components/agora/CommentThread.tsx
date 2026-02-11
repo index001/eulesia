@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { sanitizeContent } from '../../utils/sanitize'
-import { ChevronUp, ChevronDown, MessageSquare, Minus, Plus } from 'lucide-react'
+import { ChevronUp, ChevronDown, MessageSquare, Minus, Plus, Pencil, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActorBadge } from '../common/ActorBadge'
 import { EditedIndicator } from '../common/EditedIndicator'
+import { ConfirmDeleteDialog } from '../common/ConfirmDeleteDialog'
 import { formatRelativeTime } from '../../lib/formatTime'
 import type { UserRole } from '../../types'
 
@@ -67,6 +68,9 @@ function CommentItem({
   const { t } = useTranslation(['agora', 'common'])
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [replyContent, setReplyContent] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  const [editContent, setEditContent] = useState('')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const author = comment.author
   if (!author) return null
 
@@ -78,11 +82,30 @@ function CommentItem({
   // Get replies to this comment
   const childReplies = allComments.filter(c => c.parentId === comment.id)
 
-  // Edit/delete kept for future use
-  void onEdit
-  void onDelete
-  void currentUserId
-  void currentUserRole
+  // Permission checks
+  const isAdmin = currentUserRole === 'admin'
+  const isAuthor = currentUserId === comment.authorId
+  const canEditComment = isAdmin || isAuthor
+  const canDeleteComment = isAdmin || isAuthor
+
+  const handleStartEdit = () => {
+    setEditContent(comment.content)
+    setIsEditing(true)
+  }
+
+  const handleSaveEdit = () => {
+    if (editContent.trim() && onEdit) {
+      onEdit(comment.id, editContent.trim())
+      setIsEditing(false)
+    }
+  }
+
+  const handleConfirmDelete = () => {
+    if (onDelete) {
+      onDelete(comment.id)
+    }
+    setShowDeleteConfirm(false)
+  }
 
   const handleSubmitReply = () => {
     if (replyContent.trim()) {
@@ -177,7 +200,32 @@ function CommentItem({
                 <div className={`mt-1 rounded-lg ${
                   isInstitution ? 'bg-violet-50 p-3 border border-violet-100' : ''
                 }`}>
-                  {comment.contentHtml ? (
+                  {isEditing ? (
+                    <div>
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        rows={4}
+                        autoFocus
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={handleSaveEdit}
+                          disabled={!editContent.trim()}
+                          className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {t('common:actions.save')}
+                        </button>
+                        <button
+                          onClick={() => setIsEditing(false)}
+                          className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800"
+                        >
+                          {t('common:actions.cancel')}
+                        </button>
+                      </div>
+                    </div>
+                  ) : comment.contentHtml ? (
                     <div
                       className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none"
                       dangerouslySetInnerHTML={{ __html: sanitizeContent(comment.contentHtml) }}
@@ -190,15 +238,43 @@ function CommentItem({
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-3 mt-1">
-                  <button
-                    onClick={() => onReply(comment.id)}
-                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 py-1 rounded transition-colors"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    {t('common:actions.reply')}
-                  </button>
-                </div>
+                {!isEditing && (
+                  <div className="flex items-center gap-3 mt-1">
+                    <button
+                      onClick={() => onReply(comment.id)}
+                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 py-1 rounded transition-colors"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      {t('common:actions.reply')}
+                    </button>
+                    {canEditComment && (
+                      <button
+                        onClick={handleStartEdit}
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 py-1 rounded transition-colors"
+                      >
+                        <Pencil className="w-3 h-3" />
+                        {t('common:actions.edit')}
+                      </button>
+                    )}
+                    {canDeleteComment && (
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-600 py-1 rounded transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        {t('common:actions.delete')}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Delete confirmation */}
+                <ConfirmDeleteDialog
+                  open={showDeleteConfirm}
+                  type="comment"
+                  onConfirm={handleConfirmDelete}
+                  onClose={() => setShowDeleteConfirm(false)}
+                />
 
                 {/* Reply form */}
                 {replyingTo === comment.id && (
@@ -254,6 +330,10 @@ function CommentItem({
                 replyingTo={replyingTo}
                 onSubmitReply={onSubmitReply}
                 onCancelReply={onCancelReply}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                currentUserId={currentUserId}
+                currentUserRole={currentUserRole}
               />
             ))}
           </div>
@@ -276,12 +356,6 @@ interface CommentThreadProps {
 export function CommentThread({ comments, onVote, onReply, onEdit, onDelete, currentUserId, currentUserRole }: CommentThreadProps) {
   const { t } = useTranslation('agora')
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
-
-  // Keep for future use
-  void onEdit
-  void onDelete
-  void currentUserId
-  void currentUserRole
 
   // Get top-level comments (no parent)
   const topLevel = comments.filter(c => !c.parentId)
@@ -329,6 +403,10 @@ export function CommentThread({ comments, onVote, onReply, onEdit, onDelete, cur
           replyingTo={replyingTo}
           onSubmitReply={handleSubmitReply}
           onCancelReply={handleCancelReply}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
         />
       ))}
     </div>

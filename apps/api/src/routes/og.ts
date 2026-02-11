@@ -8,13 +8,6 @@ const SITE_NAME = 'Eulesia'
 const DEFAULT_DESCRIPTION = 'Eurooppalainen kansalaisdemokratia-alusta'
 const DEFAULT_IMAGE = '/og-default.png'
 
-const BOT_PATTERNS = /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|TelegramBot|Embedly|Pinterest|vkShare|Applebot/i
-
-function isBot(req: Request): boolean {
-  const ua = req.headers['user-agent'] || ''
-  return BOT_PATTERNS.test(ua)
-}
-
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -77,10 +70,16 @@ function buildOgHtml(opts: {
 </html>`
 }
 
+function defaultOg(req: Request, res: Response) {
+  res.status(200).send(buildOgHtml({
+    title: SITE_NAME,
+    description: DEFAULT_DESCRIPTION,
+    url: req.originalUrl
+  }))
+}
+
 // Thread OG
-router.get('/og/agora/thread/:threadId', async (req: Request, res: Response) => {
-  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
-  if (!isBot(req)) return res.redirect(`${appUrl}/agora/thread/${req.params.threadId}`)
+router.get('/agora/thread/:threadId', async (req: Request, res: Response) => {
   try {
     const [thread] = await db
       .select({
@@ -92,33 +91,21 @@ router.get('/og/agora/thread/:threadId', async (req: Request, res: Response) => 
       .where(eq(threads.id, req.params.threadId))
       .limit(1)
 
-    if (!thread) {
-      return res.status(200).send(buildOgHtml({
-        title: SITE_NAME,
-        description: DEFAULT_DESCRIPTION,
-        url: `/agora/thread/${req.params.threadId}`
-      }))
-    }
+    if (!thread) return defaultOg(req, res)
 
     res.send(buildOgHtml({
       title: thread.title,
       description: stripMarkdown(thread.content),
-      url: `/agora/thread/${req.params.threadId}`,
+      url: req.originalUrl,
       type: 'article'
     }))
   } catch {
-    res.status(200).send(buildOgHtml({
-      title: SITE_NAME,
-      description: DEFAULT_DESCRIPTION,
-      url: `/agora/thread/${req.params.threadId}`
-    }))
+    defaultOg(req, res)
   }
 })
 
 // Club OG
-router.get('/og/clubs/:clubId', async (req: Request, res: Response) => {
-  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
-  if (!isBot(req)) return res.redirect(`${appUrl}/clubs/${req.params.clubId}`)
+router.get('/clubs/:clubId', async (req: Request, res: Response) => {
   try {
     const [club] = await db
       .select({
@@ -131,38 +118,26 @@ router.get('/og/clubs/:clubId', async (req: Request, res: Response) => {
       .where(eq(clubs.id, req.params.clubId))
       .limit(1)
 
-    if (!club) {
-      return res.status(200).send(buildOgHtml({
-        title: SITE_NAME,
-        description: DEFAULT_DESCRIPTION,
-        url: `/clubs/${req.params.clubId}`
-      }))
-    }
+    if (!club) return defaultOg(req, res)
 
     const desc = club.description
       ? stripMarkdown(club.description)
-      : `${club.memberCount || 0} j\u00e4sent\u00e4`
+      : `${club.memberCount || 0} jäsentä`
 
     res.send(buildOgHtml({
       title: club.name,
       description: desc,
-      url: `/clubs/${req.params.clubId}`,
+      url: req.originalUrl,
       type: 'website',
       image: club.coverImageUrl || undefined
     }))
   } catch {
-    res.status(200).send(buildOgHtml({
-      title: SITE_NAME,
-      description: DEFAULT_DESCRIPTION,
-      url: `/clubs/${req.params.clubId}`
-    }))
+    defaultOg(req, res)
   }
 })
 
 // Club thread OG
-router.get('/og/clubs/:clubId/thread/:threadId', async (req: Request, res: Response) => {
-  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
-  if (!isBot(req)) return res.redirect(`${appUrl}/clubs/${req.params.clubId}/thread/${req.params.threadId}`)
+router.get('/clubs/:clubId/thread/:threadId', async (req: Request, res: Response) => {
   try {
     const [thread] = await db
       .select({
@@ -173,33 +148,21 @@ router.get('/og/clubs/:clubId/thread/:threadId', async (req: Request, res: Respo
       .where(eq(clubThreads.id, req.params.threadId))
       .limit(1)
 
-    if (!thread) {
-      return res.status(200).send(buildOgHtml({
-        title: SITE_NAME,
-        description: DEFAULT_DESCRIPTION,
-        url: `/clubs/${req.params.clubId}/thread/${req.params.threadId}`
-      }))
-    }
+    if (!thread) return defaultOg(req, res)
 
     res.send(buildOgHtml({
       title: thread.title,
       description: stripMarkdown(thread.content),
-      url: `/clubs/${req.params.clubId}/thread/${req.params.threadId}`,
+      url: req.originalUrl,
       type: 'article'
     }))
   } catch {
-    res.status(200).send(buildOgHtml({
-      title: SITE_NAME,
-      description: DEFAULT_DESCRIPTION,
-      url: `/clubs/${req.params.clubId}/thread/${req.params.threadId}`
-    }))
+    defaultOg(req, res)
   }
 })
 
 // Municipality OG
-router.get('/og/kunnat/:municipalityId', async (req: Request, res: Response) => {
-  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
-  if (!isBot(req)) return res.redirect(`${appUrl}/kunnat/${req.params.municipalityId}`)
+router.get('/kunnat/:municipalityId', async (req: Request, res: Response) => {
   try {
     const [municipality] = await db
       .select({
@@ -210,34 +173,22 @@ router.get('/og/kunnat/:municipalityId', async (req: Request, res: Response) => 
       .where(eq(municipalities.id, req.params.municipalityId))
       .limit(1)
 
-    if (!municipality) {
-      return res.status(200).send(buildOgHtml({
-        title: SITE_NAME,
-        description: DEFAULT_DESCRIPTION,
-        url: `/kunnat/${req.params.municipalityId}`
-      }))
-    }
+    if (!municipality) return defaultOg(req, res)
 
     const name = municipality.nameFi || municipality.name
     res.send(buildOgHtml({
       title: name,
       description: `${name} - keskustelu ja päätöksenteko`,
-      url: `/kunnat/${req.params.municipalityId}`,
+      url: req.originalUrl,
       type: 'place'
     }))
   } catch {
-    res.status(200).send(buildOgHtml({
-      title: SITE_NAME,
-      description: DEFAULT_DESCRIPTION,
-      url: `/kunnat/${req.params.municipalityId}`
-    }))
+    defaultOg(req, res)
   }
 })
 
 // User profile OG
-router.get('/og/user/:userId', async (req: Request, res: Response) => {
-  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
-  if (!isBot(req)) return res.redirect(`${appUrl}/user/${req.params.userId}`)
+router.get('/user/:userId', async (req: Request, res: Response) => {
   try {
     const [user] = await db
       .select({
@@ -249,27 +200,17 @@ router.get('/og/user/:userId', async (req: Request, res: Response) => {
       .where(eq(users.id, req.params.userId))
       .limit(1)
 
-    if (!user) {
-      return res.status(200).send(buildOgHtml({
-        title: SITE_NAME,
-        description: DEFAULT_DESCRIPTION,
-        url: `/user/${req.params.userId}`
-      }))
-    }
+    if (!user) return defaultOg(req, res)
 
     res.send(buildOgHtml({
       title: user.name,
       description: `${user.name} Eulesia-alustalla`,
-      url: `/user/${req.params.userId}`,
+      url: req.originalUrl,
       type: 'profile',
       image: user.avatarUrl || undefined
     }))
   } catch {
-    res.status(200).send(buildOgHtml({
-      title: SITE_NAME,
-      description: DEFAULT_DESCRIPTION,
-      url: `/user/${req.params.userId}`
-    }))
+    defaultOg(req, res)
   }
 })
 

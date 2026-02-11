@@ -61,12 +61,12 @@ services:
       - "traefik.http.routers.eulesia-api-http.service=eulesia-api"
       # Service
       - "traefik.http.services.eulesia-api.loadbalancer.server.port=3001"
-      # OG meta tags: route /og/* on main domain to API
-      - "traefik.http.routers.eulesia-og.rule=Host(`${DOMAIN}`) && PathPrefix(`/og/`)"
+      # OG meta tags: route bot requests on main domain to API for OG-enabled paths
+      - "traefik.http.routers.eulesia-og.rule=Host(`${DOMAIN}`) && HeadersRegexp(`User-Agent`, `(?i)(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|TelegramBot|Embedly|Pinterest|vkShare|Applebot)`) && (PathPrefix(`/agora/thread/`) || PathPrefix(`/clubs/`) || PathPrefix(`/kunnat/`) || PathPrefix(`/user/`))"
       - "traefik.http.routers.eulesia-og.entrypoints=websecure"
       - "traefik.http.routers.eulesia-og.tls.certresolver=le"
       - "traefik.http.routers.eulesia-og.service=eulesia-api"
-      - "traefik.http.routers.eulesia-og.priority=100"
+      - "traefik.http.routers.eulesia-og.priority=200"
     networks:
       - internal
       - wp_web
