@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import DOMPurify from 'dompurify'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Building2, ChevronDown } from 'lucide-react'
 import { Layout } from '../components/layout'
@@ -16,6 +16,7 @@ import { transformAuthor, transformComment } from '../utils/transforms'
 export function ThreadPage() {
   const { t } = useTranslation(['agora', 'common'])
   const { threadId } = useParams<{ threadId: string }>()
+  const navigate = useNavigate()
   const { currentUser } = useAuth()
   const [sort, setSort] = useState<CommentSort>('best')
   const [showSortMenu, setShowSortMenu] = useState(false)
@@ -101,13 +102,13 @@ export function ThreadPage() {
     <Layout>
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <Link
-          to="/agora"
+        <button
+          onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('thread.backToAgora')}
-        </Link>
+        </button>
       </div>
 
       {/* Thread header */}

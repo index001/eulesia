@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import DOMPurify from 'dompurify'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
@@ -47,6 +47,7 @@ function MessageBubble({ message, isOwnMessage }: { message: DirectMessage; isOw
 
 export function DMConversationPage() {
   const { t } = useTranslation('messages')
+  const navigate = useNavigate()
   const { conversationId } = useParams<{ conversationId: string }>()
   const { currentUser } = useAuth()
   const { joinDm, leaveDm } = useSocket()
@@ -120,9 +121,9 @@ export function DMConversationPage() {
         {/* Header */}
         <div className="bg-teal-700 px-4 py-4 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <Link to="/messages" className="p-2 -ml-2 hover:bg-white/10 rounded-lg">
+            <button onClick={() => navigate(-1)} className="p-2 -ml-2 hover:bg-white/10 rounded-lg">
               <ArrowLeft className="w-5 h-5 text-white" />
-            </Link>
+            </button>
             {otherUser && (
               <Link to={`/user/${otherUser.id}`} className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">

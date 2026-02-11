@@ -74,12 +74,12 @@ export function MunicipalityPage() {
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-            <Link
-              to="/kunnat"
+            <button
+              onClick={() => navigate(-1)}
               className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </Link>
+            </button>
             <div>
               <h1 className="text-xl font-bold text-gray-900">
                 {municipality?.name || t('agora:municipality.defaultName')}

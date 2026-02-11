@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Users, Shield, MessageSquare, Pin, ScrollText, X, Send,
   Settings, Globe, Lock, MapPin, Image as ImageIcon, Loader2, Trash2,
@@ -29,6 +29,7 @@ function transformUser(user: UserSummary) {
 
 export function ClubViewPage() {
   const { t } = useTranslation('clubs')
+  const navigate = useNavigate()
   const { clubId } = useParams<{ clubId: string }>()
   const { data: club, isLoading, error } = useClub(clubId || '')
   const joinClubMutation = useJoinClub()
@@ -201,13 +202,13 @@ export function ClubViewPage() {
     <Layout>
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <Link
-          to="/clubs"
+        <button
+          onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('backToClubs')}
-        </Link>
+        </button>
       </div>
 
       {/* Cover image */}

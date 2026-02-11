@@ -134,13 +134,13 @@ export function ClubThreadPage() {
     <Layout>
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <Link
-          to={`/clubs/${clubId}`}
+        <button
+          onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('clubs:backToClub')}
-        </Link>
+        </button>
       </div>
 
       {/* Thread header */}

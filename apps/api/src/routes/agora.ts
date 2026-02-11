@@ -505,6 +505,36 @@ router.post('/threads', authMiddleware, asyncHandler(async (req: AuthenticatedRe
     })
   }
 
+  // Auto-resolve municipalityId from location if not provided
+  let resolvedMunicipalityId = data.municipalityId || null
+  if (!resolvedMunicipalityId && resolvedLocationId && data.scope === 'local') {
+    const { locations: locationsTable } = await import('../db/index.js')
+    const [loc] = await db
+      .select({ name: locationsTable.name, type: locationsTable.type })
+      .from(locationsTable)
+      .where(eq(locationsTable.id, resolvedLocationId))
+      .limit(1)
+
+    if (loc && loc.type === 'municipality') {
+      // Find or create the matching municipality
+      const [existingMuni] = await db
+        .select({ id: municipalities.id })
+        .from(municipalities)
+        .where(eq(municipalities.name, loc.name))
+        .limit(1)
+
+      if (existingMuni) {
+        resolvedMunicipalityId = existingMuni.id
+      } else {
+        const [newMuni] = await db
+          .insert(municipalities)
+          .values({ name: loc.name, nameFi: loc.name, country: 'FI' })
+          .returning({ id: municipalities.id })
+        resolvedMunicipalityId = newMuni.id
+      }
+    }
+  }
+
   // Render markdown
   const contentHtml = renderMarkdown(data.content)
 
@@ -518,7 +548,7 @@ router.post('/threads', authMiddleware, asyncHandler(async (req: AuthenticatedRe
       authorId: userId,
       scope: data.scope,
       country: data.country || 'FI',
-      municipalityId: data.municipalityId,
+      municipalityId: resolvedMunicipalityId,
       locationId: resolvedLocationId,
       institutionalContext: data.institutionalContext,
       language: data.language || req.user?.locale || 'fi'

@@ -271,7 +271,7 @@ export function HomePage() {
                   {homeData.recentActivity.threads.slice(0, 3).map((thread: { id: string; title: string; scope: string }) => (
                     <Link
                       key={thread.id}
-                      to={`/agora/${thread.id}`}
+                      to={`/agora/thread/${thread.id}`}
                       className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:shadow-sm transition-shadow"
                     >
                       <BookOpen className="w-4 h-4 text-blue-600" />
