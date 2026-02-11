@@ -177,6 +177,23 @@ async function runMigrations() {
     await db.execute(sql`DELETE FROM "club_threads" WHERE "club_id" IN (SELECT "id" FROM "clubs" WHERE "slug" IN ('tampere-history', 'cycling-tampere', 'hervanta-neighbors'))`)
     await db.execute(sql`DELETE FROM "club_members" WHERE "club_id" IN (SELECT "id" FROM "clubs" WHERE "slug" IN ('tampere-history', 'cycling-tampere', 'hervanta-neighbors'))`)
     await db.execute(sql`DELETE FROM "clubs" WHERE "slug" IN ('tampere-history', 'cycling-tampere', 'hervanta-neighbors')`)
+    // 0012: is_hidden columns
+    await db.execute(sql`ALTER TABLE "threads" ADD COLUMN IF NOT EXISTS "is_hidden" boolean DEFAULT false`)
+    await db.execute(sql`ALTER TABLE "comments" ADD COLUMN IF NOT EXISTS "is_hidden" boolean DEFAULT false`)
+    await db.execute(sql`ALTER TABLE "club_threads" ADD COLUMN IF NOT EXISTS "is_hidden" boolean DEFAULT false`)
+    await db.execute(sql`ALTER TABLE "club_comments" ADD COLUMN IF NOT EXISTS "is_hidden" boolean DEFAULT false`)
+    await db.execute(sql`ALTER TABLE "room_messages" ADD COLUMN IF NOT EXISTS "is_hidden" boolean DEFAULT false`)
+    // 0013: DSA moderation tables
+    await db.execute(sql`DO $$ BEGIN CREATE TYPE report_reason AS ENUM ('illegal', 'harassment', 'spam', 'misinformation', 'other'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN CREATE TYPE report_status AS ENUM ('pending', 'reviewing', 'resolved', 'dismissed'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN CREATE TYPE content_type AS ENUM ('thread', 'comment', 'club_thread', 'club_comment', 'club', 'user', 'room_message', 'dm'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN CREATE TYPE action_type AS ENUM ('content_removed', 'content_restored', 'user_warned', 'user_suspended', 'user_banned', 'user_unbanned', 'report_dismissed', 'report_resolved', 'role_changed'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN CREATE TYPE sanction_type AS ENUM ('warning', 'suspension', 'ban'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN CREATE TYPE appeal_status AS ENUM ('pending', 'accepted', 'rejected'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`CREATE TABLE IF NOT EXISTS "content_reports" ("id" UUID PRIMARY KEY DEFAULT gen_random_uuid(), "reporter_user_id" UUID NOT NULL REFERENCES "users"("id"), "content_type" content_type NOT NULL, "content_id" UUID NOT NULL, "reason" report_reason NOT NULL, "description" TEXT, "status" report_status DEFAULT 'pending', "assigned_to" UUID REFERENCES "users"("id"), "resolved_at" TIMESTAMPTZ, "created_at" TIMESTAMPTZ DEFAULT NOW())`)
+    await db.execute(sql`CREATE TABLE IF NOT EXISTS "moderation_actions" ("id" UUID PRIMARY KEY DEFAULT gen_random_uuid(), "admin_user_id" UUID NOT NULL REFERENCES "users"("id"), "action_type" action_type NOT NULL, "target_type" content_type NOT NULL, "target_id" UUID NOT NULL, "report_id" UUID REFERENCES "content_reports"("id"), "reason" TEXT, "metadata" JSONB, "created_at" TIMESTAMPTZ DEFAULT NOW())`)
+    await db.execute(sql`CREATE TABLE IF NOT EXISTS "user_sanctions" ("id" UUID PRIMARY KEY DEFAULT gen_random_uuid(), "user_id" UUID NOT NULL REFERENCES "users"("id"), "sanction_type" sanction_type NOT NULL, "reason" TEXT, "issued_by" UUID NOT NULL REFERENCES "users"("id"), "issued_at" TIMESTAMPTZ DEFAULT NOW(), "expires_at" TIMESTAMPTZ, "revoked_at" TIMESTAMPTZ, "revoked_by" UUID REFERENCES "users"("id"))`)
+    await db.execute(sql`CREATE TABLE IF NOT EXISTS "moderation_appeals" ("id" UUID PRIMARY KEY DEFAULT gen_random_uuid(), "sanction_id" UUID REFERENCES "user_sanctions"("id"), "report_id" UUID REFERENCES "content_reports"("id"), "action_id" UUID REFERENCES "moderation_actions"("id"), "user_id" UUID NOT NULL REFERENCES "users"("id"), "reason" TEXT NOT NULL, "status" appeal_status DEFAULT 'pending', "admin_response" TEXT, "responded_by" UUID REFERENCES "users"("id"), "responded_at" TIMESTAMPTZ, "created_at" TIMESTAMPTZ DEFAULT NOW())`)
     console.log('Migrations OK')
   } catch (error) {
     console.error('Migration error:', error)
