@@ -21,6 +21,6 @@ DOMPurify.addHook('uponSanitizeElement', (node, data) => {
 export function sanitizeContent(html: string): string {
   return DOMPurify.sanitize(html, {
     ADD_TAGS: ['iframe'],
-    ADD_ATTR: ['allow', 'allowfullscreen', 'loading', 'referrerpolicy']
+    ADD_ATTR: ['allow', 'allowfullscreen', 'loading', 'referrerpolicy', 'data-url']
   })
 }

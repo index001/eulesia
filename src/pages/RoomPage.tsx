@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { sanitizeContent } from '../utils/sanitize'
+import { ContentWithPreviews } from '../components/common/ContentWithPreviews'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save, Search, Pencil, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -529,7 +529,7 @@ function MessageBubble({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete
               }`}
             >
               {message.contentHtml ? (
-                <div dangerouslySetInnerHTML={{ __html: sanitizeContent(message.contentHtml) }} className="prose prose-sm max-w-none" />
+                <ContentWithPreviews html={message.contentHtml} className="prose prose-sm max-w-none" />
               ) : (
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               )}

@@ -53,7 +53,10 @@ export const queryKeys = {
 
   // Map
   mapPoints: (bounds: MapBounds | null, filters: MapFilterState) => ['mapPoints', bounds, filters] as const,
-  mapLocation: (type: string, id: string) => ['mapLocation', type, id] as const
+  mapLocation: (type: string, id: string) => ['mapLocation', type, id] as const,
+
+  // Link previews
+  linkPreview: (url: string) => ['linkPreview', url] as const
 }
 
 // Auth hooks
@@ -866,5 +869,16 @@ export function useMapLocationDetails(type: string, id: string) {
     queryFn: () => api.getLocationDetails(type, id),
     enabled: !!type && !!id,
     staleTime: 5 * 60_000
+  })
+}
+
+// Link previews
+export function useLinkPreview(url: string) {
+  return useQuery({
+    queryKey: queryKeys.linkPreview(url),
+    queryFn: () => api.getLinkPreview(url),
+    enabled: !!url,
+    staleTime: 24 * 60 * 60_000, // 24h
+    retry: false
   })
 }

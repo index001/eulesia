@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { sanitizeContent } from '../../utils/sanitize'
+import { ContentWithPreviews } from '../common/ContentWithPreviews'
 import { ChevronUp, ChevronDown, MessageSquare, Minus, Plus, Pencil, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActorBadge } from '../common/ActorBadge'
@@ -267,9 +267,9 @@ function CommentItem({
                       </div>
                     </div>
                   ) : comment.contentHtml ? (
-                    <div
+                    <ContentWithPreviews
+                      html={comment.contentHtml}
                       className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: sanitizeContent(comment.contentHtml) }}
                     />
                   ) : (
                     <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">

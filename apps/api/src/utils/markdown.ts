@@ -50,6 +50,37 @@ const imageEmbedExtension: TokenizerExtension & RendererExtension = {
   }
 }
 
+// --- Link preview placeholder extension ---
+// Matches bare URLs on their own line that are NOT YouTube or image URLs
+const YOUTUBE_HOST_RE = /^https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\//
+const IMAGE_EXT_RE = /\.(jpg|jpeg|png|gif|webp|avif|bmp)(\?[^\s]*)?$/i
+const LINK_PREVIEW_REGEX = /^(https?:\/\/[^\s]+)\n?/
+
+const linkPreviewExtension: TokenizerExtension & RendererExtension = {
+  name: 'linkPreview',
+  level: 'block',
+  start(src: string) {
+    return src.match(/^https?:\/\//)?.index
+  },
+  tokenizer(src: string) {
+    const match = src.match(LINK_PREVIEW_REGEX)
+    if (match) {
+      const url = match[1]
+      // Skip if YouTube or image (those have their own handlers)
+      if (YOUTUBE_HOST_RE.test(url) || IMAGE_EXT_RE.test(url)) return undefined
+      return {
+        type: 'linkPreview',
+        raw: match[0],
+        url
+      }
+    }
+  },
+  renderer(token) {
+    const escaped = escapeHtml(token.url)
+    return `<a href="${escaped}" target="_blank" rel="noopener noreferrer">${escaped}</a>\n<div class="link-preview" data-url="${escaped}"></div>\n`
+  }
+}
+
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
@@ -59,7 +90,8 @@ marked.setOptions({
   gfm: true,
   breaks: true
 })
-marked.use({ extensions: [youtubeExtension, imageEmbedExtension] })
+// Note: order matters — YouTube and image extensions are checked first
+marked.use({ extensions: [youtubeExtension, imageEmbedExtension, linkPreviewExtension] })
 
 const sanitizeOptions: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -79,7 +111,7 @@ const sanitizeOptions: sanitizeHtml.IOptions = {
     code: ['class'],
     pre: ['class'],
     iframe: ['src', 'allow', 'allowfullscreen', 'loading', 'title'],
-    div: ['class']
+    div: ['class', 'data-url']
   },
   allowedSchemes: ['http', 'https', 'mailto'],
   allowedSchemesByTag: {
@@ -87,7 +119,7 @@ const sanitizeOptions: sanitizeHtml.IOptions = {
   },
   allowedIframeHostnames: ['www.youtube-nocookie.com', 'www.youtube.com'],
   allowedClasses: {
-    div: ['youtube-embed'],
+    div: ['youtube-embed', 'link-preview'],
     img: ['uploaded-image', 'embedded-image']
   },
   transformTags: {

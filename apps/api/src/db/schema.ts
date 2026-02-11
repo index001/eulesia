@@ -980,3 +980,19 @@ export type NewModerationAppeal = typeof moderationAppeals.$inferInsert
 export type ModerationAppeal = typeof moderationAppeals.$inferSelect
 export type NewEditHistory = typeof editHistory.$inferInsert
 export type EditHistory = typeof editHistory.$inferSelect
+
+// Link preview cache
+export const linkPreviews = pgTable('link_previews', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  url: text('url').notNull().unique(),
+  title: text('title'),
+  description: text('description'),
+  imageUrl: text('image_url'),
+  siteName: text('site_name'),
+  faviconUrl: text('favicon_url'),
+  fetchedAt: timestamp('fetched_at').defaultNow().notNull(),
+  error: boolean('error').default(false)
+})
+
+export type NewLinkPreview = typeof linkPreviews.$inferInsert
+export type LinkPreviewRecord = typeof linkPreviews.$inferSelect

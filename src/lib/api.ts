@@ -729,6 +729,11 @@ class ApiClient {
   async getMySanctions(): Promise<MySanction[]> {
     return this.request('/reports/my-sanctions')
   }
+
+  // Link previews
+  async getLinkPreview(url: string): Promise<LinkPreviewData> {
+    return this.request(`/link-preview?url=${encodeURIComponent(url)}`)
+  }
 }
 
 // Types
@@ -1506,6 +1511,15 @@ export interface MySanction {
   issuedAt: string
   expiresAt?: string
   revokedAt?: string
+}
+
+export interface LinkPreviewData {
+  url: string
+  title: string | null
+  description: string | null
+  imageUrl: string | null
+  siteName: string | null
+  faviconUrl: string | null
 }
 
 // Export singleton instance

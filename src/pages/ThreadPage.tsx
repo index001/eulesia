@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react'
-import { sanitizeContent } from '../utils/sanitize'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Building2, ChevronDown, Pencil, Trash2, History } from 'lucide-react'
 import { Layout } from '../components/layout'
-import { ActorBadge, ScopeBadge, TagList, ContentEndMarker, ReportButton, ConfirmDeleteDialog, EditedIndicator } from '../components/common'
+import { ActorBadge, ScopeBadge, TagList, ContentEndMarker, ReportButton, ConfirmDeleteDialog, EditedIndicator, ContentWithPreviews } from '../components/common'
 import { InstitutionalContextBox } from '../components/agora/InstitutionalContextBox'
 import { CommentThread } from '../components/agora/CommentThread'
 import { ThreadVoteButtons } from '../components/agora/ThreadVoteButtons'
@@ -48,10 +47,9 @@ export function ThreadPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditHistory, setShowEditHistory] = useState(false)
 
-  // Memoize sanitized HTML to prevent re-render layout shift (e.g. images reloading)
   // Must be called before any early returns to maintain consistent hook call order
-  const sanitizedContentHtml = useMemo(
-    () => thread?.contentHtml ? sanitizeContent(thread.contentHtml) : null,
+  const contentHtml = useMemo(
+    () => thread?.contentHtml ?? null,
     [thread?.contentHtml]
   )
 
@@ -319,10 +317,10 @@ export function ThreadPage() {
                   </button>
                 </div>
               </div>
-            ) : sanitizedContentHtml ? (
-              <div
+            ) : contentHtml ? (
+              <ContentWithPreviews
+                html={contentHtml}
                 className="prose prose-gray max-w-none"
-                dangerouslySetInnerHTML={{ __html: sanitizedContentHtml }}
               />
             ) : (
               <div className="prose prose-gray max-w-none">

@@ -15,6 +15,7 @@ import dmRoutes from './dm.js'
 import notificationsRoutes from './notifications.js'
 import adminRoutes from './admin.js'
 import reportsRoutes from './reports.js'
+import linkPreviewRoutes from './linkPreview.js'
 
 const router = Router()
 
@@ -34,6 +35,7 @@ router.use('/dm', dmRoutes)
 router.use('/notifications', notificationsRoutes)
 router.use('/admin', adminRoutes)
 router.use('/reports', reportsRoutes)
+router.use('/', linkPreviewRoutes)
 
 // Health check
 router.get('/health', (_req, res) => {

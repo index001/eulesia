@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { sanitizeContent } from '../utils/sanitize'
+import { ContentWithPreviews } from '../components/common/ContentWithPreviews'
 import { useTranslation } from 'react-i18next'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Users, ChevronDown, Lock, Unlock, Pin, PinOff, Trash2 } from 'lucide-react'
@@ -271,9 +271,9 @@ export function ClubThreadPage() {
         {/* Thread content */}
         <div className="bg-white rounded-xl p-6 border border-gray-200">
           {thread.contentHtml ? (
-            <div
+            <ContentWithPreviews
+              html={thread.contentHtml}
               className="prose prose-gray max-w-none"
-              dangerouslySetInnerHTML={{ __html: sanitizeContent(thread.contentHtml) }}
             />
           ) : (
             <div className="prose prose-gray max-w-none whitespace-pre-wrap">
