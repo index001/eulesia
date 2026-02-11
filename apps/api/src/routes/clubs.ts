@@ -509,7 +509,7 @@ router.get('/:clubId/threads/:threadId', optionalAuthMiddleware, asyncHandler(as
     })
     .from(clubComments)
     .leftJoin(users, eq(clubComments.authorId, users.id))
-    .where(and(eq(clubComments.threadId, threadId), eq(clubComments.isHidden, false)))
+    .where(eq(clubComments.threadId, threadId))
     .orderBy(clubComments.createdAt)
 
   // Check membership for memberRole
@@ -535,10 +535,25 @@ router.get('/:clubId/threads/:threadId', optionalAuthMiddleware, asyncHandler(as
       ...threadData.thread,
       author: threadData.author,
       memberRole,
-      comments: commentList.map(({ comment, author }) => ({
-        ...comment,
-        author
-      }))
+      comments: commentList.map(({ comment, author }) => {
+        if (comment.isHidden) {
+          return {
+            id: comment.id,
+            threadId: comment.threadId,
+            parentId: comment.parentId,
+            authorId: comment.authorId,
+            content: '',
+            contentHtml: null,
+            createdAt: comment.createdAt,
+            isHidden: true,
+            author: null
+          }
+        }
+        return {
+          ...comment,
+          author
+        }
+      })
     }
   })
 }))

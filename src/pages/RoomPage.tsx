@@ -447,10 +447,19 @@ interface MessageBubbleProps {
 }
 
 function MessageBubble({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete }: MessageBubbleProps) {
-  const { t } = useTranslation('home')
+  const { t } = useTranslation(['home', 'common'])
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  // Deleted message placeholder
+  if (message.isHidden) {
+    return (
+      <div className="flex justify-center py-1">
+        <span className="text-xs text-gray-400 italic">{t('common:messageDeleted')}</span>
+      </div>
+    )
+  }
 
   const canEdit = isOwnMessage
   const canDelete = isOwnMessage || isOwnerOrAdmin
@@ -470,12 +479,12 @@ function MessageBubble({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete
   return (
     <div className={`group flex gap-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
       <div className="flex-shrink-0">
-        <ActorBadge user={transformAuthor(message.author)} showName={false} size="sm" />
+        {message.author && <ActorBadge user={transformAuthor(message.author)} showName={false} size="sm" />}
       </div>
       <div className={`max-w-[75%] ${isOwnMessage ? 'text-right' : ''}`}>
         <div className="flex items-baseline gap-2 mb-1">
           <span className={`text-sm font-medium text-gray-900 ${isOwnMessage ? 'order-2' : ''}`}>
-            {message.author.name}
+            {message.author?.name}
           </span>
           <span className="text-xs text-gray-500">
             {formatRelativeTime(message.createdAt)}

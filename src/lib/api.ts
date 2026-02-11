@@ -795,13 +795,14 @@ export interface Comment {
   id: string
   content: string
   contentHtml?: string
-  author: UserSummary
+  author: UserSummary | null
   parentId?: string | null
   score?: number
   depth?: number
   userVote?: number
   editedAt?: string | null
   editedBy?: string | null
+  isHidden?: boolean
   createdAt: string
 }
 
@@ -899,9 +900,10 @@ export interface RoomMessage {
   id: string
   content: string
   contentHtml?: string
-  author: UserSummary
+  author: UserSummary | null
   editedAt?: string | null
   editedBy?: string | null
+  isHidden?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -955,8 +957,9 @@ export interface DirectMessage {
   conversationId: string
   content: string
   contentHtml?: string
-  author: UserSummary
+  author: UserSummary | null
   editedAt?: string | null
+  isHidden?: boolean
   createdAt: string
 }
 
@@ -964,6 +967,7 @@ export interface EditHistoryEntry {
   id: string
   contentType: string
   previousContent: string
+  previousContentHtml?: string | null
   previousTitle?: string | null
   editedAt: string
   editor: {

@@ -71,17 +71,27 @@ export function AgoraPage() {
   const { data: municipalitiesData } = useMunicipalities()
   const { data: subscriptionsData } = useSubscriptions()
 
+  const [page, setPage] = useState(1)
+  const [allThreads, setAllThreads] = useState<ReturnType<typeof transformThread>[]>([])
+
   // Build filters for the API
   const filters = useMemo(() => ({
     feedScope,
     sortBy,
     topPeriod: sortBy === 'top' ? topPeriod : undefined,
     municipalityId: selectedMunicipality,
-    tags: selectedTags.length > 0 ? selectedTags : undefined
-  }), [feedScope, sortBy, topPeriod, selectedMunicipality, selectedTags])
+    tags: selectedTags.length > 0 ? selectedTags : undefined,
+    page
+  }), [feedScope, sortBy, topPeriod, selectedMunicipality, selectedTags, page])
 
   const { data: threadsData, isLoading, error } = useThreads(filters)
   const voteThreadMutation = useVoteThread(filters)
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setPage(1)
+    setAllThreads([])
+  }, [feedScope, sortBy, topPeriod, selectedMunicipality, selectedTags]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Determine if user has subscriptions
   const hasSubscriptions = useMemo(() => {
@@ -127,10 +137,22 @@ export function AgoraPage() {
     return tagsData?.map(t => t.tag) || []
   }, [tagsData])
 
-  const threads = useMemo(() => {
-    if (!threadsData?.items) return []
-    return threadsData.items.map(transformThread)
-  }, [threadsData])
+  // Accumulate threads across pages
+  useEffect(() => {
+    if (!threadsData?.items) return
+    const newThreads = threadsData.items.map(transformThread)
+    if (page === 1) {
+      setAllThreads(newThreads)
+    } else {
+      setAllThreads(prev => {
+        const existingIds = new Set(prev.map(t => t.id))
+        const unique = newThreads.filter(t => !existingIds.has(t.id))
+        return [...prev, ...unique]
+      })
+    }
+  }, [threadsData, page]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const threads = allThreads
 
   // Is this a personalized scope with no subscriptions?
   const isPersonalizedScope = ['local', 'national', 'european'].includes(feedScope)
@@ -274,9 +296,25 @@ export function AgoraPage() {
           </div>
         )}
 
-        {/* End marker */}
+        {/* Load more / End marker */}
         {!isLoading && !showOnboarding && threads.length > 0 && (
-          <ContentEndMarker />
+          threadsData?.hasMore ? (
+            <div className="py-6 text-center">
+              <button
+                onClick={() => setPage(p => p + 1)}
+                className="px-6 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                {t('common:loadMore')}
+              </button>
+            </div>
+          ) : (
+            <ContentEndMarker />
+          )
+        )}
+        {isLoading && page > 1 && (
+          <div className="flex justify-center py-6">
+            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          </div>
         )}
       </div>
     </Layout>

@@ -415,7 +415,7 @@ router.get('/threads/:id', optionalAuthMiddleware, asyncHandler(async (req: Auth
     })
     .from(comments)
     .leftJoin(users, eq(comments.authorId, users.id))
-    .where(and(eq(comments.threadId, id), eq(comments.isHidden, false)))
+    .where(eq(comments.threadId, id))
     .orderBy(orderBy)
 
   // Get user's votes if logged in
@@ -463,20 +463,50 @@ router.get('/threads/:id', optionalAuthMiddleware, asyncHandler(async (req: Auth
     sourceInstitutionName = srcInst?.name || null
   }
 
+  // Resolve editor name if thread was edited
+  let editorName: string | null = null
+  if (threadData.thread.editedBy) {
+    const [editor] = await db
+      .select({ name: users.name })
+      .from(users)
+      .where(eq(users.id, threadData.thread.editedBy))
+      .limit(1)
+    editorName = editor?.name || null
+  }
+
   res.json({
     success: true,
     data: {
       ...threadData.thread,
+      editorName,
       tags: tags.map(t => t.tag),
       author: threadData.author,
       municipality: threadData.municipality,
       userVote: threadUserVote,
       sourceInstitutionName,
-      comments: commentList.map(({ comment, author }) => ({
-        ...comment,
-        author,
-        userVote: userVotes[comment.id] || 0
-      }))
+      comments: commentList.map(({ comment, author }) => {
+        if (comment.isHidden) {
+          return {
+            id: comment.id,
+            threadId: comment.threadId,
+            parentId: comment.parentId,
+            authorId: comment.authorId,
+            content: '',
+            contentHtml: null,
+            score: 0,
+            depth: comment.depth,
+            createdAt: comment.createdAt,
+            isHidden: true,
+            author: null,
+            userVote: 0
+          }
+        }
+        return {
+          ...comment,
+          author,
+          userVote: userVotes[comment.id] || 0
+        }
+      })
     }
   })
 }))
@@ -1030,6 +1060,7 @@ router.get('/threads/:id/edit-history', asyncHandler(async (req, res: Response) 
       id: editHistory.id,
       contentType: editHistory.contentType,
       previousContent: editHistory.previousContent,
+      previousContentHtml: editHistory.previousContentHtml,
       previousTitle: editHistory.previousTitle,
       editedAt: editHistory.editedAt,
       editor: {

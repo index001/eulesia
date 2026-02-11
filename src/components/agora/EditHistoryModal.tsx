@@ -2,6 +2,7 @@ import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useThreadEditHistory } from '../../hooks/useApi'
 import { formatRelativeTime } from '../../lib/formatTime'
+import { sanitizeContent } from '../../utils/sanitize'
 
 interface EditHistoryModalProps {
   threadId: string
@@ -48,9 +49,16 @@ export function EditHistoryModal({ threadId, open, onClose }: EditHistoryModalPr
                   )}
                   <div>
                     <span className="text-xs font-medium text-gray-500">{t('thread.previousContent')}:</span>
-                    <p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap line-clamp-6">
-                      {entry.previousContent}
-                    </p>
+                    {entry.previousContentHtml ? (
+                      <div
+                        className="text-sm text-gray-600 mt-1 prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: sanitizeContent(entry.previousContentHtml) }}
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">
+                        {entry.previousContent}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

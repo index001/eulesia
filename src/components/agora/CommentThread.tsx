@@ -30,8 +30,9 @@ interface CommentWithAuthor {
   userVote?: number
   editedAt?: string | null
   editedBy?: string | null
+  isHidden?: boolean
   createdAt: string
-  author: CommentAuthor
+  author: CommentAuthor | null
 }
 
 interface CommentItemProps {
@@ -72,15 +73,55 @@ function CommentItem({
   const [editContent, setEditContent] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const author = comment.author
-  if (!author) return null
-
-  const isInstitution = author.role === 'institution'
-  const score = comment.score || 0
-  const userVote = comment.userVote || 0
   const maxVisualDepth = 6
 
   // Get replies to this comment
   const childReplies = allComments.filter(c => c.parentId === comment.id)
+
+  // Deleted comment placeholder — show stub but keep child replies visible
+  if (comment.isHidden || !author) {
+    return (
+      <div className={depth > 0 ? 'relative' : ''}>
+        {depth > 0 && depth <= maxVisualDepth && (
+          <div
+            className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200"
+            style={{ marginLeft: -12 }}
+          />
+        )}
+        <div className="py-2 px-3">
+          <p className="text-sm text-gray-400 italic">
+            {t('common:messageDeleted')}
+          </p>
+        </div>
+        {childReplies.length > 0 && (
+          <div className={`mt-2 ${depth < maxVisualDepth ? 'ml-6 pl-3' : 'ml-2'}`}>
+            {childReplies.map(reply => (
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                replies={[]}
+                allComments={allComments}
+                depth={depth + 1}
+                onVote={onVote}
+                onReply={onReply}
+                replyingTo={replyingTo}
+                onSubmitReply={onSubmitReply}
+                onCancelReply={onCancelReply}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                currentUserId={currentUserId}
+                currentUserRole={currentUserRole}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const isInstitution = author.role === 'institution'
+  const score = comment.score || 0
+  const userVote = comment.userVote || 0
 
   // Permission checks
   const isAdmin = currentUserRole === 'admin'

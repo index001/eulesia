@@ -243,7 +243,7 @@ router.get('/:conversationId', authMiddleware, asyncHandler(async (req: Authenti
 
   const otherUser = otherParticipants[0]?.user
 
-  // Get messages (newest first, then reverse for display; filter hidden)
+  // Get messages (newest first, then reverse for display; include hidden as stubs)
   const messagesData = await db
     .select({
       message: directMessages,
@@ -251,7 +251,7 @@ router.get('/:conversationId', authMiddleware, asyncHandler(async (req: Authenti
     })
     .from(directMessages)
     .innerJoin(users, eq(directMessages.authorId, users.id))
-    .where(and(eq(directMessages.conversationId, conversationId), eq(directMessages.isHidden, false)))
+    .where(eq(directMessages.conversationId, conversationId))
     .orderBy(desc(directMessages.createdAt))
     .limit(limitNum)
 
@@ -260,15 +260,29 @@ router.get('/:conversationId', authMiddleware, asyncHandler(async (req: Authenti
     data: {
       id: conversationId,
       otherUser: otherUser ? formatUserSummary(otherUser) : null,
-      messages: messagesData.map(({ message, author }) => ({
-        id: message.id,
-        conversationId: message.conversationId,
-        content: message.content,
-        contentHtml: message.contentHtml,
-        author: formatUserSummary(author),
-        editedAt: message.editedAt?.toISOString() || null,
-        createdAt: message.createdAt?.toISOString()
-      })).reverse() // Oldest first
+      messages: messagesData.map(({ message, author }) => {
+        if (message.isHidden) {
+          return {
+            id: message.id,
+            conversationId: message.conversationId,
+            content: '',
+            contentHtml: null,
+            author: null,
+            editedAt: null,
+            createdAt: message.createdAt?.toISOString(),
+            isHidden: true
+          }
+        }
+        return {
+          id: message.id,
+          conversationId: message.conversationId,
+          content: message.content,
+          contentHtml: message.contentHtml,
+          author: formatUserSummary(author),
+          editedAt: message.editedAt?.toISOString() || null,
+          createdAt: message.createdAt?.toISOString()
+        }
+      }).reverse() // Oldest first
     }
   })
 }))

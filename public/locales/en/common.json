@@ -179,5 +179,7 @@
     "cancel": "Cancel",
     "send": "Submit Appeal",
     "submitted": "Appeal submitted. We will review it as soon as possible."
-  }
+  },
+  "messageDeleted": "This message has been deleted",
+  "loadMore": "Load more"
 }

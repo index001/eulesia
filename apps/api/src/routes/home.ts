@@ -228,7 +228,7 @@ router.get('/rooms/:roomId', optionalAuthMiddleware, asyncHandler(async (req: Au
     }
   }
 
-  // Get messages (filter out hidden)
+  // Get messages (include hidden as stubs for placeholder display)
   const messagesData = await db
     .select({
       message: roomMessages,
@@ -236,7 +236,7 @@ router.get('/rooms/:roomId', optionalAuthMiddleware, asyncHandler(async (req: Au
     })
     .from(roomMessages)
     .innerJoin(users, eq(roomMessages.authorId, users.id))
-    .where(and(eq(roomMessages.roomId, roomId), eq(roomMessages.isHidden, false)))
+    .where(eq(roomMessages.roomId, roomId))
     .orderBy(desc(roomMessages.createdAt))
     .limit(limitNum)
 
@@ -258,10 +258,24 @@ router.get('/rooms/:roomId', optionalAuthMiddleware, asyncHandler(async (req: Au
       ...room,
       owner: formatUserSummary(owner),
       members: members.map(formatUserSummary),
-      messages: messagesData.map(({ message, author }) => ({
-        ...message,
-        author: formatUserSummary(author)
-      })).reverse(), // Oldest first
+      messages: messagesData.map(({ message, author }) => {
+        if (message.isHidden) {
+          return {
+            id: message.id,
+            roomId: message.roomId,
+            authorId: message.authorId,
+            content: '',
+            contentHtml: null,
+            createdAt: message.createdAt,
+            isHidden: true,
+            author: null
+          }
+        }
+        return {
+          ...message,
+          author: formatUserSummary(author)
+        }
+      }).reverse(), // Oldest first
       isOwner,
       canPost: room.visibility === 'public' || isOwner || members.some(m => m.id === currentUserId)
     }

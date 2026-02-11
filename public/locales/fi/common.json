@@ -179,5 +179,7 @@
     "cancel": "Peruuta",
     "send": "Lähetä valitus",
     "submitted": "Valitus lähetetty. Käsittelemme sen mahdollisimman pian."
-  }
+  },
+  "messageDeleted": "Tämä viesti on poistettu",
+  "loadMore": "Lataa lisää"
 }

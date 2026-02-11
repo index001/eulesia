@@ -201,7 +201,7 @@ export function ThreadPage() {
             {t('thread.posted', { time: formatRelativeTime(thread.createdAt) })}
           </span>
           {thread.editedAt && (
-            <EditedIndicator editedAt={thread.editedAt} />
+            <EditedIndicator editedAt={thread.editedAt} editorName={thread.editorName} />
           )}
         </div>
 
