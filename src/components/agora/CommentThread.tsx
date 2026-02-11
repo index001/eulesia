@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import DOMPurify from 'dompurify'
+import { sanitizeContent } from '../../utils/sanitize'
 import { ChevronUp, ChevronDown, MessageSquare, Minus, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActorBadge } from '../common/ActorBadge'
@@ -161,7 +161,7 @@ function CommentItem({
                   {comment.contentHtml ? (
                     <div
                       className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment.contentHtml) }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeContent(comment.contentHtml) }}
                     />
                   ) : (
                     <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import DOMPurify from 'dompurify'
+import { sanitizeContent } from '../utils/sanitize'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Building2, ChevronDown } from 'lucide-react'
@@ -180,7 +180,7 @@ export function ThreadPage() {
             {thread.contentHtml ? (
               <div
                 className="prose prose-gray max-w-none"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(thread.contentHtml) }}
+                dangerouslySetInnerHTML={{ __html: sanitizeContent(thread.contentHtml) }}
               />
             ) : (
               <div className="prose prose-gray max-w-none">

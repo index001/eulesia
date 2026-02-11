@@ -9,6 +9,7 @@ import path from 'path'
 
 import { env } from './utils/env.js'
 import routes from './routes/index.js'
+import ogRoutes from './routes/og.js'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
 import { initScheduler } from './services/scheduler.js'
 import { fullSync, startPeriodicSync, healthCheck as meiliHealthCheck } from './services/search/index.js'
@@ -98,6 +99,9 @@ app.get('/health', async (_req, res) => {
     }
   })
 })
+
+// OG meta tag routes (for social media bot crawlers, proxied by Nginx)
+app.use(ogRoutes)
 
 // API routes
 app.use('/api/v1', routes)

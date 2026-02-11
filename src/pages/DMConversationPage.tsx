@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import DOMPurify from 'dompurify'
+import { sanitizeContent } from '../utils/sanitize'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -35,7 +35,7 @@ function MessageBubble({ message, isOwnMessage }: { message: DirectMessage; isOw
           }`}
         >
           {message.contentHtml ? (
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.contentHtml) }} className="prose prose-sm max-w-none" />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeContent(message.contentHtml) }} className="prose prose-sm max-w-none" />
           ) : (
             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
           )}

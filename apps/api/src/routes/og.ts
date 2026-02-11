@@ -1,0 +1,259 @@
+import { Router, type Request, type Response } from 'express'
+import { db, threads, clubs, clubThreads, municipalities, users } from '../db/index.js'
+import { eq } from 'drizzle-orm'
+
+const router = Router()
+
+const SITE_NAME = 'Eulesia'
+const DEFAULT_DESCRIPTION = 'Eurooppalainen kansalaisdemokratia-alusta'
+const DEFAULT_IMAGE = '/og-default.png'
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/[#*_~`>]/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\n+/g, ' ')
+    .trim()
+    .substring(0, 200)
+}
+
+function buildOgHtml(opts: {
+  title: string
+  description: string
+  url: string
+  type?: string
+  image?: string
+  siteName?: string
+}): string {
+  const {
+    title,
+    description,
+    url,
+    type = 'article',
+    image,
+    siteName = SITE_NAME
+  } = opts
+
+  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
+  const fullUrl = url.startsWith('http') ? url : `${appUrl}${url}`
+  const imageUrl = image
+    ? (image.startsWith('http') ? image : `${process.env.API_URL || appUrl}${image}`)
+    : `${appUrl}${DEFAULT_IMAGE}`
+
+  return `<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <title>${escapeHtml(title)} - ${escapeHtml(siteName)}</title>
+  <meta property="og:title" content="${escapeHtml(title)}" />
+  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:url" content="${escapeHtml(fullUrl)}" />
+  <meta property="og:type" content="${escapeHtml(type)}" />
+  <meta property="og:site_name" content="${escapeHtml(siteName)}" />
+  <meta property="og:image" content="${escapeHtml(imageUrl)}" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="${escapeHtml(title)}" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />
+  <meta name="twitter:image" content="${escapeHtml(imageUrl)}" />
+  <meta name="description" content="${escapeHtml(description)}" />
+  <meta http-equiv="refresh" content="0;url=${escapeHtml(fullUrl)}" />
+</head>
+<body></body>
+</html>`
+}
+
+// Thread OG
+router.get('/agora/thread/:threadId', async (req: Request, res: Response) => {
+  try {
+    const [thread] = await db
+      .select({
+        title: threads.title,
+        content: threads.content,
+        scope: threads.scope
+      })
+      .from(threads)
+      .where(eq(threads.id, req.params.threadId))
+      .limit(1)
+
+    if (!thread) {
+      return res.status(200).send(buildOgHtml({
+        title: SITE_NAME,
+        description: DEFAULT_DESCRIPTION,
+        url: req.originalUrl
+      }))
+    }
+
+    res.send(buildOgHtml({
+      title: thread.title,
+      description: stripMarkdown(thread.content),
+      url: req.originalUrl,
+      type: 'article'
+    }))
+  } catch {
+    res.status(200).send(buildOgHtml({
+      title: SITE_NAME,
+      description: DEFAULT_DESCRIPTION,
+      url: req.originalUrl
+    }))
+  }
+})
+
+// Club OG
+router.get('/clubs/:clubId', async (req: Request, res: Response) => {
+  try {
+    const [club] = await db
+      .select({
+        name: clubs.name,
+        description: clubs.description,
+        coverImageUrl: clubs.coverImageUrl,
+        memberCount: clubs.memberCount
+      })
+      .from(clubs)
+      .where(eq(clubs.id, req.params.clubId))
+      .limit(1)
+
+    if (!club) {
+      return res.status(200).send(buildOgHtml({
+        title: SITE_NAME,
+        description: DEFAULT_DESCRIPTION,
+        url: req.originalUrl
+      }))
+    }
+
+    const desc = club.description
+      ? stripMarkdown(club.description)
+      : `${club.memberCount || 0} j\u00e4sent\u00e4`
+
+    res.send(buildOgHtml({
+      title: club.name,
+      description: desc,
+      url: req.originalUrl,
+      type: 'website',
+      image: club.coverImageUrl || undefined
+    }))
+  } catch {
+    res.status(200).send(buildOgHtml({
+      title: SITE_NAME,
+      description: DEFAULT_DESCRIPTION,
+      url: req.originalUrl
+    }))
+  }
+})
+
+// Club thread OG
+router.get('/clubs/:clubId/thread/:threadId', async (req: Request, res: Response) => {
+  try {
+    const [thread] = await db
+      .select({
+        title: clubThreads.title,
+        content: clubThreads.content
+      })
+      .from(clubThreads)
+      .where(eq(clubThreads.id, req.params.threadId))
+      .limit(1)
+
+    if (!thread) {
+      return res.status(200).send(buildOgHtml({
+        title: SITE_NAME,
+        description: DEFAULT_DESCRIPTION,
+        url: req.originalUrl
+      }))
+    }
+
+    res.send(buildOgHtml({
+      title: thread.title,
+      description: stripMarkdown(thread.content),
+      url: req.originalUrl,
+      type: 'article'
+    }))
+  } catch {
+    res.status(200).send(buildOgHtml({
+      title: SITE_NAME,
+      description: DEFAULT_DESCRIPTION,
+      url: req.originalUrl
+    }))
+  }
+})
+
+// Municipality OG
+router.get('/kunnat/:municipalityId', async (req: Request, res: Response) => {
+  try {
+    const [municipality] = await db
+      .select({
+        name: municipalities.name,
+        nameFi: municipalities.nameFi
+      })
+      .from(municipalities)
+      .where(eq(municipalities.id, req.params.municipalityId))
+      .limit(1)
+
+    if (!municipality) {
+      return res.status(200).send(buildOgHtml({
+        title: SITE_NAME,
+        description: DEFAULT_DESCRIPTION,
+        url: req.originalUrl
+      }))
+    }
+
+    const name = municipality.nameFi || municipality.name
+    res.send(buildOgHtml({
+      title: name,
+      description: `${name} - keskustelu ja p\u00e4\u00e4t\u00f6ksenteko`,
+      url: req.originalUrl,
+      type: 'place'
+    }))
+  } catch {
+    res.status(200).send(buildOgHtml({
+      title: SITE_NAME,
+      description: DEFAULT_DESCRIPTION,
+      url: req.originalUrl
+    }))
+  }
+})
+
+// User profile OG
+router.get('/user/:userId', async (req: Request, res: Response) => {
+  try {
+    const [user] = await db
+      .select({
+        name: users.name,
+        avatarUrl: users.avatarUrl,
+        role: users.role
+      })
+      .from(users)
+      .where(eq(users.id, req.params.userId))
+      .limit(1)
+
+    if (!user) {
+      return res.status(200).send(buildOgHtml({
+        title: SITE_NAME,
+        description: DEFAULT_DESCRIPTION,
+        url: req.originalUrl
+      }))
+    }
+
+    res.send(buildOgHtml({
+      title: user.name,
+      description: `${user.name} Eulesia-alustalla`,
+      url: req.originalUrl,
+      type: 'profile',
+      image: user.avatarUrl || undefined
+    }))
+  } catch {
+    res.status(200).send(buildOgHtml({
+      title: SITE_NAME,
+      description: DEFAULT_DESCRIPTION,
+      url: req.originalUrl
+    }))
+  }
+})
+
+export default router

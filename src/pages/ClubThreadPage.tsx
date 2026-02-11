@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import DOMPurify from 'dompurify'
+import { sanitizeContent } from '../utils/sanitize'
 import { useTranslation } from 'react-i18next'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Users, ChevronDown, Lock, Unlock, Pin, PinOff, Trash2 } from 'lucide-react'
@@ -273,7 +273,7 @@ export function ClubThreadPage() {
           {thread.contentHtml ? (
             <div
               className="prose prose-gray max-w-none"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(thread.contentHtml) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeContent(thread.contentHtml) }}
             />
           ) : (
             <div className="prose prose-gray max-w-none whitespace-pre-wrap">
