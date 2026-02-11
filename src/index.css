@@ -71,6 +71,19 @@ body {
   margin: 1em 0;
 }
 
+/* Uploaded images - prevent layout shift */
+.uploaded-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1em 0;
+}
+
+/* Prevent content images from causing layout shift */
+.prose img {
+  content-visibility: auto;
+}
+
 /* Guide tour: highlighted element */
 [data-guide-active="true"] {
   position: relative;

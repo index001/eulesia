@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { sanitizeContent } from '../utils/sanitize'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -98,6 +98,12 @@ export function ThreadPage() {
   const isInstitutional = thread.author.role === 'institution'
   const comments = thread.comments?.map(transformComment) || []
 
+  // Memoize sanitized HTML to prevent re-render layout shift (e.g. images reloading)
+  const sanitizedContentHtml = useMemo(
+    () => thread.contentHtml ? sanitizeContent(thread.contentHtml) : null,
+    [thread.contentHtml]
+  )
+
   return (
     <Layout>
       {/* Back navigation */}
@@ -177,10 +183,10 @@ export function ThreadPage() {
 
           {/* Content */}
           <div className="flex-grow p-6">
-            {thread.contentHtml ? (
+            {sanitizedContentHtml ? (
               <div
                 className="prose prose-gray max-w-none"
-                dangerouslySetInnerHTML={{ __html: sanitizeContent(thread.contentHtml) }}
+                dangerouslySetInnerHTML={{ __html: sanitizedContentHtml }}
               />
             ) : (
               <div className="prose prose-gray max-w-none">
@@ -262,6 +268,12 @@ export function ThreadPage() {
             <textarea
               value={commentContent}
               onChange={(e) => setCommentContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  if (commentContent.trim() && !isSubmitting) handleSubmitComment()
+                }
+              }}
               placeholder={t('thread.shareThoughts')}
               className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}

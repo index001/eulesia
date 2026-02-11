@@ -5,14 +5,15 @@ const ALLOWED_IFRAME_HOSTS = ['www.youtube-nocookie.com', 'www.youtube.com']
 // Hook: only allow YouTube iframes, remove all others
 DOMPurify.addHook('uponSanitizeElement', (node, data) => {
   if (data.tagName === 'iframe') {
-    const src = node.getAttribute('src') || ''
+    const el = node as Element
+    const src = el.getAttribute('src') || ''
     try {
       const url = new URL(src)
       if (!ALLOWED_IFRAME_HOSTS.includes(url.hostname)) {
-        node.remove()
+        el.remove()
       }
     } catch {
-      node.remove()
+      el.remove()
     }
   }
 })

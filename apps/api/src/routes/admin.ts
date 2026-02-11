@@ -1,6 +1,6 @@
 import { Router, type Response } from 'express'
 import { z } from 'zod'
-import { eq, desc, and, sql, count, isNull, or, gt, inArray, ilike } from 'drizzle-orm'
+import { eq, desc, and, sql, count, or, gt, ilike } from 'drizzle-orm'
 import {
   db, users, threads, comments, clubs, clubThreads, clubComments,
   contentReports, moderationActions, userSanctions, moderationAppeals,
@@ -20,7 +20,7 @@ router.use(requireAdmin)
 
 // ─── Dashboard ──────────────────────────────────────────────
 
-router.get('/dashboard', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.get('/dashboard', asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
   const [userCount] = await db.select({ count: count() }).from(users)
   const [threadCount] = await db.select({ count: count() }).from(threads)
   const [clubCount] = await db.select({ count: count() }).from(clubs)

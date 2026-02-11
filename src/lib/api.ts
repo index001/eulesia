@@ -551,6 +551,135 @@ class ApiClient {
 
     return data
   }
+
+  // ─── Admin API ────────────────────────────────────────────
+
+  async getAdminDashboard(): Promise<AdminDashboard> {
+    return this.request('/admin/dashboard')
+  }
+
+  async getAdminUsers(params?: { page?: number; limit?: number; search?: string; role?: string }): Promise<PaginatedResponse<AdminUser>> {
+    const searchParams = new URLSearchParams()
+    if (params?.page) searchParams.set('page', params.page.toString())
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.search) searchParams.set('search', params.search)
+    if (params?.role) searchParams.set('role', params.role)
+    const query = searchParams.toString()
+    return this.request(`/admin/users${query ? `?${query}` : ''}`)
+  }
+
+  async getAdminUser(id: string): Promise<AdminUserDetail> {
+    return this.request(`/admin/users/${id}`)
+  }
+
+  async changeUserRole(id: string, role: 'citizen' | 'institution' | 'admin'): Promise<{ id: string; role: string }> {
+    return this.request(`/admin/users/${id}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role })
+    })
+  }
+
+  async issueSanction(userId: string, data: IssueSanctionData): Promise<AdminSanction> {
+    return this.request(`/admin/users/${userId}/sanction`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async getUserSanctions(userId: string): Promise<AdminSanction[]> {
+    return this.request(`/admin/users/${userId}/sanctions`)
+  }
+
+  async revokeSanction(sanctionId: string): Promise<{ revoked: boolean }> {
+    return this.request(`/admin/sanctions/${sanctionId}`, { method: 'DELETE' })
+  }
+
+  async getAdminReports(params?: { page?: number; limit?: number; status?: string; reason?: string; contentType?: string }): Promise<PaginatedResponse<AdminReport>> {
+    const searchParams = new URLSearchParams()
+    if (params?.page) searchParams.set('page', params.page.toString())
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.status) searchParams.set('status', params.status)
+    if (params?.reason) searchParams.set('reason', params.reason)
+    if (params?.contentType) searchParams.set('contentType', params.contentType)
+    const query = searchParams.toString()
+    return this.request(`/admin/reports${query ? `?${query}` : ''}`)
+  }
+
+  async getAdminReport(id: string): Promise<AdminReportDetail> {
+    return this.request(`/admin/reports/${id}`)
+  }
+
+  async updateReport(id: string, data: { status: string; reason?: string }): Promise<{ id: string; status: string }> {
+    return this.request(`/admin/reports/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async removeContent(type: string, id: string, reason?: string): Promise<{ hidden: boolean }> {
+    return this.request(`/admin/content/${type}/${id}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ reason })
+    })
+  }
+
+  async restoreContent(type: string, id: string): Promise<{ restored: boolean }> {
+    return this.request(`/admin/content/${type}/${id}/restore`, { method: 'POST' })
+  }
+
+  async getModLog(params?: { page?: number; limit?: number; actionType?: string; adminId?: string }): Promise<PaginatedResponse<ModLogEntry>> {
+    const searchParams = new URLSearchParams()
+    if (params?.page) searchParams.set('page', params.page.toString())
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.actionType) searchParams.set('actionType', params.actionType)
+    if (params?.adminId) searchParams.set('adminId', params.adminId)
+    const query = searchParams.toString()
+    return this.request(`/admin/modlog${query ? `?${query}` : ''}`)
+  }
+
+  async getTransparencyStats(from?: string, to?: string): Promise<TransparencyStats> {
+    const searchParams = new URLSearchParams()
+    if (from) searchParams.set('from', from)
+    if (to) searchParams.set('to', to)
+    const query = searchParams.toString()
+    return this.request(`/admin/transparency${query ? `?${query}` : ''}`)
+  }
+
+  async getAdminAppeals(params?: { page?: number; limit?: number; status?: string }): Promise<PaginatedResponse<AdminAppeal>> {
+    const searchParams = new URLSearchParams()
+    if (params?.page) searchParams.set('page', params.page.toString())
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.status) searchParams.set('status', params.status)
+    const query = searchParams.toString()
+    return this.request(`/admin/appeals${query ? `?${query}` : ''}`)
+  }
+
+  async resolveAppeal(id: string, data: { status: 'accepted' | 'rejected'; adminResponse: string }): Promise<{ id: string; status: string }> {
+    return this.request(`/admin/appeals/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    })
+  }
+
+  // ─── User reports & appeals ──────────────────────────────
+
+  async submitReport(data: SubmitReportData): Promise<ContentReportResponse> {
+    return this.request('/reports', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async submitAppeal(data: SubmitAppealData): Promise<AppealResponse> {
+    return this.request('/reports/appeal', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async getMySanctions(): Promise<MySanction[]> {
+    return this.request('/reports/my-sanctions')
+  }
 }
 
 // Types
@@ -1141,136 +1270,6 @@ export interface UploadImageResponse {
   thumbnailUrl: string
   width: number
   height: number
-}
-
-  // ─── Admin API ────────────────────────────────────────────
-
-  async getAdminDashboard(): Promise<AdminDashboard> {
-    return this.request('/admin/dashboard')
-  }
-
-  async getAdminUsers(params?: { page?: number; limit?: number; search?: string; role?: string }): Promise<PaginatedResponse<AdminUser>> {
-    const searchParams = new URLSearchParams()
-    if (params?.page) searchParams.set('page', params.page.toString())
-    if (params?.limit) searchParams.set('limit', params.limit.toString())
-    if (params?.search) searchParams.set('search', params.search)
-    if (params?.role) searchParams.set('role', params.role)
-    const query = searchParams.toString()
-    return this.request(`/admin/users${query ? `?${query}` : ''}`)
-  }
-
-  async getAdminUser(id: string): Promise<AdminUserDetail> {
-    return this.request(`/admin/users/${id}`)
-  }
-
-  async changeUserRole(id: string, role: 'citizen' | 'institution' | 'admin'): Promise<{ id: string; role: string }> {
-    return this.request(`/admin/users/${id}/role`, {
-      method: 'PATCH',
-      body: JSON.stringify({ role })
-    })
-  }
-
-  async issueSanction(userId: string, data: IssueSanctionData): Promise<AdminSanction> {
-    return this.request(`/admin/users/${userId}/sanction`, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-  }
-
-  async getUserSanctions(userId: string): Promise<AdminSanction[]> {
-    return this.request(`/admin/users/${userId}/sanctions`)
-  }
-
-  async revokeSanction(sanctionId: string): Promise<{ revoked: boolean }> {
-    return this.request(`/admin/sanctions/${sanctionId}`, { method: 'DELETE' })
-  }
-
-  async getAdminReports(params?: { page?: number; limit?: number; status?: string; reason?: string; contentType?: string }): Promise<PaginatedResponse<AdminReport>> {
-    const searchParams = new URLSearchParams()
-    if (params?.page) searchParams.set('page', params.page.toString())
-    if (params?.limit) searchParams.set('limit', params.limit.toString())
-    if (params?.status) searchParams.set('status', params.status)
-    if (params?.reason) searchParams.set('reason', params.reason)
-    if (params?.contentType) searchParams.set('contentType', params.contentType)
-    const query = searchParams.toString()
-    return this.request(`/admin/reports${query ? `?${query}` : ''}`)
-  }
-
-  async getAdminReport(id: string): Promise<AdminReportDetail> {
-    return this.request(`/admin/reports/${id}`)
-  }
-
-  async updateReport(id: string, data: { status: string; reason?: string }): Promise<{ id: string; status: string }> {
-    return this.request(`/admin/reports/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data)
-    })
-  }
-
-  async removeContent(type: string, id: string, reason?: string): Promise<{ hidden: boolean }> {
-    return this.request(`/admin/content/${type}/${id}`, {
-      method: 'DELETE',
-      body: JSON.stringify({ reason })
-    })
-  }
-
-  async restoreContent(type: string, id: string): Promise<{ restored: boolean }> {
-    return this.request(`/admin/content/${type}/${id}/restore`, { method: 'POST' })
-  }
-
-  async getModLog(params?: { page?: number; limit?: number; actionType?: string; adminId?: string }): Promise<PaginatedResponse<ModLogEntry>> {
-    const searchParams = new URLSearchParams()
-    if (params?.page) searchParams.set('page', params.page.toString())
-    if (params?.limit) searchParams.set('limit', params.limit.toString())
-    if (params?.actionType) searchParams.set('actionType', params.actionType)
-    if (params?.adminId) searchParams.set('adminId', params.adminId)
-    const query = searchParams.toString()
-    return this.request(`/admin/modlog${query ? `?${query}` : ''}`)
-  }
-
-  async getTransparencyStats(from?: string, to?: string): Promise<TransparencyStats> {
-    const searchParams = new URLSearchParams()
-    if (from) searchParams.set('from', from)
-    if (to) searchParams.set('to', to)
-    const query = searchParams.toString()
-    return this.request(`/admin/transparency${query ? `?${query}` : ''}`)
-  }
-
-  async getAdminAppeals(params?: { page?: number; limit?: number; status?: string }): Promise<PaginatedResponse<AdminAppeal>> {
-    const searchParams = new URLSearchParams()
-    if (params?.page) searchParams.set('page', params.page.toString())
-    if (params?.limit) searchParams.set('limit', params.limit.toString())
-    if (params?.status) searchParams.set('status', params.status)
-    const query = searchParams.toString()
-    return this.request(`/admin/appeals${query ? `?${query}` : ''}`)
-  }
-
-  async resolveAppeal(id: string, data: { status: 'accepted' | 'rejected'; adminResponse: string }): Promise<{ id: string; status: string }> {
-    return this.request(`/admin/appeals/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data)
-    })
-  }
-
-  // ─── User reports & appeals ──────────────────────────────
-
-  async submitReport(data: SubmitReportData): Promise<ContentReportResponse> {
-    return this.request('/reports', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-  }
-
-  async submitAppeal(data: SubmitAppealData): Promise<AppealResponse> {
-    return this.request('/reports/appeal', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-  }
-
-  async getMySanctions(): Promise<MySanction[]> {
-    return this.request('/reports/my-sanctions')
-  }
 }
 
 // ─── Admin types ──────────────────────────────────────────

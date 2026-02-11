@@ -14,7 +14,7 @@ import { api, type InviteCode, type InvitedUser } from '../lib/api'
 
 export function ProfilePage() {
   const { t } = useTranslation(['profile', 'common', 'auth'])
-  const { currentUser, logout, refreshUser, sanction } = useAuth()
+  const { currentUser, logout, refreshUser } = useAuth()
   const { data: mySanctions } = useMySanctions()
   const navigate = useNavigate()
   const updateProfileMutation = useUpdateProfile()

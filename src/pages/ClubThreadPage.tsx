@@ -339,6 +339,12 @@ export function ClubThreadPage() {
               <textarea
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    if (commentContent.trim() && !isSubmitting) handleSubmitComment()
+                  }
+                }}
                 placeholder={t('clubs:thread.writeComment')}
                 className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 rows={3}

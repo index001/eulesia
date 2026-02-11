@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Users, Shield, MessageSquare, Pin, ScrollText, X, Send,
   Settings, Globe, Lock, MapPin, Image as ImageIcon, Loader2, Trash2,
-  MoreVertical, UserMinus, ChevronDown
+  MoreVertical, UserMinus
 } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { ActorBadge, ContentEndMarker, FollowButton, LocationSearch, ReportButton } from '../components/common'
