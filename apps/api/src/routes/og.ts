@@ -8,6 +8,13 @@ const SITE_NAME = 'Eulesia'
 const DEFAULT_DESCRIPTION = 'Eurooppalainen kansalaisdemokratia-alusta'
 const DEFAULT_IMAGE = '/og-default.png'
 
+const BOT_PATTERNS = /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|TelegramBot|Embedly|Pinterest|vkShare|Applebot/i
+
+function isBot(req: Request): boolean {
+  const ua = req.headers['user-agent'] || ''
+  return BOT_PATTERNS.test(ua)
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -71,7 +78,9 @@ function buildOgHtml(opts: {
 }
 
 // Thread OG
-router.get('/agora/thread/:threadId', async (req: Request, res: Response) => {
+router.get('/og/agora/thread/:threadId', async (req: Request, res: Response) => {
+  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
+  if (!isBot(req)) return res.redirect(`${appUrl}/agora/thread/${req.params.threadId}`)
   try {
     const [thread] = await db
       .select({
@@ -87,27 +96,29 @@ router.get('/agora/thread/:threadId', async (req: Request, res: Response) => {
       return res.status(200).send(buildOgHtml({
         title: SITE_NAME,
         description: DEFAULT_DESCRIPTION,
-        url: req.originalUrl
+        url: `/agora/thread/${req.params.threadId}`
       }))
     }
 
     res.send(buildOgHtml({
       title: thread.title,
       description: stripMarkdown(thread.content),
-      url: req.originalUrl,
+      url: `/agora/thread/${req.params.threadId}`,
       type: 'article'
     }))
   } catch {
     res.status(200).send(buildOgHtml({
       title: SITE_NAME,
       description: DEFAULT_DESCRIPTION,
-      url: req.originalUrl
+      url: `/agora/thread/${req.params.threadId}`
     }))
   }
 })
 
 // Club OG
-router.get('/clubs/:clubId', async (req: Request, res: Response) => {
+router.get('/og/clubs/:clubId', async (req: Request, res: Response) => {
+  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
+  if (!isBot(req)) return res.redirect(`${appUrl}/clubs/${req.params.clubId}`)
   try {
     const [club] = await db
       .select({
@@ -124,7 +135,7 @@ router.get('/clubs/:clubId', async (req: Request, res: Response) => {
       return res.status(200).send(buildOgHtml({
         title: SITE_NAME,
         description: DEFAULT_DESCRIPTION,
-        url: req.originalUrl
+        url: `/clubs/${req.params.clubId}`
       }))
     }
 
@@ -135,7 +146,7 @@ router.get('/clubs/:clubId', async (req: Request, res: Response) => {
     res.send(buildOgHtml({
       title: club.name,
       description: desc,
-      url: req.originalUrl,
+      url: `/clubs/${req.params.clubId}`,
       type: 'website',
       image: club.coverImageUrl || undefined
     }))
@@ -143,13 +154,15 @@ router.get('/clubs/:clubId', async (req: Request, res: Response) => {
     res.status(200).send(buildOgHtml({
       title: SITE_NAME,
       description: DEFAULT_DESCRIPTION,
-      url: req.originalUrl
+      url: `/clubs/${req.params.clubId}`
     }))
   }
 })
 
 // Club thread OG
-router.get('/clubs/:clubId/thread/:threadId', async (req: Request, res: Response) => {
+router.get('/og/clubs/:clubId/thread/:threadId', async (req: Request, res: Response) => {
+  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
+  if (!isBot(req)) return res.redirect(`${appUrl}/clubs/${req.params.clubId}/thread/${req.params.threadId}`)
   try {
     const [thread] = await db
       .select({
@@ -164,27 +177,29 @@ router.get('/clubs/:clubId/thread/:threadId', async (req: Request, res: Response
       return res.status(200).send(buildOgHtml({
         title: SITE_NAME,
         description: DEFAULT_DESCRIPTION,
-        url: req.originalUrl
+        url: `/clubs/${req.params.clubId}/thread/${req.params.threadId}`
       }))
     }
 
     res.send(buildOgHtml({
       title: thread.title,
       description: stripMarkdown(thread.content),
-      url: req.originalUrl,
+      url: `/clubs/${req.params.clubId}/thread/${req.params.threadId}`,
       type: 'article'
     }))
   } catch {
     res.status(200).send(buildOgHtml({
       title: SITE_NAME,
       description: DEFAULT_DESCRIPTION,
-      url: req.originalUrl
+      url: `/clubs/${req.params.clubId}/thread/${req.params.threadId}`
     }))
   }
 })
 
 // Municipality OG
-router.get('/kunnat/:municipalityId', async (req: Request, res: Response) => {
+router.get('/og/kunnat/:municipalityId', async (req: Request, res: Response) => {
+  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
+  if (!isBot(req)) return res.redirect(`${appUrl}/kunnat/${req.params.municipalityId}`)
   try {
     const [municipality] = await db
       .select({
@@ -199,28 +214,30 @@ router.get('/kunnat/:municipalityId', async (req: Request, res: Response) => {
       return res.status(200).send(buildOgHtml({
         title: SITE_NAME,
         description: DEFAULT_DESCRIPTION,
-        url: req.originalUrl
+        url: `/kunnat/${req.params.municipalityId}`
       }))
     }
 
     const name = municipality.nameFi || municipality.name
     res.send(buildOgHtml({
       title: name,
-      description: `${name} - keskustelu ja p\u00e4\u00e4t\u00f6ksenteko`,
-      url: req.originalUrl,
+      description: `${name} - keskustelu ja päätöksenteko`,
+      url: `/kunnat/${req.params.municipalityId}`,
       type: 'place'
     }))
   } catch {
     res.status(200).send(buildOgHtml({
       title: SITE_NAME,
       description: DEFAULT_DESCRIPTION,
-      url: req.originalUrl
+      url: `/kunnat/${req.params.municipalityId}`
     }))
   }
 })
 
 // User profile OG
-router.get('/user/:userId', async (req: Request, res: Response) => {
+router.get('/og/user/:userId', async (req: Request, res: Response) => {
+  const appUrl = process.env.APP_URL || 'https://eulesia.eu'
+  if (!isBot(req)) return res.redirect(`${appUrl}/user/${req.params.userId}`)
   try {
     const [user] = await db
       .select({
@@ -236,14 +253,14 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
       return res.status(200).send(buildOgHtml({
         title: SITE_NAME,
         description: DEFAULT_DESCRIPTION,
-        url: req.originalUrl
+        url: `/user/${req.params.userId}`
       }))
     }
 
     res.send(buildOgHtml({
       title: user.name,
       description: `${user.name} Eulesia-alustalla`,
-      url: req.originalUrl,
+      url: `/user/${req.params.userId}`,
       type: 'profile',
       image: user.avatarUrl || undefined
     }))
@@ -251,7 +268,7 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
     res.status(200).send(buildOgHtml({
       title: SITE_NAME,
       description: DEFAULT_DESCRIPTION,
-      url: req.originalUrl
+      url: `/user/${req.params.userId}`
     }))
   }
 })

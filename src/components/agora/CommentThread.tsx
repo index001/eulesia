@@ -3,6 +3,7 @@ import { sanitizeContent } from '../../utils/sanitize'
 import { ChevronUp, ChevronDown, MessageSquare, Minus, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActorBadge } from '../common/ActorBadge'
+import { EditedIndicator } from '../common/EditedIndicator'
 import { formatRelativeTime } from '../../lib/formatTime'
 import type { UserRole } from '../../types'
 
@@ -26,6 +27,8 @@ interface CommentWithAuthor {
   score?: number
   depth?: number
   userVote?: number
+  editedAt?: string | null
+  editedBy?: string | null
   createdAt: string
   author: CommentAuthor
 }
@@ -40,6 +43,10 @@ interface CommentItemProps {
   replyingTo: string | null
   onSubmitReply: (parentId: string, content: string) => void
   onCancelReply: () => void
+  onEdit?: (commentId: string, content: string) => void
+  onDelete?: (commentId: string) => void
+  currentUserId?: string
+  currentUserRole?: string
 }
 
 function CommentItem({
@@ -51,12 +58,15 @@ function CommentItem({
   onReply,
   replyingTo,
   onSubmitReply,
-  onCancelReply
+  onCancelReply,
+  onEdit,
+  onDelete,
+  currentUserId,
+  currentUserRole
 }: CommentItemProps) {
   const { t } = useTranslation(['agora', 'common'])
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [replyContent, setReplyContent] = useState('')
-
   const author = comment.author
   if (!author) return null
 
@@ -67,6 +77,12 @@ function CommentItem({
 
   // Get replies to this comment
   const childReplies = allComments.filter(c => c.parentId === comment.id)
+
+  // Edit/delete kept for future use
+  void onEdit
+  void onDelete
+  void currentUserId
+  void currentUserRole
 
   const handleSubmitReply = () => {
     if (replyContent.trim()) {
@@ -152,6 +168,9 @@ function CommentItem({
                   <ActorBadge user={author} size="sm" />
                   <span className="text-gray-400">•</span>
                   <span className="text-gray-500">{formatRelativeTime(comment.createdAt)}</span>
+                  {comment.editedAt && (
+                    <EditedIndicator editedAt={comment.editedAt} />
+                  )}
                 </div>
 
                 {/* Content */}
@@ -248,11 +267,21 @@ interface CommentThreadProps {
   comments: CommentWithAuthor[]
   onVote?: (commentId: string, value: number) => void
   onReply?: (parentId: string, content: string) => void
+  onEdit?: (commentId: string, content: string) => void
+  onDelete?: (commentId: string) => void
+  currentUserId?: string
+  currentUserRole?: string
 }
 
-export function CommentThread({ comments, onVote, onReply }: CommentThreadProps) {
+export function CommentThread({ comments, onVote, onReply, onEdit, onDelete, currentUserId, currentUserRole }: CommentThreadProps) {
   const { t } = useTranslation('agora')
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
+
+  // Keep for future use
+  void onEdit
+  void onDelete
+  void currentUserId
+  void currentUserRole
 
   // Get top-level comments (no parent)
   const topLevel = comments.filter(c => !c.parentId)

@@ -61,6 +61,12 @@ services:
       - "traefik.http.routers.eulesia-api-http.service=eulesia-api"
       # Service
       - "traefik.http.services.eulesia-api.loadbalancer.server.port=3001"
+      # OG meta tags: route /og/* on main domain to API
+      - "traefik.http.routers.eulesia-og.rule=Host(`${DOMAIN}`) && PathPrefix(`/og/`)"
+      - "traefik.http.routers.eulesia-og.entrypoints=websecure"
+      - "traefik.http.routers.eulesia-og.tls.certresolver=le"
+      - "traefik.http.routers.eulesia-og.service=eulesia-api"
+      - "traefik.http.routers.eulesia-og.priority=100"
     networks:
       - internal
       - wp_web
