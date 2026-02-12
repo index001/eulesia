@@ -1,4 +1,4 @@
-import { ArrowLeft, Globe, Code, Users, Building2, MessageSquare, Shield, Sparkles, BookOpen, Scale, Landmark, FlaskConical, ArrowRight } from 'lucide-react'
+import { ArrowLeft, Globe, Code, Users, Building2, MessageSquare, Shield, Sparkles, BookOpen, Scale, Landmark, FlaskConical, ArrowRight, MapPin, Calendar, Heart, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
@@ -210,26 +210,55 @@ function AboutContent() {
           </div>
         </div>
 
-        {/* Project status and getting involved */}
+        {/* Roadmap */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-blue-600" />
-              {t('project.title')}
+              <MapPin className="w-4 h-4 text-blue-600" />
+              {t('roadmap.title')}
             </h2>
           </div>
-          <div className="p-4 space-y-3">
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {t('project.p1')}
-            </p>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {t('project.p2')}
-            </p>
-            <div className="bg-blue-50 rounded-lg p-3 mt-2">
-              <p className="text-sm text-blue-900 font-medium">{t('project.ctaTitle')}</p>
-              <p className="text-xs text-blue-700 mt-1">
-                {t('project.ctaDesc')}
-              </p>
+          <div className="p-4 space-y-4">
+            {/* Now */}
+            <div className="relative pl-6 border-l-2 border-blue-500">
+              <div className="absolute -left-[7px] top-0.5 w-3 h-3 bg-blue-500 rounded-full" />
+              <h3 className="font-medium text-blue-900 text-sm">{t('roadmap.now')}</h3>
+              <ul className="mt-1.5 space-y-1">
+                {(t('roadmap.nowItems', { returnObjects: true }) as string[]).map((item, i) => (
+                  <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                    <span className="text-blue-400 mt-1 flex-shrink-0">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Q2-Q3 2026 */}
+            <div className="relative pl-6 border-l-2 border-gray-200">
+              <div className="absolute -left-[7px] top-0.5 w-3 h-3 bg-gray-300 rounded-full" />
+              <h3 className="font-medium text-gray-700 text-sm">{t('roadmap.q2q3')}</h3>
+              <ul className="mt-1.5 space-y-1">
+                {(t('roadmap.q2q3Items', { returnObjects: true }) as string[]).map((item, i) => (
+                  <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                    <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Late 2026 */}
+            <div className="relative pl-6 border-l-2 border-gray-200">
+              <div className="absolute -left-[7px] top-0.5 w-3 h-3 bg-gray-300 rounded-full" />
+              <h3 className="font-medium text-gray-700 text-sm">{t('roadmap.late2026')}</h3>
+              <ul className="mt-1.5 space-y-1">
+                {(t('roadmap.late2026Items', { returnObjects: true }) as string[]).map((item, i) => (
+                  <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                    <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
@@ -261,15 +290,75 @@ function AboutContent() {
           </div>
         </div>
 
+        {/* Organization & Team */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-600" />
+              {t('organization.title')}
+            </h2>
+          </div>
+          <div className="p-4 space-y-3">
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {t('organization.p1')}
+            </p>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {t('organization.p2')}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Heart className="w-4 h-4 text-blue-600" />
+              {t('team.title')}
+            </h2>
+          </div>
+          <div className="p-4 space-y-3">
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {t('team.description')}
+            </p>
+            <a
+              href={`mailto:${t('team.contact')}`}
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            >
+              <Mail className="w-4 h-4" />
+              {t('team.contact')}
+            </a>
+          </div>
+        </div>
+
+        {/* Funding */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-blue-600" />
+              {t('funding.title')}
+            </h2>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-gray-700 mb-2">{t('funding.description')}</p>
+            <ul className="space-y-1">
+              {(t('funding.items', { returnObjects: true }) as string[]).map((item, i) => (
+                <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                  <span className="text-blue-400 mt-1 flex-shrink-0">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
         {/* Research */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-blue-600" />
+              <FlaskConical className="w-4 h-4 text-blue-600" />
               {t('research.title')}
             </h2>
           </div>
-          <div className="p-4 space-y-3">
+          <div className="p-4">
             <p className="text-sm text-gray-700 leading-relaxed">
               {t('research.description')}
             </p>

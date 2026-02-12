@@ -2,53 +2,82 @@
   "signIn": "Sign in",
   "back": "Back",
   "heroSubtitle": "European citizen infrastructure",
-  "heroDescription": "Eulesia is social media designed as citizen infrastructure rather than commercial media. A public space, not a private platform.",
-  "earlyStage": "Project is in early stages — development is active",
+  "heroDescription": "Eulesia is social media built as citizen infrastructure — not a commercial platform. A public space where citizens and institutions meet under common rules.",
+  "earlyStage": "Early access — development is active",
   "whatIs": {
     "title": "What is Eulesia?",
-    "p1": "Public discourse has moved to commercial platforms designed to capture attention and sell ads — not for democratic discussion. Municipalities communicate via Facebook, citizens discuss on Reddit, but the incentive structures of these platforms do not serve civic discourse.",
-    "p2": "Eulesia is the answer to this problem: social media with familiar features (feeds, messages, communities, discussions), but built from the ground up on civic terms. The name refers to the ancient agora — a public space where common affairs were discussed under common rules."
+    "p1": "Eulesia is social media with familiar features — feeds, messages, communities, and discussions — but without advertising, behavioral tracking, or attention economy. The name refers to the ancient agora: a public space where common affairs were discussed.",
+    "p2": "On Eulesia, municipalities, agencies, and other public institutions participate as civic actors, municipal meeting minutes are automatically brought in for discussion, and every conversation is linked to real decision-making processes."
   },
   "whyNeeded": {
     "title": "Why is this needed?",
-    "p1": "When public institutions rely on commercial platforms to reach citizens, they cede part of the digital public space to private actors. A municipality's Facebook page operates under Meta's terms of service, not a democratic mandate.",
-    "p2": "Existing participation platforms (like Decidim or CONSUL) provide structures for participatory democracy, but lack everyday social interaction. Commercial platforms offer social agency, but without civic structure. Eulesia combines both: social agency and citizenship."
+    "p1": "Public discourse has fragmented across commercial platforms designed to capture attention — not for constructive civic discussion. A municipality communicates on Facebook under Meta's rules, citizens comment on different platforms under different identities.",
+    "p2": "Existing participation platforms (Decidim, CONSUL) provide democratic structures but lack everyday social interaction. Commercial platforms offer social agency but without civic structure. Eulesia combines both."
   },
   "fourSpaces": {
     "title": "Four spaces",
     "agora": "Agora",
-    "agoraDesc": "Public citizen discussion structured by administrative level: local, national, European. Discussion is anchored to real decision-making processes.",
+    "agoraDesc": "Public citizen discussion at three levels: local, national, and EU. AI summaries of municipal meeting minutes bring official content into discussion.",
     "clubs": "Clubs",
-    "clubsDesc": "Spaces for civil society and interest groups, where people can organize freely without institutional intermediaries.",
+    "clubsDesc": "Free spaces for civil society and interest groups, where people can organize without institutional intermediaries.",
     "home": "Home",
-    "homeDesc": "Private messaging and personal spaces. A personal area whose content is not used for advertising or profiling.",
+    "homeDesc": "Private messaging and personal spaces. Content is not used for advertising or profiling.",
     "services": "Services",
-    "servicesDesc": "An ecosystem layer for practical civic functions without attention economy logic."
+    "servicesDesc": "Practical civic functions without attention economy logic. Coming later."
   },
   "principles": {
     "title": "Design principles",
     "identity": "Verified identity",
-    "identityDesc": "One person, one account. Participation under your real name, like in the agora. The goal is integration with the European Digital Identity Wallet (EUDI).",
+    "identityDesc": "One person, one account. Goal is integration with the European Digital Identity Wallet (EUDI).",
     "institutional": "Institutional presence",
-    "institutionalDesc": "Public institutions participate as civic actors, not advertisers. When a municipality participates in a discussion, official documents, timelines, and contact information become visible.",
+    "institutionalDesc": "Public institutions participate as civic actors. Official documents, decisions, and contact information are visible in discussions.",
     "noAttention": "No attention economy",
-    "noAttentionDesc": "No algorithmic feed, no infinite scroll, no engagement metrics. Content appears in chronological order or user-chosen order. The value proposition is not dopamine but impact.",
+    "noAttentionDesc": "No algorithmic feed, no infinite scroll, no engagement metrics. Your data is not a product.",
     "socialAgency": "Social agency",
-    "socialAgencyDesc": "Citizens can organize and discuss freely without all activity being channeled through institutional processes.",
-    "privacy": "User-centric privacy",
-    "privacyDesc": "No advertising, no behavioral tracking, no data sales. GDPR built in, not added afterwards."
+    "socialAgencyDesc": "Citizens can organize and discuss freely without everything being channeled through institutional processes.",
+    "privacy": "Privacy built in",
+    "privacyDesc": "No advertising, no behavioral tracking, no data sales. GDPR built in."
   },
   "automated": {
     "title": "Automated civic content",
-    "p1": "Municipal meeting minutes are automatically fetched, summarized by AI (the European Mistral language model), and published as discussion starters. Summaries are an access layer to official documents, not a replacement — there is always a direct link to original sources.",
-    "p2": "This solves the fundamental problem of civic platforms: the lack of content at the start. New users immediately encounter genuine civic content, and discussion begins while decisions are still being prepared — not only after they are made."
+    "p1": "Municipal meeting minutes are automatically fetched, summarized by the European Mistral language model, and published as discussion starters. There is always a direct link to original sources.",
+    "p2": "New users immediately encounter genuine civic content, and discussion begins while decisions are still being prepared — not only after they are made."
   },
-  "project": {
-    "title": "Project status and participation",
-    "p1": "Eulesia is an early-stage research and development project. A working prototype exists and is being developed iteratively based on pilot user feedback. Design principles are derived from platform governance research literature.",
-    "p2": "Development proceeds on multiple parallel tracks: research funding, volunteer development work, and community building. The governance model is still open — possibilities include an independent foundation, association, or other organizational form serving the public interest.",
-    "ctaTitle": "Get involved",
-    "ctaDesc": "You can get involved within Eulesia itself — join discussions, give feedback, or participate in development work. Early-stage users play a significant role in shaping the platform's direction."
+  "roadmap": {
+    "title": "Roadmap",
+    "now": "Now: Early access — Finland",
+    "nowItems": [
+      "First early adopters via invite model",
+      "Collaboration with municipalities and regions",
+      "Get in touch: info@eulesia.eu"
+    ],
+    "q2q3": "Q2–Q3 2026",
+    "q2q3Items": [
+      "Strong authentication with bank credentials (optional)"
+    ],
+    "late2026": "Late 2026 / Early 2027",
+    "late2026Items": [
+      "EUDI Wallet login enabled",
+      "One person, one account principle enforced"
+    ]
+  },
+  "funding": {
+    "title": "Funding",
+    "description": "Eulesia is a non-profit project. Funding sources:",
+    "items": [
+      "Research and development grants",
+      "Donations"
+    ]
+  },
+  "organization": {
+    "title": "Organization",
+    "p1": "Eulesia is currently a private project developed by Markus Sjöberg. The long-term goal is a structure that ensures the platform's continuity and independence.",
+    "p2": "Possibilities being explored: an independent foundation, publicly funded organization, or university-based maintenance and development. The university model would enable research-based development and availability of anonymized social media data for European researchers."
+  },
+  "team": {
+    "title": "Team",
+    "description": "Development has so far been done by Markus Sjöberg. A real social media platform needs a team — if you're interested in joining, get in touch.",
+    "contact": "info@eulesia.eu"
   },
   "whatNot": {
     "title": "What Eulesia is not",
@@ -57,14 +86,14 @@
     "notUnilateral": "No unilateral rule changes by private actors",
     "notEngagement": "Not optimized for engagement, attention, or addiction"
   },
-  "research": {
-    "title": "Research foundation",
-    "description": "Eulesia's design is based on Design Science Research methodology. Six design requirements are derived through normative synthesis from platform governance research literature. The project is developed alongside academic research at Tampere University."
-  },
   "openSource": {
     "title": "Open source",
-    "description": "Eulesia's code is open source. Anyone can inspect, audit, and participate in the platform's development. Transparency is a core principle.",
+    "description": "Eulesia's code is open source. Anyone can inspect, audit, and participate in development. Transparency is a core principle.",
     "viewOnGithub": "View on GitHub →"
+  },
+  "research": {
+    "title": "Research foundation",
+    "description": "Eulesia's design is based on Design Science Research methodology. Design requirements are derived from platform governance research literature. The project is developed alongside academic research at Tampere University."
   },
   "euAlignment": {
     "title": "European digital public infrastructure",
