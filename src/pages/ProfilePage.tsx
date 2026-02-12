@@ -282,12 +282,14 @@ export function ProfilePage() {
           <div>
             <h1 className="text-xl font-bold text-gray-900">{currentUser.name}</h1>
             <div className="flex items-center gap-2 mt-1">
-              <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
-                <Shield className="w-3 h-3" />
-                {currentUser.identityLevel === 'high' ? t('identity.highAssurance') :
-                 currentUser.identityLevel === 'substantial' ? t('identity.substantial') :
-                 t('identity.verified')}
-              </span>
+              {currentUser.identityVerified && (
+                <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
+                  <Shield className="w-3 h-3" />
+                  {currentUser.identityLevel === 'high' ? t('identity.highAssurance') :
+                   currentUser.identityLevel === 'substantial' ? t('identity.substantial') :
+                   t('identity.verified')}
+                </span>
+              )}
               {currentUser.municipality && (
                 <span className="text-xs text-gray-500">
                   {currentUser.municipality.name}

@@ -180,7 +180,8 @@ router.get('/:id', optionalAuthMiddleware, asyncHandler(async (req: Authenticate
       author: {
         id: users.id,
         name: users.name,
-        avatarUrl: users.avatarUrl
+        avatarUrl: users.avatarUrl,
+        identityVerified: users.identityVerified
       }
     })
     .from(clubThreads)
@@ -481,7 +482,8 @@ router.get('/:clubId/threads/:threadId', optionalAuthMiddleware, asyncHandler(as
         id: users.id,
         name: users.name,
         avatarUrl: users.avatarUrl,
-        role: users.role
+        role: users.role,
+        identityVerified: users.identityVerified
       }
     })
     .from(clubThreads)
@@ -504,7 +506,8 @@ router.get('/:clubId/threads/:threadId', optionalAuthMiddleware, asyncHandler(as
         id: users.id,
         name: users.name,
         avatarUrl: users.avatarUrl,
-        role: users.role
+        role: users.role,
+        identityVerified: users.identityVerified
       }
     })
     .from(clubComments)

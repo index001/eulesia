@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Shield, Calendar, MessageSquare, FileText, Loader2, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Shield, ShieldCheck, ShieldX, Calendar, MessageSquare, FileText, Loader2, AlertTriangle } from 'lucide-react'
 import { AdminLayout } from '../../components/admin'
-import { useAdminUser, useChangeUserRole, useIssueSanction, useRevokeSanction } from '../../hooks/useAdminApi'
+import { useAdminUser, useChangeUserRole, useToggleVerification, useIssueSanction, useRevokeSanction } from '../../hooks/useAdminApi'
 import { formatRelativeTime, formatDateLong } from '../../lib/formatTime'
 
 export function AdminUserDetailPage() {
@@ -11,6 +11,7 @@ export function AdminUserDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: user, isLoading } = useAdminUser(id || '')
   const changeRoleMutation = useChangeUserRole()
+  const toggleVerificationMutation = useToggleVerification()
   const issueSanctionMutation = useIssueSanction()
   const revokeSanctionMutation = useRevokeSanction()
 
@@ -105,11 +106,52 @@ export function AdminUserDetailPage() {
               <FileText className="w-4 h-4" />
               {t('userDetail.comments', { count: user.commentCount })}
             </div>
-            {user.identityVerified && (
+            {user.identityVerified ? (
               <div className="flex items-center gap-2 text-green-700">
                 <Shield className="w-4 h-4" />
                 {t('userDetail.verified')}
               </div>
+            ) : (
+              <div className="flex items-center gap-2 text-gray-400">
+                <Shield className="w-4 h-4" />
+                {t('userDetail.notVerified')}
+              </div>
+            )}
+          </div>
+
+          {/* Verify / Unverify */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <label className="text-sm font-medium text-gray-700 block mb-2">{t('userDetail.verification')}</label>
+            {user.identityVerified ? (
+              <button
+                onClick={() => id && toggleVerificationMutation.mutate({ id, verified: false })}
+                disabled={toggleVerificationMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm border border-red-300 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50"
+              >
+                {toggleVerificationMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <ShieldX className="w-4 h-4" />
+                    {t('userDetail.removeVerification')}
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={() => id && toggleVerificationMutation.mutate({ id, verified: true })}
+                disabled={toggleVerificationMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm border border-green-300 text-green-700 rounded-lg hover:bg-green-50 disabled:opacity-50"
+              >
+                {toggleVerificationMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    {t('userDetail.grantVerification')}
+                  </>
+                )}
+              </button>
             )}
           </div>
 

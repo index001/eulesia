@@ -226,7 +226,8 @@ router.get('/threads', optionalAuthMiddleware, asyncHandler(async (req: Authenti
         avatarUrl: users.avatarUrl,
         role: users.role,
         institutionType: users.institutionType,
-        institutionName: users.institutionName
+        institutionName: users.institutionName,
+        identityVerified: users.identityVerified
       },
       municipality: municipalities
     })
@@ -348,7 +349,8 @@ router.get('/threads/:id', optionalAuthMiddleware, asyncHandler(async (req: Auth
         avatarUrl: users.avatarUrl,
         role: users.role,
         institutionType: users.institutionType,
-        institutionName: users.institutionName
+        institutionName: users.institutionName,
+        identityVerified: users.identityVerified
       },
       municipality: municipalities
     })
@@ -397,7 +399,8 @@ router.get('/threads/:id', optionalAuthMiddleware, asyncHandler(async (req: Auth
         avatarUrl: users.avatarUrl,
         role: users.role,
         institutionType: users.institutionType,
-        institutionName: users.institutionName
+        institutionName: users.institutionName,
+        identityVerified: users.identityVerified
       }
     })
     .from(comments)

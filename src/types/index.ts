@@ -9,7 +9,7 @@ export interface User {
   id: string
   name: string
   role: UserRole
-  verified: boolean // Always true in Eulesia
+  verified: boolean
   municipality?: string
   avatarUrl?: string
   avatarInitials: string

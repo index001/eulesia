@@ -632,6 +632,13 @@ class ApiClient {
     })
   }
 
+  async toggleVerification(id: string, verified: boolean): Promise<{ id: string; identityVerified: boolean }> {
+    return this.request(`/admin/users/${id}/verify`, {
+      method: 'PATCH',
+      body: JSON.stringify({ verified })
+    })
+  }
+
   async issueSanction(userId: string, data: IssueSanctionData): Promise<AdminSanction> {
     return this.request(`/admin/users/${userId}/sanction`, {
       method: 'POST',
@@ -823,6 +830,7 @@ export interface UserSummary {
   role: 'citizen' | 'institution' | 'admin'
   institutionType?: string
   institutionName?: string
+  identityVerified?: boolean
 }
 
 export interface InstitutionalContext {

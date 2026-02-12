@@ -20,7 +20,7 @@ export const subscriptionNotifyEnum = pgEnum('subscription_notify', ['all', 'non
 export const reportReasonEnum = pgEnum('report_reason', ['illegal', 'harassment', 'spam', 'misinformation', 'other'])
 export const reportStatusEnum = pgEnum('report_status', ['pending', 'reviewing', 'resolved', 'dismissed'])
 export const contentTypeEnum = pgEnum('content_type', ['thread', 'comment', 'club_thread', 'club_comment', 'club', 'user', 'room_message', 'dm'])
-export const actionTypeEnum = pgEnum('action_type', ['content_removed', 'content_restored', 'user_warned', 'user_suspended', 'user_banned', 'user_unbanned', 'report_dismissed', 'report_resolved', 'role_changed'])
+export const actionTypeEnum = pgEnum('action_type', ['content_removed', 'content_restored', 'user_warned', 'user_suspended', 'user_banned', 'user_unbanned', 'report_dismissed', 'report_resolved', 'role_changed', 'user_verified', 'user_unverified'])
 export const sanctionTypeEnum = pgEnum('sanction_type', ['warning', 'suspension', 'ban'])
 export const appealStatusEnum = pgEnum('appeal_status', ['pending', 'accepted', 'rejected'])
 

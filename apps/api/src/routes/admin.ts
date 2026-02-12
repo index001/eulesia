@@ -184,6 +184,29 @@ router.patch('/users/:id/role', asyncHandler(async (req: AuthenticatedRequest, r
   res.json({ success: true, data: { id, role } })
 }))
 
+// PATCH /admin/users/:id/verify
+router.patch('/users/:id/verify', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params
+  const { verified } = z.object({ verified: z.boolean() }).parse(req.body)
+
+  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1)
+  if (!user) throw new AppError(404, 'User not found')
+
+  await db.update(users).set({ identityVerified: verified }).where(eq(users.id, id))
+
+  // Log action
+  await db.insert(moderationActions).values({
+    adminUserId: req.user!.id,
+    actionType: verified ? 'user_verified' : 'user_unverified',
+    targetType: 'user',
+    targetId: id,
+    reason: verified ? 'Identity verified by admin' : 'Identity verification removed by admin',
+    metadata: { identityVerified: verified }
+  })
+
+  res.json({ success: true, data: { id, identityVerified: verified } })
+}))
+
 // ─── Sanctions ──────────────────────────────────────────────
 
 const issueSanctionSchema = z.object({

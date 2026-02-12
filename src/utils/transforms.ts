@@ -5,7 +5,7 @@ export function transformAuthor(author: UserSummary) {
     id: author.id,
     name: author.name,
     role: author.role,
-    verified: true,
+    verified: author.identityVerified ?? false,
     avatarUrl: author.avatarUrl,
     avatarInitials: author.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
     institutionType: author.institutionType as 'municipality' | 'agency' | 'ministry' | undefined,

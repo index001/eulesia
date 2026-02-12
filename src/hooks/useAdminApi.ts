@@ -55,6 +55,21 @@ export function useChangeUserRole() {
   })
 }
 
+// Verification
+export function useToggleVerification() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, verified }: { id: string; verified: boolean }) =>
+      api.toggleVerification(id, verified),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.user(id) })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+      queryClient.invalidateQueries({ queryKey: adminKeys.dashboard })
+    }
+  })
+}
+
 // Sanctions
 export function useIssueSanction() {
   const queryClient = useQueryClient()

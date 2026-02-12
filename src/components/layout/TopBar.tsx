@@ -223,10 +223,12 @@ export function TopBar() {
               )}
             </div>
             {/* Verified identity indicator */}
-            <div className="hidden sm:flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
-              <Shield className="w-3 h-3" />
-              <span>{t('verified')}</span>
-            </div>
+            {currentUser?.identityVerified && (
+              <div className="hidden sm:flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
+                <Shield className="w-3 h-3" />
+                <span>{t('verified')}</span>
+              </div>
+            )}
           </Link>
         </div>
       </div>
