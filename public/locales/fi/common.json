@@ -183,5 +183,23 @@
     "submitted": "Valitus lähetetty. Käsittelemme sen mahdollisimman pian."
   },
   "messageDeleted": "Tämä viesti on poistettu",
-  "loadMore": "Lataa lisää"
+  "loadMore": "Lataa lisää",
+  "errorPages": {
+    "notFound": {
+      "title": "Sivua ei löytynyt",
+      "description": "Etsimääsi sivua ei ole olemassa tai se on siirretty."
+    },
+    "error": {
+      "title": "Jokin meni pieleen",
+      "description": "Pahoittelut, sovelluksessa tapahtui virhe. Yritä ladata sivu uudelleen."
+    },
+    "backToAgora": "Takaisin Agoraan",
+    "backToHome": "Etusivulle",
+    "reload": "Lataa uudelleen"
+  },
+  "cookies": {
+    "message": "Eulesia käyttää vain välttämätöntä istuntoevästettä kirjautumiseen. Emme käytä analytiikka- tai mainosevästeitä.",
+    "accept": "Selvä",
+    "learnMore": "Tietosuojaseloste"
+  }
 }

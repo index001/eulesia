@@ -183,5 +183,23 @@
     "submitted": "Appeal submitted. We will review it as soon as possible."
   },
   "messageDeleted": "This message has been deleted",
-  "loadMore": "Load more"
+  "loadMore": "Load more",
+  "errorPages": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or has been moved."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "Sorry, an unexpected error occurred. Please try reloading the page."
+    },
+    "backToAgora": "Back to Agora",
+    "backToHome": "Go to homepage",
+    "reload": "Reload page"
+  },
+  "cookies": {
+    "message": "Eulesia only uses an essential session cookie for authentication. We do not use analytics or advertising cookies.",
+    "accept": "Got it",
+    "learnMore": "Privacy policy"
+  }
 }

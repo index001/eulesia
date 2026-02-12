@@ -1,0 +1,24 @@
+# Eulesia - Citizen Democracy Platform
+# https://eulesia.eu
+
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /terms
+Allow: /privacy
+
+# Authenticated content - crawlers can't access
+Disallow: /agora
+Disallow: /clubs
+Disallow: /messages
+Disallow: /home
+Disallow: /map
+Disallow: /profile
+Disallow: /services
+Disallow: /admin
+Disallow: /auth
+
+# API
+Disallow: /api/
+
+Sitemap: https://eulesia.eu/sitemap.xml

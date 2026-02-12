@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useNavigate } from '
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { SocketProvider } from './hooks/useSocket'
 import { GuideProvider } from './components/guide'
+import { CookieConsent } from './components/common/CookieConsent'
+import { ErrorBoundary } from './components/common/ErrorBoundary'
 import {
   LoginPage,
   AgoraPage,
@@ -25,7 +27,8 @@ import {
   DMConversationPage,
   UserHomePage,
   TermsPage,
-  PrivacyPage
+  PrivacyPage,
+  NotFoundPage
 } from './pages'
 import {
   AdminDashboardPage,
@@ -288,8 +291,8 @@ function AppRoutes() {
       <Route path="/admin/appeals" element={<AdminRoute><AdminAppealsPage /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* 404 */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
@@ -354,15 +357,18 @@ function MagicLinkVerify() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <SocketProvider>
-          <GuideProvider>
-            <AppRoutes />
-          </GuideProvider>
-        </SocketProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <SocketProvider>
+            <GuideProvider>
+              <AppRoutes />
+              <CookieConsent />
+            </GuideProvider>
+          </SocketProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 
