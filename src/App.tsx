@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth'
 import { SocketProvider } from './hooks/useSocket'
 import { GuideProvider } from './components/guide'
 import { CookieConsent } from './components/common/CookieConsent'
+import { ScrollToTop } from './components/common/ScrollToTop'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import {
   LoginPage,
@@ -327,6 +328,7 @@ function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <SocketProvider>
             <GuideProvider>

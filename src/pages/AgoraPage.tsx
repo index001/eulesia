@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback, useLayoutEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
@@ -207,6 +207,50 @@ export function AgoraPage() {
     if (!currentUser) return
     voteThreadMutation.mutate({ threadId, value })
   }
+
+  // --- Scroll position save/restore ---
+  const scrollRestored = useRef(false)
+  const SCROLL_KEY = 'agora_scroll_y'
+
+  // Save scroll position on scroll (debounced)
+  useEffect(() => {
+    let ticking = false
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true
+        requestAnimationFrame(() => {
+          sessionStorage.setItem(SCROLL_KEY, String(window.scrollY))
+          ticking = false
+        })
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Restore scroll position after threads have loaded (only once per visit)
+  useLayoutEffect(() => {
+    if (scrollRestored.current) return
+    if (threads.length === 0) return
+
+    const saved = sessionStorage.getItem(SCROLL_KEY)
+    if (saved) {
+      const y = parseInt(saved, 10)
+      if (y > 0) {
+        // Small delay to let the DOM render the thread cards first
+        requestAnimationFrame(() => {
+          window.scrollTo(0, y)
+        })
+      }
+    }
+    scrollRestored.current = true
+  }, [threads.length])
+
+  // Clear saved scroll when filters change (starting fresh)
+  useEffect(() => {
+    sessionStorage.removeItem(SCROLL_KEY)
+    scrollRestored.current = false
+  }, [feedScope, sortBy, topPeriod, selectedMunicipality, selectedTags]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleThreadCreated = (threadId: string) => {
     navigate(`/agora/thread/${threadId}`)
