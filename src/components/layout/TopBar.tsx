@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bell, Shield, X, Search, MessageSquare, Check, Trash2, UserPlus, Reply, AtSign } from 'lucide-react'
+import { Bell, Shield, X, Search, MessageSquare, Check, Trash2, UserPlus, Reply, AtSign, LogIn } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../hooks/useAuth'
@@ -148,88 +148,99 @@ export function TopBar() {
             <Search className="w-5 h-5" />
           </button>
 
-          {/* Notifications */}
-          <div className="relative" ref={notificationRef} data-guide="notifications">
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
+          {currentUser ? (
+            <>
+              {/* Notifications */}
+              <div className="relative" ref={notificationRef} data-guide="notifications">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
 
-            {/* Notifications dropdown */}
-            {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
-                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900">{t('notifications.title')}</h3>
-                  <div className="flex items-center gap-1">
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={() => markAllRead.mutate()}
-                        className="p-1 hover:bg-gray-100 rounded text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                        title={t('notifications.markAllReadTitle')}
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{t('notifications.markAllRead')}</span>
-                      </button>
+                {/* Notifications dropdown */}
+                {showNotifications && (
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900">{t('notifications.title')}</h3>
+                      <div className="flex items-center gap-1">
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={() => markAllRead.mutate()}
+                            className="p-1 hover:bg-gray-100 rounded text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                            title={t('notifications.markAllReadTitle')}
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">{t('notifications.markAllRead')}</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setShowNotifications(false)}
+                          className="p-1 hover:bg-gray-100 rounded"
+                        >
+                          <X className="w-4 h-4 text-gray-500" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {notifications && notifications.length > 0 ? (
+                      <div className="max-h-96 overflow-y-auto divide-y divide-gray-100">
+                        {notifications.map((notification) => (
+                          <NotificationItem
+                            key={notification.id}
+                            notification={notification}
+                            onNavigate={handleNotificationClick}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center">
+                        <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">{t('notifications.empty')}</p>
+                        <p className="text-xs text-gray-400 mt-1">{t('notifications.emptyHint')}</p>
+                      </div>
                     )}
-                    <button
-                      onClick={() => setShowNotifications(false)}
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <X className="w-4 h-4 text-gray-500" />
-                    </button>
-                  </div>
-                </div>
-
-                {notifications && notifications.length > 0 ? (
-                  <div className="max-h-96 overflow-y-auto divide-y divide-gray-100">
-                    {notifications.map((notification) => (
-                      <NotificationItem
-                        key={notification.id}
-                        notification={notification}
-                        onNavigate={handleNotificationClick}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-8 text-center">
-                    <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">{t('notifications.empty')}</p>
-                    <p className="text-xs text-gray-400 mt-1">{t('notifications.emptyHint')}</p>
                   </div>
                 )}
               </div>
-            )}
-          </div>
 
-          {/* Profile */}
-          <Link
-            to="/profile"
-            className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
-              {currentUser?.avatarUrl ? (
-                <img src={currentUser.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
-              ) : (
-                <span className="text-white text-xs font-medium">
-                  {avatarInitials}
-                </span>
-              )}
-            </div>
-            {/* Verified identity indicator */}
-            {currentUser?.identityVerified && (
-              <div className="hidden sm:flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
-                <Shield className="w-3 h-3" />
-                <span>{t('verified')}</span>
-              </div>
-            )}
-          </Link>
+              {/* Profile */}
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
+                  {currentUser.avatarUrl ? (
+                    <img src={currentUser.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span className="text-white text-xs font-medium">
+                      {avatarInitials}
+                    </span>
+                  )}
+                </div>
+                {currentUser.identityVerified && (
+                  <div className="hidden sm:flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
+                    <Shield className="w-3 h-3" />
+                    <span>{t('verified')}</span>
+                  </div>
+                )}
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-800 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>{t('auth:signIn')}</span>
+            </Link>
+          )}
         </div>
       </div>
 

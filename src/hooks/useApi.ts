@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
+import { useAuth } from './useAuth'
 import type {
   ThreadFilters,
   ClubFilters,
@@ -306,9 +307,11 @@ export function useDeleteDirectMessage(conversationId: string) {
 
 // Subscription hooks
 export function useSubscriptions() {
+  const { isAuthenticated } = useAuth()
   return useQuery({
     queryKey: queryKeys.subscriptions,
-    queryFn: () => api.getSubscriptions()
+    queryFn: () => api.getSubscriptions(),
+    enabled: isAuthenticated
   })
 }
 
@@ -682,26 +685,32 @@ export function useMarkRead(conversationId: string) {
 }
 
 export function useUnreadDmCount() {
+  const { isAuthenticated } = useAuth()
   return useQuery({
     queryKey: queryKeys.dmUnreadCount,
     queryFn: () => api.getUnreadDmCount(),
-    refetchInterval: 30_000
+    refetchInterval: 30_000,
+    enabled: isAuthenticated
   })
 }
 
 // Notification hooks
 export function useNotifications() {
+  const { isAuthenticated } = useAuth()
   return useQuery({
     queryKey: queryKeys.notifications,
-    queryFn: () => api.getNotifications(30)
+    queryFn: () => api.getNotifications(30),
+    enabled: isAuthenticated
   })
 }
 
 export function useUnreadNotificationCount() {
+  const { isAuthenticated } = useAuth()
   return useQuery({
     queryKey: queryKeys.notificationUnreadCount,
     queryFn: () => api.getUnreadNotificationCount(),
-    refetchInterval: 60_000
+    refetchInterval: 60_000,
+    enabled: isAuthenticated
   })
 }
 

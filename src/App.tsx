@@ -121,48 +121,12 @@ function AppRoutes() {
           element={<AuthCallback />}
         />
 
-        {/* Protected routes */}
-        <Route
-          path="/agora"
-          element={
-            <ProtectedRoute>
-              <AgoraPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agora/thread/:threadId"
-          element={
-            <ProtectedRoute>
-              <ThreadPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agora/tag/:tagName"
-          element={
-            <ProtectedRoute>
-              <TagPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/kunnat"
-          element={
-            <ProtectedRoute>
-              <MunicipalitiesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/kunnat/:municipalityId"
-          element={
-            <ProtectedRoute>
-              <MunicipalityPage />
-            </ProtectedRoute>
-          }
-        />
+        {/* Public content routes (readable without login) */}
+        <Route path="/agora" element={<AgoraPage />} />
+        <Route path="/agora/thread/:threadId" element={<ThreadPage />} />
+        <Route path="/agora/tag/:tagName" element={<TagPage />} />
+        <Route path="/kunnat" element={<MunicipalitiesPage />} />
+        <Route path="/kunnat/:municipalityId" element={<MunicipalityPage />} />
 
         <Route
           path="/clubs"
@@ -279,23 +243,8 @@ function AppRoutes() {
           element={<PrivacyPage />}
         />
 
-        <Route
-          path="/aiheet"
-          element={
-            <ProtectedRoute>
-              <TopicsPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/user/:userId"
-          element={
-            <ProtectedRoute>
-              <UserProfilePage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/aiheet" element={<TopicsPage />} />
+        <Route path="/user/:userId" element={<UserProfilePage />} />
 
         {/* Admin routes */}
         <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />

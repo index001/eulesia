@@ -2,19 +2,23 @@ import { Landmark, Users, Home, MapPin, MessageSquare } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useUnreadDmCount } from '../../hooks/useApi'
+import { useAuth } from '../../hooks/useAuth'
 
-const navItems = [
-  { to: '/agora', icon: Landmark, tKey: 'nav.agora' },
-  { to: '/clubs', icon: Users, tKey: 'nav.clubs' },
-  { to: '/messages', icon: MessageSquare, tKey: 'nav.messages', badge: 'dm' as const },
-  { to: '/map', icon: MapPin, tKey: 'nav.map' },
-  { to: '/home', icon: Home, tKey: 'nav.home' }
+const allNavItems = [
+  { to: '/agora', icon: Landmark, tKey: 'nav.agora', public: true },
+  { to: '/clubs', icon: Users, tKey: 'nav.clubs', public: false },
+  { to: '/messages', icon: MessageSquare, tKey: 'nav.messages', badge: 'dm' as const, public: false },
+  { to: '/map', icon: MapPin, tKey: 'nav.map', public: true },
+  { to: '/home', icon: Home, tKey: 'nav.home', public: false }
 ]
 
 export function BottomNav() {
   const { t } = useTranslation()
+  const { currentUser } = useAuth()
   const { data: dmUnread } = useUnreadDmCount()
   const unreadCount = dmUnread?.count ?? 0
+
+  const navItems = currentUser ? allNavItems : allNavItems.filter(item => item.public)
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 pb-[env(safe-area-inset-bottom)]" data-guide="bottomnav">

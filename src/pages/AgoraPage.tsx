@@ -102,7 +102,14 @@ export function AgoraPage() {
 
   // Set default feed scope based on subscriptions (only once on initial load)
   useEffect(() => {
-    if (!feedScopeInitialized && currentUser && subscriptionsData !== undefined) {
+    if (feedScopeInitialized) return
+    if (!currentUser) {
+      // Unauthenticated: always show 'all' feed
+      setFeedScope('all')
+      setFeedScopeInitialized(true)
+      return
+    }
+    if (subscriptionsData !== undefined) {
       if (hasSubscriptions) {
         setFeedScope('following')
       } else {

@@ -398,30 +398,38 @@ export function ThreadPage() {
           </div>
 
           {/* Comment input */}
-          <div className="bg-white rounded-xl p-4 border border-gray-200 mb-4">
-            <textarea
-              value={commentContent}
-              onChange={(e) => setCommentContent(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  if (commentContent.trim() && !isSubmitting) handleSubmitComment()
-                }
-              }}
-              placeholder={t('thread.shareThoughts')}
-              className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows={3}
-            />
-            <div className="flex justify-end mt-3">
-              <button
-                onClick={handleSubmitComment}
-                disabled={!commentContent.trim() || isSubmitting}
-                className="bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? t('thread.posting') : t('thread.postReply')}
-              </button>
+          {currentUser ? (
+            <div className="bg-white rounded-xl p-4 border border-gray-200 mb-4">
+              <textarea
+                value={commentContent}
+                onChange={(e) => setCommentContent(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    if (commentContent.trim() && !isSubmitting) handleSubmitComment()
+                  }
+                }}
+                placeholder={t('thread.shareThoughts')}
+                className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+              />
+              <div className="flex justify-end mt-3">
+                <button
+                  onClick={handleSubmitComment}
+                  disabled={!commentContent.trim() || isSubmitting}
+                  className="bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? t('thread.posting') : t('thread.postReply')}
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-200 mb-4 text-center">
+              <p className="text-sm text-blue-800">
+                <a href="/" className="font-medium underline hover:text-blue-900">{t('common:actions.loginToVote')}</a>
+              </p>
+            </div>
+          )}
 
           {/* Comments */}
           {comments.length > 0 ? (
