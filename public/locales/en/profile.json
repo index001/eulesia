@@ -54,6 +54,20 @@
     "deleteConfirmPlaceholder": "Type POISTA",
     "deleteConfirmButton": "Delete account permanently"
   },
+  "personalData": {
+    "title": "My data",
+    "back": "Back to profile",
+    "description": "All your personal data stored in Eulesia. You can download it in JSON format.",
+    "storedData": "Stored data",
+    "threads": "Threads",
+    "comments": "Comments",
+    "clubMemberships": "Club memberships",
+    "rooms": "Rooms",
+    "roomMessages": "Room messages",
+    "notifications": "Notifications",
+    "subscriptions": "Subscriptions",
+    "exportInfo": "In accordance with GDPR, you can download all your data. The file contains all your data stored in Eulesia in JSON format."
+  },
   "language": {
     "title": "Language",
     "description": "Choose the interface language"

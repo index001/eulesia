@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Shield, Fingerprint, CheckCircle, Lock, Users, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Ticket } from 'lucide-react'
+import { Shield, Fingerprint, CheckCircle, Lock, Users, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Ticket, AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../lib/api'
@@ -23,7 +23,8 @@ export function LoginPage() {
   const [invitedBy, setInvitedBy] = useState<string | null>(null)
   const [regUsername, setRegUsername] = useState('')
   const [regPassword, setRegPassword] = useState('')
-  const [regName, setRegName] = useState('')
+  const [regFirstName, setRegFirstName] = useState('')
+  const [regLastName, setRegLastName] = useState('')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,7 +72,7 @@ export function LoginPage() {
         inviteCode,
         username: regUsername,
         password: regPassword,
-        name: regName
+        name: `${regFirstName.trim()} ${regLastName.trim()}`
       })
       // Navigation handled by App.tsx
     } catch (err) {
@@ -313,23 +314,53 @@ export function LoginPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4 mb-4">
-                  <div>
-                    <label htmlFor="reg-name" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('fullName')}
-                    </label>
-                    <input
-                      type="text"
-                      id="reg-name"
-                      value={regName}
-                      onChange={(e) => setRegName(e.target.value)}
-                      placeholder={t('fullNamePlaceholder')}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                      autoFocus
-                      autoComplete="name"
-                    />
+                {/* Beta notice */}
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-amber-800 space-y-1">
+                      <p className="font-medium">{t('betaNotice.title')}</p>
+                      <p>{t('betaNotice.realName')}</p>
+                      <p>{t('betaNotice.strongAuth')}</p>
+                    </div>
                   </div>
+                </div>
+
+                <div className="space-y-4 mb-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="reg-firstname" className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('firstName')}
+                      </label>
+                      <input
+                        type="text"
+                        id="reg-firstname"
+                        value={regFirstName}
+                        onChange={(e) => setRegFirstName(e.target.value)}
+                        placeholder={t('firstNamePlaceholder')}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                        autoFocus
+                        autoComplete="given-name"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="reg-lastname" className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('lastName')}
+                      </label>
+                      <input
+                        type="text"
+                        id="reg-lastname"
+                        value={regLastName}
+                        onChange={(e) => setRegLastName(e.target.value)}
+                        placeholder={t('lastNamePlaceholder')}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                        autoComplete="family-name"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-amber-700 -mt-2">{t('realNameNotice')}</p>
 
                   <div>
                     <label htmlFor="reg-username" className="block text-sm font-medium text-gray-700 mb-1">
@@ -376,7 +407,7 @@ export function LoginPage() {
 
                 <button
                   type="submit"
-                  disabled={isLoading || !regUsername || !regPassword || !regName}
+                  disabled={isLoading || !regUsername || !regPassword || !regFirstName.trim() || !regLastName.trim()}
                   className="w-full bg-green-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (

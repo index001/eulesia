@@ -27,6 +27,7 @@ import {
   UserHomePage,
   TermsPage,
   PrivacyPage,
+  PersonalDataPage,
   NotFoundPage
 } from './pages'
 
@@ -248,6 +249,14 @@ function AppRoutes() {
           }
         />
 
+        <Route
+          path="/profile/data"
+          element={
+            <ProtectedRoute>
+              <PersonalDataPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/profile"
           element={

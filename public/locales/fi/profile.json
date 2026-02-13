@@ -54,6 +54,20 @@
     "deleteConfirmPlaceholder": "Kirjoita POISTA",
     "deleteConfirmButton": "Poista tili pysyvästi"
   },
+  "personalData": {
+    "title": "Omat tiedot",
+    "back": "Takaisin profiiliin",
+    "description": "Kaikki Eulesiaan tallennetut henkilökohtaiset tietosi. Voit ladata ne JSON-muodossa.",
+    "storedData": "Tallennettu data",
+    "threads": "Keskustelut",
+    "comments": "Kommentit",
+    "clubMemberships": "Klubijäsenyydet",
+    "rooms": "Huoneet",
+    "roomMessages": "Huoneviestit",
+    "notifications": "Ilmoitukset",
+    "subscriptions": "Seurannat",
+    "exportInfo": "GDPR:n mukaisesti voit ladata kaikki tietosi. Tiedosto sisältää kaiken Eulesiaan tallennetun datasi JSON-muodossa."
+  },
   "language": {
     "title": "Kieli",
     "description": "Valitse käyttöliittymän kieli"

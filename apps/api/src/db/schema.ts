@@ -155,6 +155,12 @@ export const users = pgTable('users', {
   identityProvider: varchar('identity_provider', { length: 50 }),
   identityLevel: identityLevelEnum('identity_level').default('basic'),
 
+  // Strong authentication / EUDI Wallet fields
+  verifiedName: varchar('verified_name', { length: 255 }),     // Official name from PID / strong auth
+  rpSubject: varchar('rp_subject', { length: 255 }),           // Relying Party subject — persistent pseudonym from wallet/IdP
+  identityIssuer: varchar('identity_issuer', { length: 255 }), // Issuer of the identity credential
+  identityVerifiedAt: timestamp('identity_verified_at', { withTimezone: true }), // When identity was verified
+
   // Settings
   notificationReplies: boolean('notification_replies').default(true),
   notificationMentions: boolean('notification_mentions').default(true),

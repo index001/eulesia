@@ -243,7 +243,7 @@ export function ThreadPage() {
 
         {/* Tags */}
         <div className="mb-4">
-          <TagList tags={thread.tags} size="md" />
+          <TagList tags={thread.tags || []} size="md" />
         </div>
 
         {/* Author + Report */}

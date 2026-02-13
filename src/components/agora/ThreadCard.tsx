@@ -150,7 +150,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
 
           {/* Tags */}
           <div className="mb-3">
-            <TagList tags={thread.tags.slice(0, 3)} />
+            <TagList tags={(thread.tags || []).slice(0, 3)} />
           </div>
 
           {/* Footer: author + replies */}
