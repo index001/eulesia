@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from 'express'
+import dns from 'dns/promises'
 import { db, linkPreviews } from '../db/index.js'
 import { eq } from 'drizzle-orm'
 
@@ -36,6 +37,45 @@ function isInternalUrl(urlString: string): boolean {
   } catch {
     return true
   }
+}
+
+// Check if a resolved IP address is internal/private
+function isInternalIp(ip: string): boolean {
+  const parts = ip.split('.')
+  if (parts.length === 4 && parts.every(p => /^\d+$/.test(p))) {
+    const first = parseInt(parts[0])
+    const second = parseInt(parts[1])
+    if (first === 127) return true
+    if (first === 10) return true
+    if (first === 172 && second >= 16 && second <= 31) return true
+    if (first === 192 && second === 168) return true
+    if (first === 169 && second === 254) return true
+    if (first === 0) return true
+  }
+  // IPv6 loopback
+  if (ip === '::1' || ip === '::' || ip.startsWith('fe80:') || ip.startsWith('fc00:') || ip.startsWith('fd')) return true
+  return false
+}
+
+// Resolve hostname and check if it points to an internal IP (DNS rebinding protection)
+async function resolvesToInternalIp(hostname: string): Promise<boolean> {
+  try {
+    const addresses = await dns.resolve4(hostname)
+    for (const addr of addresses) {
+      if (isInternalIp(addr)) return true
+    }
+  } catch {
+    // If DNS resolution fails, allow the request — the fetch will fail anyway
+  }
+  try {
+    const addresses = await dns.resolve6(hostname)
+    for (const addr of addresses) {
+      if (isInternalIp(addr)) return true
+    }
+  } catch {
+    // IPv6 resolution failure is fine
+  }
+  return false
 }
 
 // Parse OG metadata from HTML
@@ -152,6 +192,11 @@ router.get('/link-preview', async (req: Request, res: Response) => {
     }
 
     if (isInternalUrl(url)) {
+      return res.status(400).json({ success: false, error: 'Internal URLs not allowed' })
+    }
+
+    // DNS resolution check — prevent domain-to-internal-IP bypass (SSRF)
+    if (await resolvesToInternalIp(parsedUrl.hostname)) {
       return res.status(400).json({ success: false, error: 'Internal URLs not allowed' })
     }
 

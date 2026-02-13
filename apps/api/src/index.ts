@@ -13,6 +13,7 @@ import ogRoutes from './routes/og.js'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
 import { initScheduler } from './services/scheduler.js'
 import { fullSync, startPeriodicSync, healthCheck as meiliHealthCheck } from './services/search/index.js'
+import { hashToken } from './utils/crypto.js'
 
 // Upload directory (relative to project root)
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads'
@@ -48,6 +49,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }))
+
+// Trust proxy (for rate limiting behind reverse proxy) — MUST be before rate limiter
+app.set('trust proxy', 1)
 
 // Rate limiting (relaxed in development)
 const isDev = env.NODE_ENV === 'development'
@@ -86,9 +90,6 @@ app.use('/uploads', (_req, res, next) => {
   next()
 }, express.static(path.resolve(UPLOAD_DIR)))
 
-// Trust proxy (for rate limiting behind reverse proxy)
-app.set('trust proxy', 1)
-
 // Health check endpoint
 app.get('/health', async (_req, res) => {
   const meiliOk = await meiliHealthCheck()
@@ -111,20 +112,85 @@ app.use('/api/v1', routes)
 app.use(notFoundHandler)
 app.use(errorHandler)
 
-// Socket.io authentication and events
-io.on('connection', (socket) => {
-  console.log('Socket connected:', socket.id)
+// Socket.io authentication middleware
+io.use(async (socket, next) => {
+  try {
+    const rawCookies = socket.handshake.headers.cookie
+    if (!rawCookies) {
+      return next(new Error('Authentication required'))
+    }
 
-  // Home rooms
-  socket.on('join:room', (roomId: string) => {
-    socket.join(`room:${roomId}`)
+    // Parse cookies manually (simple key=value pairs separated by '; ')
+    const cookieMap = Object.fromEntries(
+      rawCookies.split('; ').map(c => { const [k, ...v] = c.split('='); return [k, v.join('=')] })
+    )
+    const sessionToken = cookieMap.session
+    if (!sessionToken) {
+      return next(new Error('Authentication required'))
+    }
+
+    const tokenHash = hashToken(sessionToken)
+    const { eq, and, gt } = await import('drizzle-orm')
+    const { db, sessions, users } = await import('./db/index.js')
+
+    const [session] = await db
+      .select()
+      .from(sessions)
+      .where(and(eq(sessions.tokenHash, tokenHash), gt(sessions.expiresAt, new Date())))
+      .limit(1)
+
+    if (!session) {
+      return next(new Error('Invalid session'))
+    }
+
+    const [user] = await db
+      .select({ id: users.id, role: users.role })
+      .from(users)
+      .where(eq(users.id, session.userId))
+      .limit(1)
+
+    if (!user) {
+      return next(new Error('User not found'))
+    }
+
+    // Attach userId to socket for later use
+    ;(socket as any).userId = user.id
+    ;(socket as any).userRole = user.role
+    next()
+  } catch (err) {
+    console.error('Socket auth error:', err)
+    next(new Error('Authentication failed'))
+  }
+})
+
+// Socket.io events (authenticated connections only)
+io.on('connection', (socket) => {
+  const userId = (socket as any).userId as string
+  console.log('Socket connected:', socket.id, 'user:', userId)
+
+  // Home rooms — verify membership
+  socket.on('join:room', async (roomId: string) => {
+    try {
+      const { eq, and } = await import('drizzle-orm')
+      const { db, roomMembers } = await import('./db/index.js')
+      const [membership] = await db
+        .select()
+        .from(roomMembers)
+        .where(and(eq(roomMembers.roomId, roomId), eq(roomMembers.userId, userId)))
+        .limit(1)
+      if (membership || (socket as any).userRole === 'admin') {
+        socket.join(`room:${roomId}`)
+      }
+    } catch (err) {
+      console.error('Error joining room:', err)
+    }
   })
 
   socket.on('leave:room', (roomId: string) => {
     socket.leave(`room:${roomId}`)
   })
 
-  // Agora threads
+  // Agora threads — public, allow all authenticated users
   socket.on('join:thread', (threadId: string) => {
     socket.join(`thread:${threadId}`)
   })
@@ -133,18 +199,38 @@ io.on('connection', (socket) => {
     socket.leave(`thread:${threadId}`)
   })
 
-  // User-specific room (for notifications)
-  socket.on('join:user', (userId: string) => {
-    socket.join(`user:${userId}`)
+  // User-specific room (notifications) — only own room
+  socket.on('join:user', (requestedUserId: string) => {
+    if (requestedUserId === userId) {
+      socket.join(`user:${userId}`)
+    }
   })
 
-  socket.on('leave:user', (userId: string) => {
-    socket.leave(`user:${userId}`)
+  socket.on('leave:user', (requestedUserId: string) => {
+    if (requestedUserId === userId) {
+      socket.leave(`user:${userId}`)
+    }
   })
 
-  // Direct messages
-  socket.on('join:dm', (conversationId: string) => {
-    socket.join(`dm:${conversationId}`)
+  // Direct messages — verify participation
+  socket.on('join:dm', async (conversationId: string) => {
+    try {
+      const { eq, and } = await import('drizzle-orm')
+      const { db, conversationParticipants } = await import('./db/index.js')
+      const [participant] = await db
+        .select()
+        .from(conversationParticipants)
+        .where(and(
+          eq(conversationParticipants.conversationId, conversationId),
+          eq(conversationParticipants.userId, userId)
+        ))
+        .limit(1)
+      if (participant || (socket as any).userRole === 'admin') {
+        socket.join(`dm:${conversationId}`)
+      }
+    } catch (err) {
+      console.error('Error joining DM:', err)
+    }
   })
 
   socket.on('leave:dm', (conversationId: string) => {
@@ -191,6 +277,12 @@ async function runMigrations() {
     await db.execute(sql`DO $$ BEGIN CREATE TYPE action_type AS ENUM ('content_removed', 'content_restored', 'user_warned', 'user_suspended', 'user_banned', 'user_unbanned', 'report_dismissed', 'report_resolved', 'role_changed'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
     await db.execute(sql`DO $$ BEGIN CREATE TYPE sanction_type AS ENUM ('warning', 'suspension', 'ban'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
     await db.execute(sql`DO $$ BEGIN CREATE TYPE appeal_status AS ENUM ('pending', 'accepted', 'rejected'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    // 0014: Sync enum values — add missing values from schema
+    await db.execute(sql`DO $$ BEGIN ALTER TYPE content_type ADD VALUE IF NOT EXISTS 'system'; EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN ALTER TYPE action_type ADD VALUE IF NOT EXISTS 'user_verified'; EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN ALTER TYPE action_type ADD VALUE IF NOT EXISTS 'user_unverified'; EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN ALTER TYPE action_type ADD VALUE IF NOT EXISTS 'settings_changed'; EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`DO $$ BEGIN ALTER TYPE action_type ADD VALUE IF NOT EXISTS 'invite_count_changed'; EXCEPTION WHEN duplicate_object THEN null; END $$`)
     await db.execute(sql`CREATE TABLE IF NOT EXISTS "content_reports" ("id" UUID PRIMARY KEY DEFAULT gen_random_uuid(), "reporter_user_id" UUID NOT NULL REFERENCES "users"("id"), "content_type" content_type NOT NULL, "content_id" UUID NOT NULL, "reason" report_reason NOT NULL, "description" TEXT, "status" report_status DEFAULT 'pending', "assigned_to" UUID REFERENCES "users"("id"), "resolved_at" TIMESTAMPTZ, "created_at" TIMESTAMPTZ DEFAULT NOW())`)
     await db.execute(sql`CREATE TABLE IF NOT EXISTS "moderation_actions" ("id" UUID PRIMARY KEY DEFAULT gen_random_uuid(), "admin_user_id" UUID NOT NULL REFERENCES "users"("id"), "action_type" action_type NOT NULL, "target_type" content_type NOT NULL, "target_id" UUID NOT NULL, "report_id" UUID REFERENCES "content_reports"("id"), "reason" TEXT, "metadata" JSONB, "created_at" TIMESTAMPTZ DEFAULT NOW())`)
     await db.execute(sql`CREATE TABLE IF NOT EXISTS "user_sanctions" ("id" UUID PRIMARY KEY DEFAULT gen_random_uuid(), "user_id" UUID NOT NULL REFERENCES "users"("id"), "sanction_type" sanction_type NOT NULL, "reason" TEXT, "issued_by" UUID NOT NULL REFERENCES "users"("id"), "issued_at" TIMESTAMPTZ DEFAULT NOW(), "expires_at" TIMESTAMPTZ, "revoked_at" TIMESTAMPTZ, "revoked_by" UUID REFERENCES "users"("id"))`)

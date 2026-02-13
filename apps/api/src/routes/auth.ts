@@ -2,7 +2,7 @@ import { Router, type Response } from 'express'
 import { z } from 'zod'
 import { eq, and, gt, or } from 'drizzle-orm'
 import * as argon2 from 'argon2'
-import { db, users, magicLinks, sessions, inviteCodes } from '../db/index.js'
+import { db, users, magicLinks, sessions, inviteCodes, siteSettings } from '../db/index.js'
 import { generateMagicLinkToken, generateSessionToken, hashToken } from '../utils/crypto.js'
 import { emailService } from '../services/email.js'
 import { authMiddleware } from '../middleware/auth.js'
@@ -78,65 +78,80 @@ router.post('/magic-link', asyncHandler(async (req, res: Response) => {
 router.post('/register', asyncHandler(async (req, res: Response) => {
   const { inviteCode, username, password, name } = registerSchema.parse(req.body)
 
-  // Validate invite code
-  const [invite] = await db
+  // Check if registration is open
+  const [regSetting] = await db
     .select()
-    .from(inviteCodes)
-    .where(eq(inviteCodes.code, inviteCode.toUpperCase()))
+    .from(siteSettings)
+    .where(eq(siteSettings.key, 'registration_open'))
     .limit(1)
-
-  if (!invite) {
-    throw new AppError(400, 'Invalid invite code')
+  if (regSetting && regSetting.value === 'false') {
+    throw new AppError(403, 'Registration is currently closed')
   }
 
-  if (invite.status !== 'available') {
-    throw new AppError(400, 'Invite code has already been used')
-  }
-
-  if (invite.expiresAt && new Date(invite.expiresAt) < new Date()) {
-    throw new AppError(400, 'Invite code has expired')
-  }
-
-  // Check if username already exists
-  const [existing] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.username, username.toLowerCase()))
-    .limit(1)
-
-  if (existing) {
-    throw new AppError(400, 'Username already exists')
-  }
-
-  // Hash password
+  // Hash password before transaction (CPU-intensive work outside tx)
   const passwordHash = await argon2.hash(password)
 
-  // Create user
-  const [newUser] = await db
-    .insert(users)
-    .values({
-      username: username.toLowerCase(),
-      passwordHash,
-      name,
-      invitedBy: invite.createdBy,
-      inviteCodesRemaining: 5,
-      identityProvider: 'invite',
-      identityVerified: false,
-      identityLevel: 'basic'
-    })
-    .returning()
+  // Use transaction to prevent race conditions on invite code + username
+  const newUser = await db.transaction(async (tx) => {
+    // Validate invite code (inside tx for atomicity)
+    const [invite] = await tx
+      .select()
+      .from(inviteCodes)
+      .where(eq(inviteCodes.code, inviteCode.toUpperCase()))
+      .limit(1)
 
-  // Mark invite code as used
-  await db
-    .update(inviteCodes)
-    .set({
-      usedBy: newUser.id,
-      status: 'used',
-      usedAt: new Date()
-    })
-    .where(eq(inviteCodes.id, invite.id))
+    if (!invite) {
+      throw new AppError(400, 'Invalid invite code')
+    }
 
-  // Index new user in Meilisearch so they are immediately discoverable
+    if (invite.status !== 'available') {
+      throw new AppError(400, 'Invite code has already been used')
+    }
+
+    if (invite.expiresAt && new Date(invite.expiresAt) < new Date()) {
+      throw new AppError(400, 'Invite code has expired')
+    }
+
+    // Check if username already exists
+    const [existing] = await tx
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, username.toLowerCase()))
+      .limit(1)
+
+    if (existing) {
+      throw new AppError(400, 'Username already exists')
+    }
+
+    // Create user
+    const [created] = await tx
+      .insert(users)
+      .values({
+        username: username.toLowerCase(),
+        passwordHash,
+        name,
+        invitedBy: invite.createdBy,
+        inviteCodesRemaining: 5,
+        identityProvider: 'invite',
+        identityVerified: false,
+        identityLevel: 'basic'
+      })
+      .returning()
+
+    // Mark invite code as used (atomic with user creation)
+    await tx
+      .update(inviteCodes)
+      .set({
+        usedBy: created.id,
+        status: 'used',
+        usedAt: new Date()
+      })
+      .where(eq(inviteCodes.id, invite.id))
+
+    return created
+  })
+
+  // Index new user in Meilisearch (outside tx — not critical)
   try {
     await indexUser({
       id: newUser.id,

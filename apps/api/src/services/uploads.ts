@@ -141,10 +141,18 @@ export async function processContentImage(
  * Delete an uploaded file
  */
 export async function deleteUpload(url: string): Promise<void> {
-  if (!url.startsWith('/uploads/')) return
+  // Extract the relative path from the URL
+  // URLs can be full (http://host/uploads/avatars/file.webp) or relative (/uploads/avatars/file.webp)
+  const uploadsIndex = url.indexOf('/uploads/')
+  if (uploadsIndex === -1) return
 
-  const relativePath = url.replace('/uploads/', '')
-  const fullPath = path.join(UPLOAD_DIR, relativePath)
+  const relativePath = url.substring(uploadsIndex + '/uploads/'.length)
+
+  // Prevent path traversal
+  const normalizedPath = path.normalize(relativePath)
+  if (normalizedPath.startsWith('..') || normalizedPath.includes('/../')) return
+
+  const fullPath = path.join(UPLOAD_DIR, normalizedPath)
 
   try {
     await fs.unlink(fullPath)

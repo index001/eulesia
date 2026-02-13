@@ -1,6 +1,6 @@
 import { Router, type Response } from 'express'
 import { eq, and, sql, desc } from 'drizzle-orm'
-import { db, inviteCodes, users } from '../db/index.js'
+import { db, inviteCodes, users, siteSettings } from '../db/index.js'
 import { authMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
@@ -64,6 +64,16 @@ router.get('/', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, r
 router.post('/', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id
 
+  // Check if invites are enabled
+  const [inviteSetting] = await db
+    .select()
+    .from(siteSettings)
+    .where(eq(siteSettings.key, 'invites_enabled'))
+    .limit(1)
+  if (inviteSetting && inviteSetting.value === 'false') {
+    throw new AppError(403, 'Invite creation is currently disabled')
+  }
+
   // Check if user has remaining invites
   const [user] = await db
     .select({ inviteCodesRemaining: users.inviteCodesRemaining })
@@ -94,19 +104,23 @@ router.post('/', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, 
     throw new AppError(500, 'Failed to generate unique invite code')
   }
 
-  // Create invite code and decrement user's remaining count
-  const [newCode] = await db.insert(inviteCodes).values({
-    code: code!,
-    createdBy: userId,
-    status: 'available'
-  }).returning()
+  // Create invite code and decrement user's remaining count (atomic)
+  const [newCode] = await db.transaction(async (tx) => {
+    const [created] = await tx.insert(inviteCodes).values({
+      code: code!,
+      createdBy: userId,
+      status: 'available'
+    }).returning()
 
-  await db
-    .update(users)
-    .set({
-      inviteCodesRemaining: sql`${users.inviteCodesRemaining} - 1`
-    })
-    .where(eq(users.id, userId))
+    await tx
+      .update(users)
+      .set({
+        inviteCodesRemaining: sql`${users.inviteCodesRemaining} - 1`
+      })
+      .where(eq(users.id, userId))
+
+    return [created]
+  })
 
   res.status(201).json({
     success: true,
