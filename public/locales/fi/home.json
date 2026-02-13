@@ -70,6 +70,7 @@
     "loadError": "Huonetta ei voitu ladata",
     "backToHome": "Takaisin kotiin",
     "sendMessage": "Lähetä viesti",
+    "sending": "Lähetetään...",
     "editMessage": "Muokkaa viestiä",
     "deleteMessage": "Poista viesti"
   },

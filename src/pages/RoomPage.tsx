@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { ContentWithPreviews } from '../components/common/ContentWithPreviews'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save, Search, Pencil, Check } from 'lucide-react'
@@ -12,6 +12,7 @@ import { formatRelativeTime } from '../lib/formatTime'
 import { api } from '../lib/api'
 import type { RoomMessage, SearchUserResult } from '../lib/api'
 import { transformAuthor } from '../utils/transforms'
+import { useEffect } from 'react'
 
 export function RoomPage() {
   const { t } = useTranslation('home')
@@ -46,12 +47,6 @@ export function RoomPage() {
   const [selectedUser, setSelectedUser] = useState<SearchUserResult | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const settingsRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [roomData?.messages])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -111,7 +106,6 @@ export function RoomPage() {
       setIsSearching(true)
       try {
         const results = await api.searchUsers(query.trim(), 5)
-        // Filter out current user and existing members
         const memberIds = new Set([
           currentUser?.id,
           ...roomData?.members.map(m => m.id) || [],
@@ -166,75 +160,115 @@ export function RoomPage() {
 
   return (
     <Layout>
-      <div className="flex flex-col" style={{ height: 'calc(100dvh - 3.5rem - 5rem)' }}>
-        {/* Header */}
-        <div className={`px-4 py-4 flex-shrink-0 ${visibility === 'public' ? 'bg-green-700' : 'bg-amber-700'}`}>
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="p-2 -ml-2 hover:bg-white/10 rounded-lg">
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </button>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                {visibility === 'public' ? (
-                  <Globe className="w-4 h-4 text-white/80" />
-                ) : (
-                  <Lock className="w-4 h-4 text-white/80" />
-                )}
-                <h1 className="text-lg font-bold text-white">{name}</h1>
-              </div>
-              <p className="text-sm text-white/70">
-                {t('room.ownerHome', { name: owner.name })} &bull; {visibility === 'public' ? t('room.public') : t('room.private')}
-              </p>
+      {/* Back navigation */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t('room.backToHome')}
+        </button>
+      </div>
+
+      {/* Room header */}
+      <div className={`px-4 py-6 ${visibility === 'public' ? 'bg-green-50' : 'bg-amber-50'}`}>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              {visibility === 'public' ? (
+                <Globe className="w-4 h-4 text-green-600" />
+              ) : (
+                <Lock className="w-4 h-4 text-amber-600" />
+              )}
+              <span className="text-xs font-medium text-gray-500 uppercase">
+                {visibility === 'public' ? t('room.public') : t('room.private')}
+              </span>
+              <span className="text-xs text-gray-400">&bull;</span>
+              <span className="text-xs text-gray-500">
+                {t('room.ownerHome', { name: owner.name })}
+              </span>
             </div>
-            {isOwner && (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setShowInvite(true)}
-                  className="p-2 hover:bg-white/10 rounded-lg"
-                  aria-label={t('room.inviteTitle')}
-                >
-                  <UserPlus className="w-5 h-5 text-white" />
-                </button>
-                <button
-                  onClick={handleOpenSettings}
-                  className="p-2 hover:bg-white/10 rounded-lg"
-                  ref={settingsRef}
-                  aria-label={t('room.settings')}
-                >
-                  <Settings className="w-5 h-5 text-white" />
-                </button>
-              </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">{name}</h1>
+            {description && (
+              <p className="text-sm text-gray-600 mt-2">{description}</p>
             )}
           </div>
+          {isOwner && (
+            <div className="flex items-center gap-1 flex-shrink-0 ml-3">
+              <button
+                onClick={() => setShowInvite(true)}
+                className="p-2 hover:bg-white/60 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label={t('room.inviteTitle')}
+              >
+                <UserPlus className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleOpenSettings}
+                className="p-2 hover:bg-white/60 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label={t('room.settings')}
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Room description */}
-        {description && (
-          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex-shrink-0">
-            <p className="text-sm text-gray-600">{description}</p>
-          </div>
-        )}
-
-        {/* Members info (for private rooms) */}
+        {/* Members */}
         {visibility === 'private' && (
-          <div className="px-4 py-3 border-b border-gray-200 flex items-center flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">{t('rooms.members', { count: members.length + 1 })}</span>
-            </div>
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200/60">
+            <Users className="w-4 h-4 text-gray-400" />
+            <span className="text-xs text-gray-500">{t('rooms.members', { count: members.length + 1 })}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Main content area */}
+      <div className="px-4 py-6 space-y-6">
+        {/* Message input at the top like Agora comment box */}
+        {canPost ? (
+          <div className="bg-white rounded-xl p-4 border border-gray-200">
+            <form onSubmit={handleSendMessage}>
+              <textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    if (newMessage.trim() && !sendMessageMutation.isPending) {
+                      handleSendMessage(e)
+                    }
+                  }
+                }}
+                placeholder={t('room.writeMessage')}
+                className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                rows={3}
+              />
+              <div className="flex justify-end mt-3">
+                <button
+                  type="submit"
+                  disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                  className="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send className="w-4 h-4" />
+                  {sendMessageMutation.isPending ? t('room.sending') : t('room.sendMessage')}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 text-center">
+            <p className="text-sm text-amber-800">
+              {currentUser ? t('room.needInvitation') : t('room.signInToPost')}
+            </p>
           </div>
         )}
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {messages.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <p>{t('room.noMessages')}</p>
-              <p className="text-sm mt-1">{t('room.noMessagesHint')}</p>
-            </div>
-          ) : (
-            messages.map((msg: RoomMessage) => (
-              <MessageBubble
+        {/* Messages as thread-style cards */}
+        {messages.length > 0 ? (
+          <div className="space-y-3">
+            {messages.map((msg: RoomMessage) => (
+              <MessageCard
                 key={msg.id}
                 message={msg}
                 isOwnMessage={msg.author?.id === currentUser?.id}
@@ -242,38 +276,12 @@ export function RoomPage() {
                 onEdit={(messageId, content) => editMessageMutation.mutate({ messageId, content })}
                 onDelete={(messageId) => deleteMessageMutation.mutate(messageId)}
               />
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Message input */}
-        {canPost ? (
-          <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 py-3">
-            <form onSubmit={handleSendMessage} className="flex gap-2">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder={t('room.writeMessage')}
-                enterKeyHint="send"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-              <button
-                type="submit"
-                disabled={!newMessage.trim() || sendMessageMutation.isPending}
-                className="p-2 bg-teal-600 text-white rounded-full hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label={t('room.sendMessage')}
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            </form>
+            ))}
           </div>
         ) : (
-          <div className="flex-shrink-0 bg-gray-100 border-t border-gray-200 px-4 py-3 text-center">
-            <p className="text-sm text-gray-600">
-              {currentUser ? t('room.needInvitation') : t('room.signInToPost')}
-            </p>
+          <div className="text-center py-8 text-gray-500">
+            <p>{t('room.noMessages')}</p>
+            <p className="text-sm mt-1">{t('room.noMessagesHint')}</p>
           </div>
         )}
       </div>
@@ -362,7 +370,6 @@ export function RoomPage() {
                 />
               </div>
 
-              {/* Search results */}
               {inviteSearch.trim().length >= 2 && (
                 <div className="mt-2 border border-gray-200 rounded-lg overflow-hidden">
                   {isSearching ? (
@@ -438,7 +445,7 @@ export function RoomPage() {
   )
 }
 
-interface MessageBubbleProps {
+interface MessageCardProps {
   message: RoomMessage
   isOwnMessage: boolean
   isOwnerOrAdmin: boolean
@@ -446,7 +453,7 @@ interface MessageBubbleProps {
   onDelete: (messageId: string) => void
 }
 
-function MessageBubble({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete }: MessageBubbleProps) {
+function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete }: MessageCardProps) {
   const { t } = useTranslation(['home', 'common'])
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState('')
@@ -455,8 +462,8 @@ function MessageBubble({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete
   // Deleted message placeholder
   if (message.isHidden) {
     return (
-      <div className="flex justify-center py-1">
-        <span className="text-xs text-gray-400 italic">{t('common:messageDeleted')}</span>
+      <div className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
+        <span className="text-sm text-gray-400 italic">{t('common:messageDeleted')}</span>
       </div>
     )
   }
@@ -476,16 +483,14 @@ function MessageBubble({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete
     }
   }
 
+  const author = message.author ? transformAuthor(message.author) : null
+
   return (
-    <div className={`group flex gap-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
-      <div className="flex-shrink-0">
-        {message.author && <ActorBadge user={transformAuthor(message.author)} showName={false} size="sm" />}
-      </div>
-      <div className={`max-w-[75%] ${isOwnMessage ? 'text-right' : ''}`}>
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className={`text-sm font-medium text-gray-900 ${isOwnMessage ? 'order-2' : ''}`}>
-            {message.author?.name}
-          </span>
+    <div className="bg-white rounded-xl border border-gray-200 p-4">
+      {/* Header: author + time + actions */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          {author && <ActorBadge user={author} size="sm" />}
           <span className="text-xs text-gray-500">
             {formatRelativeTime(message.createdAt)}
           </span>
@@ -493,73 +498,63 @@ function MessageBubble({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete
             <EditedIndicator editedAt={message.editedAt} />
           )}
         </div>
-        {isEditing ? (
-          <div className="text-left">
-            <textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              rows={3}
-              autoFocus
-            />
-            <div className="flex gap-2 mt-1">
+        {(canEdit || canDelete) && !isEditing && (
+          <div className="flex items-center gap-1">
+            {canEdit && (
               <button
-                onClick={handleSaveEdit}
-                disabled={!editContent.trim()}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-teal-600 rounded hover:bg-teal-700 disabled:opacity-50"
+                onClick={handleStartEdit}
+                className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                title={t('common:actions.edit')}
               >
-                <Check className="w-3 h-3" />
-                {t('common:actions.save')}
+                <Pencil className="w-3.5 h-3.5" />
               </button>
+            )}
+            {canDelete && (
               <button
-                onClick={() => setIsEditing(false)}
-                className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                title={t('common:actions.delete')}
               >
-                {t('common:actions.cancel')}
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
-            </div>
-          </div>
-        ) : (
-          <div className="relative inline-block">
-            <div
-              className={`px-4 py-2 rounded-2xl ${
-                isOwnMessage
-                  ? 'bg-teal-600 text-white rounded-br-md'
-                  : 'bg-gray-100 text-gray-900 rounded-bl-md'
-              }`}
-            >
-              {message.contentHtml ? (
-                <ContentWithPreviews html={message.contentHtml} className="prose prose-sm max-w-none" />
-              ) : (
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              )}
-            </div>
-            {/* Hover actions */}
-            {(canEdit || canDelete) && (
-              <div className={`absolute top-0 ${isOwnMessage ? 'left-0 -translate-x-full pr-1' : 'right-0 translate-x-full pl-1'} opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5`}>
-                {canEdit && (
-                  <button
-                    onClick={handleStartEdit}
-                    className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600"
-                    title={t('common:actions.edit')}
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                )}
-                {canDelete && (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-red-600"
-                    title={t('common:actions.delete')}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
             )}
           </div>
         )}
       </div>
+
+      {/* Content */}
+      {isEditing ? (
+        <div>
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="w-full p-3 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            rows={4}
+            autoFocus
+          />
+          <div className="flex gap-2 mt-2 justify-end">
+            <button
+              onClick={() => setIsEditing(false)}
+              className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+              {t('common:actions.cancel')}
+            </button>
+            <button
+              onClick={handleSaveEdit}
+              disabled={!editContent.trim()}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+            >
+              <Check className="w-3.5 h-3.5" />
+              {t('common:actions.save')}
+            </button>
+          </div>
+        </div>
+      ) : message.contentHtml ? (
+        <ContentWithPreviews html={message.contentHtml} className="prose prose-sm prose-gray max-w-none" />
+      ) : (
+        <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{message.content}</p>
+      )}
+
       <ConfirmDeleteDialog
         open={showDeleteConfirm}
         type="message"
