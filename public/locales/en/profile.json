@@ -61,12 +61,17 @@
     "storedData": "Stored data",
     "threads": "Threads",
     "comments": "Comments",
+    "votes": "Votes",
+    "directMessages": "Direct messages",
     "clubMemberships": "Club memberships",
-    "rooms": "Rooms",
+    "rooms": "Rooms & memberships",
     "roomMessages": "Room messages",
     "notifications": "Notifications",
     "subscriptions": "Subscriptions",
-    "exportInfo": "In accordance with GDPR, you can download all your data. The file contains all your data stored in Eulesia in JSON format."
+    "sessions": "Login sessions",
+    "moderation": "Moderation (sanctions, appeals, reports)",
+    "editHistory": "Edit history",
+    "exportInfo": "In accordance with GDPR (Articles 15 & 20), you can download all your data. The file contains all your personal data stored in Eulesia in JSON format."
   },
   "language": {
     "title": "Language",

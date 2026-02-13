@@ -1,26 +1,40 @@
-import { ArrowLeft, Download, Loader2, Database, MessageSquare, Users, Bell, FileText, Home } from 'lucide-react'
+import { ArrowLeft, Download, Loader2, Database, MessageSquare, Users, Bell, FileText, Home, ThumbsUp, Shield, Key, Mail, History } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { Layout } from '../components/layout'
 import { api } from '../lib/api'
 
+interface DataExport {
+  exportedAt: string
+  user: { name: string; email: string; createdAt: string }
+  threads: unknown[]
+  comments: unknown[]
+  threadVotes: unknown[]
+  commentVotes: unknown[]
+  directMessages: unknown[]
+  conversations: unknown[]
+  clubMemberships: unknown[]
+  rooms: unknown[]
+  roomMemberships: unknown[]
+  roomMessages: unknown[]
+  roomInvitations: { sent: unknown[]; received: unknown[] }
+  notifications: unknown[]
+  subscriptions: unknown[]
+  sessions: unknown[]
+  sanctions: unknown[]
+  appeals: unknown[]
+  reports: unknown[]
+  editHistory: unknown[]
+  inviteCodes: unknown[]
+}
+
 export function PersonalDataPage() {
   const { t } = useTranslation('profile')
 
   const { data, isLoading } = useQuery({
     queryKey: ['personal-data'],
-    queryFn: () => api.exportData() as Promise<{
-      exportedAt: string
-      user: { name: string; email: string; createdAt: string }
-      threads: unknown[]
-      comments: unknown[]
-      clubMemberships: unknown[]
-      rooms: unknown[]
-      roomMessages: unknown[]
-      notifications: unknown[]
-      subscriptions: unknown[]
-    }>
+    queryFn: () => api.exportData() as Promise<DataExport>
   })
 
   const exportMutation = useMutation({
@@ -37,13 +51,18 @@ export function PersonalDataPage() {
   })
 
   const categories = data ? [
-    { icon: <FileText className="w-4 h-4" />, label: t('personalData.threads'), count: data.threads.length },
-    { icon: <MessageSquare className="w-4 h-4" />, label: t('personalData.comments'), count: data.comments.length },
-    { icon: <Users className="w-4 h-4" />, label: t('personalData.clubMemberships'), count: data.clubMemberships.length },
-    { icon: <Home className="w-4 h-4" />, label: t('personalData.rooms'), count: data.rooms.length },
-    { icon: <MessageSquare className="w-4 h-4" />, label: t('personalData.roomMessages'), count: data.roomMessages.length },
-    { icon: <Bell className="w-4 h-4" />, label: t('personalData.notifications'), count: data.notifications.length },
-    { icon: <Database className="w-4 h-4" />, label: t('personalData.subscriptions'), count: data.subscriptions.length },
+    { icon: <FileText className="w-4 h-4" />, label: t('personalData.threads'), count: data.threads?.length ?? 0 },
+    { icon: <MessageSquare className="w-4 h-4" />, label: t('personalData.comments'), count: data.comments?.length ?? 0 },
+    { icon: <ThumbsUp className="w-4 h-4" />, label: t('personalData.votes'), count: (data.threadVotes?.length ?? 0) + (data.commentVotes?.length ?? 0) },
+    { icon: <Mail className="w-4 h-4" />, label: t('personalData.directMessages'), count: data.directMessages?.length ?? 0 },
+    { icon: <Users className="w-4 h-4" />, label: t('personalData.clubMemberships'), count: data.clubMemberships?.length ?? 0 },
+    { icon: <Home className="w-4 h-4" />, label: t('personalData.rooms'), count: (data.rooms?.length ?? 0) + (data.roomMemberships?.length ?? 0) },
+    { icon: <MessageSquare className="w-4 h-4" />, label: t('personalData.roomMessages'), count: data.roomMessages?.length ?? 0 },
+    { icon: <Bell className="w-4 h-4" />, label: t('personalData.notifications'), count: data.notifications?.length ?? 0 },
+    { icon: <Database className="w-4 h-4" />, label: t('personalData.subscriptions'), count: data.subscriptions?.length ?? 0 },
+    { icon: <Key className="w-4 h-4" />, label: t('personalData.sessions'), count: data.sessions?.length ?? 0 },
+    { icon: <Shield className="w-4 h-4" />, label: t('personalData.moderation'), count: (data.sanctions?.length ?? 0) + (data.appeals?.length ?? 0) + (data.reports?.length ?? 0) },
+    { icon: <History className="w-4 h-4" />, label: t('personalData.editHistory'), count: data.editHistory?.length ?? 0 },
   ] : []
 
   return (

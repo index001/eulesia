@@ -61,12 +61,17 @@
     "storedData": "Tallennettu data",
     "threads": "Keskustelut",
     "comments": "Kommentit",
+    "votes": "Äänet",
+    "directMessages": "Yksityisviestit",
     "clubMemberships": "Klubijäsenyydet",
-    "rooms": "Huoneet",
+    "rooms": "Huoneet ja jäsenyydet",
     "roomMessages": "Huoneviestit",
     "notifications": "Ilmoitukset",
     "subscriptions": "Seurannat",
-    "exportInfo": "GDPR:n mukaisesti voit ladata kaikki tietosi. Tiedosto sisältää kaiken Eulesiaan tallennetun datasi JSON-muodossa."
+    "sessions": "Kirjautumisistunnot",
+    "moderation": "Moderointi (sanktiot, valitukset, ilmiannot)",
+    "editHistory": "Muokkaushistoria",
+    "exportInfo": "GDPR:n (artiklojen 15 ja 20) mukaisesti voit ladata kaikki tietosi. Tiedosto sisältää kaiken Eulesiaan tallennetun henkilökohtaisen datasi JSON-muodossa."
   },
   "language": {
     "title": "Kieli",

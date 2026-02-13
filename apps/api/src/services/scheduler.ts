@@ -5,17 +5,20 @@
  * - Municipal meeting minutes import
  * - Ministry/government content import
  * - EU institution content import
+ * - GDPR data retention cleanup (daily)
  */
 
 import cron from 'node-cron'
 import { importMinutes } from './import/minutes.js'
 import { importMinistryContent } from './import/ministry.js'
 import { importEuContent } from './import/eu.js'
+import { runGdprCleanup } from './gdprCleanup.js'
 import { env } from '../utils/env.js'
 
 let minutesRunning = false
 let ministryRunning = false
 let euRunning = false
+let gdprCleanupRunning = false
 
 /**
  * Run the minutes import with error handling
@@ -96,12 +99,40 @@ async function runEuImport(): Promise<void> {
 }
 
 /**
+ * Run GDPR data retention cleanup
+ */
+async function runGdprCleanupJob(): Promise<void> {
+  if (gdprCleanupRunning) {
+    console.log('⏳ GDPR cleanup already running, skipping...')
+    return
+  }
+
+  gdprCleanupRunning = true
+  console.log('🕐 Starting GDPR data retention cleanup...')
+
+  try {
+    const result = await runGdprCleanup()
+    const total = result.expiredSessions + result.usedMagicLinks + result.expiredInviteCodes
+    console.log(`✅ GDPR cleanup complete: ${total} records removed (${result.expiredSessions} sessions, ${result.usedMagicLinks} magic links, ${result.expiredInviteCodes} invite codes)`)
+
+    if (result.errors.length > 0) {
+      console.log('   Errors:', result.errors.join(', '))
+    }
+  } catch (err) {
+    console.error('❌ GDPR cleanup failed:', err instanceof Error ? err.message : err)
+  } finally {
+    gdprCleanupRunning = false
+  }
+}
+
+/**
  * Initialize the scheduler
  *
  * Schedules:
  * - Minutes import: Daily at 03:00 (runs once/day — slow due to Mistral free tier)
  * - Ministry import: Daily at 08:00, 14:00, and 20:00
  * - EU import: Daily at 10:00 and 16:00
+ * - GDPR cleanup: Daily at 04:00
  */
 export function initScheduler(): void {
   // Only run scheduler in production
@@ -136,6 +167,14 @@ export function initScheduler(): void {
   })
   console.log('   ✓ EU import scheduled: 10:00 and 16:00 Europe/Helsinki')
 
+  // GDPR data retention cleanup: 04:00 daily
+  cron.schedule('0 4 * * *', () => {
+    runGdprCleanupJob()
+  }, {
+    timezone: 'Europe/Helsinki'
+  })
+  console.log('   ✓ GDPR cleanup scheduled: 04:00 Europe/Helsinki')
+
   // Run initial imports at startup (staggered to avoid overload)
   setTimeout(() => {
     console.log('🚀 Running initial minutes import...')
@@ -151,4 +190,10 @@ export function initScheduler(): void {
     console.log('🚀 Running initial EU import...')
     runEuImport()
   }, 90000)
+
+  // Run GDPR cleanup at startup (after 2 min)
+  setTimeout(() => {
+    console.log('🚀 Running initial GDPR cleanup...')
+    runGdprCleanupJob()
+  }, 120000)
 }

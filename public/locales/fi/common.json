@@ -206,6 +206,7 @@
   "cookies": {
     "message": "Eulesia käyttää vain välttämätöntä istuntoevästettä kirjautumiseen. Emme käytä analytiikka- tai mainosevästeitä.",
     "accept": "Selvä",
+    "essentialOnly": "Vain välttämättömät",
     "learnMore": "Tietosuojaseloste"
   }
 }

@@ -224,37 +224,90 @@ router.post('/me/onboarding-complete', authMiddleware, asyncHandler(async (req: 
   res.json({ success: true })
 }))
 
-// GET /users/me/data - GDPR data export
+// GET /users/me/data - GDPR data export (Article 15 & 20 — right of access & portability)
 router.get('/me/data', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id
 
-  // Get all user data
-  const { threads, comments, clubMembers, rooms, roomMessages, notifications, userSubscriptions } = await import('../db/index.js')
+  const {
+    threads, comments, clubMembers, rooms, roomMessages, roomMembers,
+    notifications, userSubscriptions, threadVotes, commentVotes,
+    directMessages, conversationParticipants,
+    sessions, userSanctions, moderationAppeals, contentReports,
+    editHistory, inviteCodes, roomInvitations
+  } = await import('../db/index.js')
 
+  // User profile (exclude passwordHash)
   const [userData] = await db.select().from(users).where(eq(users.id, userId))
+  const { passwordHash: _pw, ...safeUserData } = userData || {} as Record<string, unknown>
+
+  // Content authored by user
   const userThreads = await db.select().from(threads).where(eq(threads.authorId, userId))
   const userComments = await db.select().from(comments).where(eq(comments.authorId, userId))
-  const userClubMemberships = await db.select().from(clubMembers).where(eq(clubMembers.userId, userId))
-  const userRooms = await db.select().from(rooms).where(eq(rooms.ownerId, userId))
   const userRoomMessages = await db.select().from(roomMessages).where(eq(roomMessages.authorId, userId))
+
+  // Votes
+  const userThreadVotes = await db.select().from(threadVotes).where(eq(threadVotes.userId, userId))
+  const userCommentVotes = await db.select().from(commentVotes).where(eq(commentVotes.userId, userId))
+
+  // Direct messages
+  const userConversations = await db.select().from(conversationParticipants).where(eq(conversationParticipants.userId, userId))
+  const conversationIds = userConversations.map(c => c.conversationId)
+  const userDMs = conversationIds.length > 0
+    ? await db.select().from(directMessages).where(inArray(directMessages.conversationId, conversationIds))
+    : []
+
+  // Memberships
+  const userClubMemberships = await db.select().from(clubMembers).where(eq(clubMembers.userId, userId))
+  const userRoomMemberships = await db.select().from(roomMembers).where(eq(roomMembers.userId, userId))
+  const userOwnedRooms = await db.select().from(rooms).where(eq(rooms.ownerId, userId))
+
+  // Invitations (sent and received)
+  const sentRoomInvitations = await db.select().from(roomInvitations).where(eq(roomInvitations.inviterId, userId))
+  const receivedRoomInvitations = await db.select().from(roomInvitations).where(eq(roomInvitations.inviteeId, userId))
+
+  // Notifications & subscriptions
   const userNotifications = await db.select().from(notifications).where(eq(notifications.userId, userId))
   const userSubs = await db.select().from(userSubscriptions).where(eq(userSubscriptions.userId, userId))
+
+  // Sessions (exclude tokenHash for security)
+  const userSessions = (await db.select().from(sessions).where(eq(sessions.userId, userId)))
+    .map(({ tokenHash: _t, ...s }) => s)
+
+  // Moderation data related to user
+  const userSanctionRecords = await db.select().from(userSanctions).where(eq(userSanctions.userId, userId))
+  const userAppeals = await db.select().from(moderationAppeals).where(eq(moderationAppeals.userId, userId))
+  const userReports = await db.select().from(contentReports).where(eq(contentReports.reporterUserId, userId))
+
+  // Edit history (edits made by user)
+  const userEdits = await db.select().from(editHistory).where(eq(editHistory.editedBy, userId))
+
+  // Invite codes created by user
+  const userInviteCodes = await db.select().from(inviteCodes).where(eq(inviteCodes.createdBy, userId))
 
   res.json({
     success: true,
     data: {
       exportedAt: new Date().toISOString(),
-      user: {
-        ...userData,
-        email: userData?.email
-      },
+      user: safeUserData,
       threads: userThreads,
       comments: userComments,
+      threadVotes: userThreadVotes,
+      commentVotes: userCommentVotes,
+      directMessages: userDMs,
+      conversations: userConversations,
       clubMemberships: userClubMemberships,
-      rooms: userRooms,
+      rooms: userOwnedRooms,
+      roomMemberships: userRoomMemberships,
       roomMessages: userRoomMessages,
+      roomInvitations: { sent: sentRoomInvitations, received: receivedRoomInvitations },
       notifications: userNotifications,
-      subscriptions: userSubs
+      subscriptions: userSubs,
+      sessions: userSessions,
+      sanctions: userSanctionRecords,
+      appeals: userAppeals,
+      reports: userReports,
+      editHistory: userEdits,
+      inviteCodes: userInviteCodes
     }
   })
 }))
@@ -303,15 +356,27 @@ router.delete('/me', authMiddleware, asyncHandler(async (req: AuthenticatedReque
       role: 'citizen',
       institutionType: null,
       institutionName: null,
+      // Clear strong auth / identity fields
+      identityVerified: false,
+      identityProvider: null,
+      identityLevel: 'basic',
+      verifiedName: null,
+      rpSubject: null,
+      identityIssuer: null,
+      identityVerifiedAt: null,
+      // Clear preferences
       notificationReplies: false,
       notificationMentions: false,
       notificationOfficial: false,
+      locale: null,
+      onboardingCompletedAt: null,
+      lastSeenAt: null,
       deletedAt: new Date()
     })
     .where(eq(users.id, userId))
 
   // 9. Clear session cookie
-  res.clearCookie('connect.sid')
+  res.clearCookie('session')
 
   res.json({
     success: true,

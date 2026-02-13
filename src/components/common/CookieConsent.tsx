@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { Cookie, X } from 'lucide-react'
+import { Cookie } from 'lucide-react'
 
 const COOKIE_CONSENT_KEY = 'eulesia_cookie_consent'
 
@@ -23,8 +23,10 @@ export function CookieConsent() {
     setVisible(false)
   }
 
-  const dismiss = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'dismissed')
+  const reject = () => {
+    // "Reject" means only essential cookies — since Eulesia only uses essential
+    // cookies anyway, this has the same effect. We record the explicit choice.
+    localStorage.setItem(COOKIE_CONSENT_KEY, 'essential_only')
     setVisible(false)
   }
 
@@ -52,15 +54,14 @@ export function CookieConsent() {
               >
                 {t('cookies.accept')}
               </button>
+              <button
+                onClick={reject}
+                className="px-4 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {t('cookies.essentialOnly')}
+              </button>
             </div>
           </div>
-          <button
-            onClick={dismiss}
-            className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label={t('actions.close')}
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
       </div>
     </div>

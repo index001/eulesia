@@ -206,6 +206,7 @@
   "cookies": {
     "message": "Eulesia only uses an essential session cookie for authentication. We do not use analytics or advertising cookies.",
     "accept": "Got it",
+    "essentialOnly": "Essential only",
     "learnMore": "Privacy policy"
   }
 }
