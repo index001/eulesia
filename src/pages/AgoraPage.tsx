@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef, useCallback, useLayoutEffect } fr
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ThreadCard, FeedFilters, FeedOnboarding, InlineThreadForm } from '../components/agora'
 import { ContentEndMarker } from '../components/common'
 import { MapPin, Building2, Globe, Users } from 'lucide-react'
@@ -250,6 +251,18 @@ export function AgoraPage() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Agora – Kansalaiskeskustelu"
+        description="Osallistu kansalaiskeskusteluun Eulesia-alustalla. Keskustele paikallisista, kansallisista ja eurooppalaisista aiheista."
+        path="/agora"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'Agora – Kansalaiskeskustelu',
+          description: 'Osallistu kansalaiskeskusteluun Eulesia-alustalla.',
+          isPartOf: { '@type': 'WebSite', name: 'Eulesia', url: 'https://eulesia.eu' }
+        }}
+      />
       {/* Page header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200" data-guide="agora-header">
         <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>

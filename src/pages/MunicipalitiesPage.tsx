@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { MapPin, MessageSquare, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { useMunicipalities, useThreads } from '../hooks/useApi'
 import type { Municipality } from '../lib/api'
 
@@ -32,6 +33,11 @@ export function MunicipalitiesPage() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Kunnat"
+        description="Selaa kuntien keskusteluja Eulesia-alustalla. Osallistu paikalliseen päätöksentekoon."
+        path="/kunnat"
+      />
       {/* Page header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div>

@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback } from 'react'
 import { ContentWithPreviews } from '../components/common/ContentWithPreviews'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save, Search, Pencil, Check } from 'lucide-react'
+import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save, Search, Pencil, Check, UserMinus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { ActorBadge, EditedIndicator, ConfirmDeleteDialog } from '../components/common'
-import { useRoom, useSendRoomMessage, useUpdateRoom, useDeleteRoom, useInviteToRoom, useEditRoomMessage, useDeleteRoomMessage } from '../hooks/useApi'
+import { useRoom, useSendRoomMessage, useUpdateRoom, useDeleteRoom, useInviteToRoom, useRemoveRoomMember, useEditRoomMessage, useDeleteRoomMessage } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import { useSocket } from '../hooks/useSocket'
 import { formatRelativeTime } from '../lib/formatTime'
@@ -26,8 +26,9 @@ export function RoomPage() {
   const inviteToRoomMutation = useInviteToRoom(roomId || '')
   const editMessageMutation = useEditRoomMessage(roomId || '')
   const deleteMessageMutation = useDeleteRoomMessage(roomId || '')
+  const removeRoomMemberMutation = useRemoveRoomMember(roomId || '')
 
-  const { joinRoom, leaveRoom } = useSocket()
+  const { joinRoom, leaveRoom, emitTypingRoom, typingInRoom } = useSocket()
 
   // Join/leave socket room for real-time updates
   useEffect(() => {
@@ -231,7 +232,10 @@ export function RoomPage() {
             <form onSubmit={handleSendMessage}>
               <textarea
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={(e) => {
+                  setNewMessage(e.target.value)
+                  if (roomId && e.target.value.trim()) emitTypingRoom(roomId)
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault()
@@ -261,6 +265,18 @@ export function RoomPage() {
             <p className="text-sm text-amber-800">
               {currentUser ? t('room.needInvitation') : t('room.signInToPost')}
             </p>
+          </div>
+        )}
+
+        {/* Typing indicator */}
+        {roomId && (typingInRoom[roomId]?.length ?? 0) > 0 && (
+          <div className="flex items-center gap-2 px-1 text-sm text-gray-500">
+            <span className="flex gap-0.5">
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </span>
+            <span>{t('room.typing')}</span>
           </div>
         )}
 
@@ -315,6 +331,42 @@ export function RoomPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 resize-none"
                 />
               </div>
+
+              {/* Members list */}
+              {visibility === 'private' && members.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('room.members')}</label>
+                  <div className="border border-gray-200 rounded-lg divide-y divide-gray-100">
+                    {members.map((member) => (
+                      <div key={member.id} className="flex items-center justify-between px-3 py-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {member.avatarUrl ? (
+                            <img src={member.avatarUrl} alt={member.name} className="w-7 h-7 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                              {member.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                          <span className="text-sm text-gray-900 truncate">{member.name}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (confirm(t('room.confirmRemoveMember', { name: member.name }))) {
+                              removeRoomMemberMutation.mutate(member.id)
+                            }
+                          }}
+                          disabled={removeRoomMemberMutation.isPending}
+                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                          aria-label={t('room.removeMember')}
+                          title={t('room.removeMember')}
+                        >
+                          <UserMinus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
               <button

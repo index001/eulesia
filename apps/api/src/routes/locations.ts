@@ -143,8 +143,18 @@ router.get('/:id', asyncHandler(async (req, res: Response) => {
     return
   }
 
-  // Get hierarchy
+  // Get hierarchy and parent for display name
   const hierarchy = await getLocationHierarchy(location.id)
+  const parentLoc = location.parentId ? await findLocationById(location.parentId) : null
+
+  // Build display name: "Location, Parent, Country"
+  const COUNTRY_NAMES: Record<string, string> = {
+    FI: 'Suomi', SE: 'Sverige', EE: 'Eesti', DE: 'Deutschland',
+    FR: 'France', NL: 'Nederland', IT: 'Italia', ES: 'España'
+  }
+  const displayParts = [location.name]
+  if (parentLoc) displayParts.push(parentLoc.name)
+  if (location.country) displayParts.push(COUNTRY_NAMES[location.country] || location.country)
 
   // Format response
   const result: LocationResult = {
@@ -155,7 +165,7 @@ router.get('/:id', asyncHandler(async (req, res: Response) => {
     nameFi: location.nameFi || null,
     nameSv: location.nameSv || null,
     nameEn: location.nameEn || null,
-    displayName: location.name, // TODO: Build full display name
+    displayName: displayParts.join(', '),
     type: location.type || 'municipality',
     adminLevel: location.adminLevel,
     country: location.country || 'FI',
@@ -165,7 +175,7 @@ router.get('/:id', asyncHandler(async (req, res: Response) => {
     population: location.population || null,
     status: 'active',
     contentCount: location.contentCount || 0,
-    parent: null // Will be in hierarchy
+    parent: parentLoc ? { name: parentLoc.name, type: parentLoc.type || 'region' } : null
   }
 
   res.json({

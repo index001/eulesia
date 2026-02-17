@@ -6,6 +6,7 @@ import { GuideProvider } from './components/guide'
 import { CookieConsent } from './components/common/CookieConsent'
 import { ScrollToTop } from './components/common/ScrollToTop'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
+import { PageErrorBoundary } from './components/common/PageErrorBoundary'
 import {
   LoginPage,
   AgoraPage,
@@ -123,17 +124,17 @@ function AppRoutes() {
         />
 
         {/* Public content routes (readable without login) */}
-        <Route path="/agora" element={<AgoraPage />} />
-        <Route path="/agora/thread/:threadId" element={<ThreadPage />} />
-        <Route path="/agora/tag/:tagName" element={<TagPage />} />
-        <Route path="/kunnat" element={<MunicipalitiesPage />} />
-        <Route path="/kunnat/:municipalityId" element={<MunicipalityPage />} />
+        <Route path="/agora" element={<PageErrorBoundary><AgoraPage /></PageErrorBoundary>} />
+        <Route path="/agora/thread/:threadId" element={<PageErrorBoundary><ThreadPage /></PageErrorBoundary>} />
+        <Route path="/agora/tag/:tagName" element={<PageErrorBoundary><TagPage /></PageErrorBoundary>} />
+        <Route path="/kunnat" element={<PageErrorBoundary><MunicipalitiesPage /></PageErrorBoundary>} />
+        <Route path="/kunnat/:municipalityId" element={<PageErrorBoundary><MunicipalityPage /></PageErrorBoundary>} />
 
         <Route
           path="/clubs"
           element={
             <ProtectedRoute>
-              <ClubsPage />
+              <PageErrorBoundary><ClubsPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -141,7 +142,7 @@ function AppRoutes() {
           path="/clubs/:clubId"
           element={
             <ProtectedRoute>
-              <ClubViewPage />
+              <PageErrorBoundary><ClubViewPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -149,7 +150,7 @@ function AppRoutes() {
           path="/clubs/:clubId/thread/:threadId"
           element={
             <ProtectedRoute>
-              <ClubThreadPage />
+              <PageErrorBoundary><ClubThreadPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -158,7 +159,7 @@ function AppRoutes() {
           path="/map"
           element={
             <ProtectedRoute>
-              <MapPage />
+              <PageErrorBoundary><MapPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -167,7 +168,7 @@ function AppRoutes() {
           path="/home"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <PageErrorBoundary><HomePage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -175,7 +176,7 @@ function AppRoutes() {
           path="/home/room/:roomId"
           element={
             <ProtectedRoute>
-              <RoomPage />
+              <PageErrorBoundary><RoomPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -183,7 +184,7 @@ function AppRoutes() {
           path="/home/:userId"
           element={
             <ProtectedRoute>
-              <UserHomePage />
+              <PageErrorBoundary><UserHomePage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -192,7 +193,7 @@ function AppRoutes() {
           path="/messages"
           element={
             <ProtectedRoute>
-              <MessagesPage />
+              <PageErrorBoundary><MessagesPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -200,7 +201,7 @@ function AppRoutes() {
           path="/messages/:conversationId"
           element={
             <ProtectedRoute>
-              <DMConversationPage />
+              <PageErrorBoundary><DMConversationPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -209,7 +210,7 @@ function AppRoutes() {
           path="/services"
           element={
             <ProtectedRoute>
-              <ServicesPage />
+              <PageErrorBoundary><ServicesPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -218,7 +219,7 @@ function AppRoutes() {
           path="/profile/data"
           element={
             <ProtectedRoute>
-              <PersonalDataPage />
+              <PageErrorBoundary><PersonalDataPage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -226,7 +227,7 @@ function AppRoutes() {
           path="/profile"
           element={
             <ProtectedRoute>
-              <ProfilePage />
+              <PageErrorBoundary><ProfilePage /></PageErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -244,20 +245,20 @@ function AppRoutes() {
           element={<PrivacyPage />}
         />
 
-        <Route path="/aiheet" element={<TopicsPage />} />
-        <Route path="/user/:userId" element={<UserProfilePage />} />
+        <Route path="/aiheet" element={<PageErrorBoundary><TopicsPage /></PageErrorBoundary>} />
+        <Route path="/user/:userId" element={<PageErrorBoundary><UserProfilePage /></PageErrorBoundary>} />
 
         {/* Admin routes */}
-        <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
-        <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
-        <Route path="/admin/users/:id" element={<AdminRoute><AdminUserDetailPage /></AdminRoute>} />
-        <Route path="/admin/reports" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
-        <Route path="/admin/reports/:id" element={<AdminRoute><AdminReportDetailPage /></AdminRoute>} />
-        <Route path="/admin/modlog" element={<AdminRoute><AdminModLogPage /></AdminRoute>} />
-        <Route path="/admin/content" element={<AdminRoute><AdminContentPage /></AdminRoute>} />
-        <Route path="/admin/transparency" element={<AdminRoute><AdminTransparencyPage /></AdminRoute>} />
-        <Route path="/admin/appeals" element={<AdminRoute><AdminAppealsPage /></AdminRoute>} />
-        <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
+        <Route path="/admin" element={<AdminRoute><PageErrorBoundary><AdminDashboardPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/users" element={<AdminRoute><PageErrorBoundary><AdminUsersPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/users/:id" element={<AdminRoute><PageErrorBoundary><AdminUserDetailPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/reports" element={<AdminRoute><PageErrorBoundary><AdminReportsPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/reports/:id" element={<AdminRoute><PageErrorBoundary><AdminReportDetailPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/modlog" element={<AdminRoute><PageErrorBoundary><AdminModLogPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/content" element={<AdminRoute><PageErrorBoundary><AdminContentPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/transparency" element={<AdminRoute><PageErrorBoundary><AdminTransparencyPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/appeals" element={<AdminRoute><PageErrorBoundary><AdminAppealsPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/settings" element={<AdminRoute><PageErrorBoundary><AdminSettingsPage /></PageErrorBoundary></AdminRoute>} />
 
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />

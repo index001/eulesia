@@ -62,7 +62,13 @@ services:
       # Service
       - "traefik.http.services.eulesia-api.loadbalancer.server.port=3001"
       # OG meta tags: route bot requests on main domain to API for OG-enabled paths
-      - "traefik.http.routers.eulesia-og.rule=Host(`${DOMAIN}`) && HeadersRegexp(`User-Agent`, `(?i)(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|TelegramBot|Embedly|Pinterest|vkShare|Applebot)`) && (PathPrefix(`/agora/thread/`) || PathPrefix(`/clubs/`) || PathPrefix(`/kunnat/`) || PathPrefix(`/user/`))"
+      - "traefik.http.routers.eulesia-og.rule=Host(`${DOMAIN}`) && HeadersRegexp(`User-Agent`, `(?i)(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|TelegramBot|Embedly|Pinterest|vkShare|Applebot|Googlebot|bingbot|Baiduspider|YandexBot|DuckDuckBot)`) && (PathPrefix(`/agora`) || PathPrefix(`/clubs/`) || PathPrefix(`/kunnat/`) || PathPrefix(`/user/`) || PathPrefix(`/aiheet`))"
+      # Sitemap: route to API for dynamic generation
+      - "traefik.http.routers.eulesia-sitemap.rule=Host(`${DOMAIN}`) && Path(`/sitemap.xml`)"
+      - "traefik.http.routers.eulesia-sitemap.entrypoints=websecure"
+      - "traefik.http.routers.eulesia-sitemap.tls.certresolver=le"
+      - "traefik.http.routers.eulesia-sitemap.service=eulesia-api"
+      - "traefik.http.routers.eulesia-sitemap.priority=200"
       - "traefik.http.routers.eulesia-og.entrypoints=websecure"
       - "traefik.http.routers.eulesia-og.tls.certresolver=le"
       - "traefik.http.routers.eulesia-og.service=eulesia-api"

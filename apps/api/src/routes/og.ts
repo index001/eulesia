@@ -187,6 +187,47 @@ router.get('/kunnat/:municipalityId', async (req: Request, res: Response) => {
   }
 })
 
+// Agora feed OG
+router.get('/agora', (_req: Request, res: Response) => {
+  res.send(buildOgHtml({
+    title: 'Agora – Kansalaiskeskustelu',
+    description: 'Osallistu kansalaiskeskusteluun Eulesia-alustalla. Keskustele paikallisista, kansallisista ja eurooppalaisista aiheista.',
+    url: '/agora',
+    type: 'website'
+  }))
+})
+
+// Tag page OG
+router.get('/agora/tag/:tagName', (req: Request, res: Response) => {
+  const tagName = decodeURIComponent(req.params.tagName).replace(/-/g, ' ')
+  res.send(buildOgHtml({
+    title: `${tagName} – Agora`,
+    description: `Keskustelut aiheesta ${tagName} Eulesia-alustalla`,
+    url: req.originalUrl,
+    type: 'website'
+  }))
+})
+
+// Topics page OG
+router.get('/aiheet', (_req: Request, res: Response) => {
+  res.send(buildOgHtml({
+    title: 'Aiheet',
+    description: 'Selaa keskusteluaiheita Eulesia-alustalla. Talous, terveys, koulutus, ympäristö ja monta muuta aihealuetta.',
+    url: '/aiheet',
+    type: 'website'
+  }))
+})
+
+// Municipalities list OG
+router.get('/kunnat', (_req: Request, res: Response) => {
+  res.send(buildOgHtml({
+    title: 'Kunnat',
+    description: 'Selaa kuntien keskusteluja Eulesia-alustalla. Osallistu paikalliseen päätöksentekoon.',
+    url: '/kunnat',
+    type: 'website'
+  }))
+})
+
 // User profile OG
 router.get('/user/:userId', async (req: Request, res: Response) => {
   try {

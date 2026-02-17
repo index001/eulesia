@@ -141,7 +141,7 @@ export function DMConversationPage() {
   const navigate = useNavigate()
   const { conversationId } = useParams<{ conversationId: string }>()
   const { currentUser } = useAuth()
-  const { joinDm, leaveDm } = useSocket()
+  const { joinDm, leaveDm, emitTypingDm, typingInDm } = useSocket()
   const { data: conversationData, isLoading, error } = useConversation(conversationId || '')
   const sendMessageMutation = useSendDM(conversationId || '')
   const markReadMutation = useMarkRead(conversationId || '')
@@ -257,6 +257,17 @@ export function DMConversationPage() {
               />
             ))
           )}
+          {/* Typing indicator */}
+          {conversationId && (typingInDm[conversationId]?.length ?? 0) > 0 && (
+            <div className="flex items-center gap-2 px-1 text-sm text-gray-500">
+              <span className="flex gap-0.5">
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </span>
+              <span>{t('typing')}</span>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -266,7 +277,10 @@ export function DMConversationPage() {
             <input
               type="text"
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => {
+                setNewMessage(e.target.value)
+                if (conversationId && e.target.value.trim()) emitTypingDm(conversationId)
+              }}
               placeholder={t('writeMessage')}
               enterKeyHint="send"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-teal-500 focus:border-transparent"

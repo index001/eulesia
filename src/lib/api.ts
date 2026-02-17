@@ -370,6 +370,10 @@ class ApiClient {
     await this.request(`/home/rooms/${roomId}/members/me`, { method: 'DELETE' })
   }
 
+  async removeRoomMember(roomId: string, memberId: string): Promise<void> {
+    await this.request(`/home/rooms/${roomId}/members/${memberId}`, { method: 'DELETE' })
+  }
+
   // Map
   async getMapPoints(bounds: MapBounds): Promise<{ points: MapPoint[] }> {
     const searchParams = new URLSearchParams()

@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Hash, Building2, Tag } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ThreadCard } from '../components/agora/ThreadCard'
 import { FollowButton } from '../components/common'
 import { useTagPage, useVoteThread } from '../hooks/useApi'
@@ -83,6 +84,11 @@ export function TagPage() {
 
   return (
     <Layout>
+      <SEOHead
+        title={`${displayName} – Agora`}
+        description={description || `Keskustelut aiheesta ${displayName} Eulesia-alustalla`}
+        path={`/agora/tag/${tagName}`}
+      />
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <button

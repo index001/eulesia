@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Shield, ArrowLeft } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { useAuth } from '../hooks/useAuth'
 
 function PublicHeader() {
@@ -94,6 +95,11 @@ export function PrivacyPage() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Tietosuojaseloste"
+        description="Eulesia-alustan tietosuojaseloste. Lue miten käsittelemme henkilötietojasi."
+        path="/privacy"
+      />
       <PrivacyContent />
     </Layout>
   )

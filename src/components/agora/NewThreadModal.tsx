@@ -1,10 +1,33 @@
 import { useState, useEffect } from 'react'
-import { X, MapPin, Building2, Globe, Loader2, Hash, Plus } from 'lucide-react'
+import { X, MapPin, Building2, Globe, Loader2, Hash, Plus, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useCreateThread } from '../../hooks/useApi'
+import { useAuth } from '../../hooks/useAuth'
 import { LocationSearch } from '../common/LocationSearch'
 import type { Scope } from '../../types'
 import type { LocationResult } from '../../lib/api'
+
+const SUPPORTED_COUNTRIES: { code: string; flag: string; name: string }[] = [
+  { code: 'FI', flag: '\u{1F1EB}\u{1F1EE}', name: 'Suomi' },
+  { code: 'SE', flag: '\u{1F1F8}\u{1F1EA}', name: 'Sverige' },
+  { code: 'EE', flag: '\u{1F1EA}\u{1F1EA}', name: 'Eesti' },
+  { code: 'DE', flag: '\u{1F1E9}\u{1F1EA}', name: 'Deutschland' },
+  { code: 'FR', flag: '\u{1F1EB}\u{1F1F7}', name: 'France' },
+  { code: 'NL', flag: '\u{1F1F3}\u{1F1F1}', name: 'Nederland' },
+  { code: 'IT', flag: '\u{1F1EE}\u{1F1F9}', name: 'Italia' },
+  { code: 'ES', flag: '\u{1F1EA}\u{1F1F8}', name: 'Espa\u00f1a' },
+]
+
+function getDefaultCountry(locale?: string): string {
+  const localeMap: Record<string, string> = {
+    fi: 'FI', sv: 'SE', et: 'EE', de: 'DE', fr: 'FR', nl: 'NL', it: 'IT', es: 'ES'
+  }
+  if (locale) {
+    const lang = locale.split('-')[0].toLowerCase()
+    if (localeMap[lang]) return localeMap[lang]
+  }
+  return 'FI'
+}
 
 interface NewThreadModalProps {
   isOpen: boolean
@@ -31,6 +54,7 @@ export function NewThreadModal({
   prefilledLocation
 }: NewThreadModalProps) {
   const { t } = useTranslation('agora')
+  const { currentUser } = useAuth()
   const createThreadMutation = useCreateThread()
 
   const scopeOptions: { value: Scope; icon: React.ElementType; label: string; description: string }[] = [
@@ -56,6 +80,8 @@ export function NewThreadModal({
 
   // Form state
   const [scope, setScope] = useState<Scope>('local')
+  const [country, setCountry] = useState(() => getDefaultCountry(currentUser?.locale))
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null)
@@ -82,7 +108,7 @@ export function NewThreadModal({
         displayName: prefilledMunicipalityName,
         type: 'municipality',
         adminLevel: 7,
-        country: 'FI',
+        country,
         latitude: 0,
         longitude: 0,
         bounds: null,
@@ -140,7 +166,7 @@ export function NewThreadModal({
         title: title.trim(),
         content: content.trim(),
         scope,
-        country: 'FI', // TODO: Make dynamic based on user's country
+        country,
         ...locationData,
         tags: selectedTags.length > 0 ? selectedTags : undefined
       })
@@ -159,6 +185,7 @@ export function NewThreadModal({
     setTitle('')
     setContent('')
     setScope('local')
+    setCountryDropdownOpen(false)
     setSelectedTags([])
     setCustomTag('')
     setError(null)
@@ -233,17 +260,82 @@ export function NewThreadModal({
                 {scope === 'local' ? 'Sijainti' : 'Maa'}
               </label>
               {scope === 'local' ? (
-                <LocationSearch
-                  value={selectedLocation}
-                  onChange={setSelectedLocation}
-                  country="FI"
-                  types={['municipality', 'village', 'city']}
-                  placeholder={t('threadForm.locationPlaceholder')}
-                />
+                <>
+                  <div className="relative mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setCountryDropdownOpen(prev => !prev)}
+                      className="flex items-center justify-between w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.flag}</span>
+                        <span className="text-gray-700">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.name}</span>
+                      </div>
+                      <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {countryDropdownOpen && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        {SUPPORTED_COUNTRIES.map(c => (
+                          <button
+                            key={c.code}
+                            type="button"
+                            onClick={() => {
+                              setCountry(c.code)
+                              setCountryDropdownOpen(false)
+                              setSelectedLocation(null)
+                            }}
+                            className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
+                              country === c.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                            }`}
+                          >
+                            <span className="text-lg">{c.flag}</span>
+                            <span>{c.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <LocationSearch
+                    value={selectedLocation}
+                    onChange={setSelectedLocation}
+                    country={country}
+                    types={['municipality', 'village', 'city']}
+                    placeholder={t('threadForm.locationPlaceholder')}
+                  />
+                </>
               ) : (
-                <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg">
-                  <span className="text-lg">🇫🇮</span>
-                  <span className="text-gray-700">Suomi</span>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setCountryDropdownOpen(prev => !prev)}
+                    className="flex items-center justify-between w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.flag}</span>
+                      <span className="text-gray-700">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.name}</span>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {countryDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {SUPPORTED_COUNTRIES.map(c => (
+                        <button
+                          key={c.code}
+                          type="button"
+                          onClick={() => {
+                            setCountry(c.code)
+                            setCountryDropdownOpen(false)
+                          }}
+                          className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
+                            country === c.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          }`}
+                        >
+                          <span className="text-lg">{c.flag}</span>
+                          <span>{c.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

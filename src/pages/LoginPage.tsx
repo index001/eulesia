@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Shield, Fingerprint, CheckCircle, Lock, Users, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Ticket, AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { SEOHead } from '../components/SEOHead'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../lib/api'
 
@@ -84,6 +85,18 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 flex flex-col">
+      <SEOHead
+        title="Eulesia – Kansalaisdemokratia-alusta"
+        description="Eulesia on eurooppalainen kansalaisdemokratia-alusta. Kirjaudu sisään tai rekisteröidy osallistuaksesi kansalaiskeskusteluun."
+        path="/"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Eulesia',
+          url: 'https://eulesia.eu',
+          description: 'Eurooppalainen kansalaisdemokratia-alusta'
+        }}
+      />
       {/* Header */}
       <header className="p-6">
         <div className="flex items-center gap-3">

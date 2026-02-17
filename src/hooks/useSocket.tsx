@@ -1,9 +1,12 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
 import { queryKeys } from './useApi'
 import type { RoomMessage, RoomWithMessages, DirectMessage, ConversationWithMessages } from '../lib/api'
+
+const TYPING_TIMEOUT_MS = 3000
+const TYPING_THROTTLE_MS = 2000
 
 interface SocketContextType {
   socket: Socket | null
@@ -13,6 +16,10 @@ interface SocketContextType {
   leaveRoom: (roomId: string) => void
   joinDm: (conversationId: string) => void
   leaveDm: (conversationId: string) => void
+  emitTypingRoom: (roomId: string) => void
+  emitTypingDm: (conversationId: string) => void
+  typingInRoom: Record<string, string[]>
+  typingInDm: Record<string, string[]>
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined)
@@ -22,8 +29,16 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 export function SocketProvider({ children }: { children: ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [typingInRoom, setTypingInRoom] = useState<Record<string, string[]>>({})
+  const [typingInDm, setTypingInDm] = useState<Record<string, string[]>>({})
   const { isAuthenticated, currentUser } = useAuth()
   const queryClient = useQueryClient()
+
+  // Track typing timeouts so we can clear them
+  const roomTypingTimeouts = useRef<Record<string, Record<string, ReturnType<typeof setTimeout>>>>({})
+  const dmTypingTimeouts = useRef<Record<string, Record<string, ReturnType<typeof setTimeout>>>>({})
+  // Throttle outgoing typing events
+  const lastTypingEmit = useRef<Record<string, number>>({})
 
   useEffect(() => {
     if (!isAuthenticated || !currentUser) {
@@ -68,11 +83,20 @@ export function SocketProvider({ children }: { children: ReactNode }) {
           }
         }
       )
+      // Clear typing for the user who sent the message
+      clearTypingUser('room', data.roomId, data.message.author?.id)
     })
 
-    // Handle typing indicators
-    newSocket.on('user_typing', (_data: { roomId: string; userId: string; userName: string }) => {
-      // TODO: Show typing indicator in UI
+    // Handle room typing indicators
+    newSocket.on('user_typing', (data: { roomId: string; userId: string }) => {
+      if (data.userId === currentUser.id) return
+      addTypingUser('room', data.roomId, data.userId)
+    })
+
+    // Handle DM typing indicators
+    newSocket.on('user_typing_dm', (data: { conversationId: string; userId: string }) => {
+      if (data.userId === currentUser.id) return
+      addTypingUser('dm', data.conversationId, data.userId)
     })
 
     // Handle new notification events
@@ -179,6 +203,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations })
       // Update unread DM badge
       queryClient.invalidateQueries({ queryKey: queryKeys.dmUnreadCount })
+      // Clear typing for the user who sent the message
+      clearTypingUser('dm', data.conversationId, data.message.author?.id)
     })
 
     setSocket(newSocket)
@@ -188,6 +214,55 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       newSocket.disconnect()
     }
   }, [isAuthenticated, currentUser, queryClient])
+
+  function addTypingUser(type: 'room' | 'dm', channelId: string, userId: string) {
+    const timeouts = type === 'room' ? roomTypingTimeouts : dmTypingTimeouts
+    const setter = type === 'room' ? setTypingInRoom : setTypingInDm
+
+    // Clear existing timeout for this user
+    if (timeouts.current[channelId]?.[userId]) {
+      clearTimeout(timeouts.current[channelId][userId])
+    }
+
+    // Add user to typing list
+    setter(prev => {
+      const current = prev[channelId] || []
+      if (!current.includes(userId)) {
+        return { ...prev, [channelId]: [...current, userId] }
+      }
+      return prev
+    })
+
+    // Set timeout to remove user after TYPING_TIMEOUT_MS
+    if (!timeouts.current[channelId]) {
+      timeouts.current[channelId] = {}
+    }
+    timeouts.current[channelId][userId] = setTimeout(() => {
+      clearTypingUser(type, channelId, userId)
+    }, TYPING_TIMEOUT_MS)
+  }
+
+  function clearTypingUser(type: 'room' | 'dm', channelId: string, userId?: string) {
+    if (!userId) return
+    const timeouts = type === 'room' ? roomTypingTimeouts : dmTypingTimeouts
+    const setter = type === 'room' ? setTypingInRoom : setTypingInDm
+
+    if (timeouts.current[channelId]?.[userId]) {
+      clearTimeout(timeouts.current[channelId][userId])
+      delete timeouts.current[channelId][userId]
+    }
+
+    setter(prev => {
+      const current = prev[channelId]
+      if (!current) return prev
+      const filtered = current.filter(id => id !== userId)
+      if (filtered.length === 0) {
+        const { [channelId]: _, ...rest } = prev
+        return rest
+      }
+      return { ...prev, [channelId]: filtered }
+    })
+  }
 
   const sendRoomMessage = useCallback((roomId: string, content: string) => {
     if (!socket || !isConnected) return
@@ -218,6 +293,24 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.emit('leave:dm', conversationId)
   }, [socket, isConnected])
 
+  const emitTypingRoom = useCallback((roomId: string) => {
+    if (!socket || !isConnected) return
+    const key = `room:${roomId}`
+    const now = Date.now()
+    if (now - (lastTypingEmit.current[key] || 0) < TYPING_THROTTLE_MS) return
+    lastTypingEmit.current[key] = now
+    socket.emit('typing:room', roomId)
+  }, [socket, isConnected])
+
+  const emitTypingDm = useCallback((conversationId: string) => {
+    if (!socket || !isConnected) return
+    const key = `dm:${conversationId}`
+    const now = Date.now()
+    if (now - (lastTypingEmit.current[key] || 0) < TYPING_THROTTLE_MS) return
+    lastTypingEmit.current[key] = now
+    socket.emit('typing:dm', conversationId)
+  }, [socket, isConnected])
+
   return (
     <SocketContext.Provider value={{
       socket,
@@ -226,7 +319,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       joinRoom,
       leaveRoom,
       joinDm,
-      leaveDm
+      leaveDm,
+      emitTypingRoom,
+      emitTypingDm,
+      typingInRoom,
+      typingInDm
     }}>
       {children}
     </SocketContext.Provider>

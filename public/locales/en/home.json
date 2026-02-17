@@ -72,7 +72,11 @@
     "sendMessage": "Send message",
     "sending": "Sending...",
     "editMessage": "Edit message",
-    "deleteMessage": "Delete message"
+    "deleteMessage": "Delete message",
+    "typing": "is typing...",
+    "removeMember": "Remove member",
+    "confirmRemoveMember": "Are you sure you want to remove {{name}} from this room?",
+    "memberRemoved": "Member removed"
   },
   "userHome": {
     "homePageTitle": "Home page",

@@ -13,5 +13,6 @@
   "unread_other": "{{count}} lukematonta",
   "sendMessage": "Lähetä viesti",
   "editMessage": "Muokkaa viestiä",
-  "deleteMessage": "Poista viesti"
+  "deleteMessage": "Poista viesti",
+  "typing": "kirjoittaa..."
 }

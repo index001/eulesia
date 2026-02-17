@@ -310,6 +310,11 @@ function mergeResults(
 /**
  * Build display name from location and optional parent
  */
+const COUNTRY_NAMES: Record<string, string> = {
+  FI: 'Suomi', SE: 'Sverige', EE: 'Eesti', DE: 'Deutschland',
+  FR: 'France', NL: 'Nederland', IT: 'Italia', ES: 'España'
+}
+
 function buildDisplayName(location: Location, parent?: Location): string {
   const parts = [location.name]
 
@@ -317,11 +322,8 @@ function buildDisplayName(location: Location, parent?: Location): string {
     parts.push(parent.name)
   }
 
-  // Add country name
-  if (location.country === 'FI') {
-    parts.push('Suomi')
-  } else if (location.country) {
-    parts.push(location.country)
+  if (location.country) {
+    parts.push(COUNTRY_NAMES[location.country] || location.country)
   }
 
   return parts.join(', ')
@@ -557,8 +559,9 @@ export async function lookupLocation(
   if (existing) {
     // Get parent info
     let parent: { name: string; type: string } | null = null
+    let parentLoc: Location | null = null
     if (existing.parentId) {
-      const parentLoc = await findLocationById(existing.parentId)
+      parentLoc = await findLocationById(existing.parentId)
       if (parentLoc) {
         parent = { name: parentLoc.name, type: parentLoc.type || 'region' }
       }
@@ -572,7 +575,7 @@ export async function lookupLocation(
       nameFi: existing.nameFi || null,
       nameSv: existing.nameSv || null,
       nameEn: existing.nameEn || null,
-      displayName: existing.name, // TODO: Build full display name
+      displayName: buildDisplayName(existing, parentLoc || undefined),
       type: existing.type || 'municipality',
       adminLevel: existing.adminLevel,
       country: existing.country || 'FI',

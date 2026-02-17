@@ -13,5 +13,6 @@
   "unread_other": "{{count}} unread",
   "sendMessage": "Send message",
   "editMessage": "Edit message",
-  "deleteMessage": "Delete message"
+  "deleteMessage": "Delete message",
+  "typing": "is typing..."
 }

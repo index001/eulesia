@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Users, ChevronDown, Lock, Unlock, Pin, PinOff, Trash2 } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ActorBadge, ContentEndMarker } from '../components/common'
 import { CommentThread } from '../components/agora/CommentThread'
 import { useClubThread, useAddClubComment, useUpdateClubThread, useDeleteClubThread, useDeleteClubComment, useCurrentUser } from '../hooks/useApi'
@@ -132,6 +133,15 @@ export function ClubThreadPage() {
 
   return (
     <Layout>
+      {thread && (
+        <SEOHead
+          title={thread.title}
+          description={thread.content.substring(0, 160).replace(/[#*_~`>\n]+/g, ' ').trim()}
+          path={`/clubs/${clubId}/thread/${threadId}`}
+          type="article"
+          noIndex
+        />
+      )}
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <button

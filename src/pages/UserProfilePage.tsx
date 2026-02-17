@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Shield, Building2, Calendar, MessageSquare, Hash, Bot, Users, Send, Home } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { FollowButton, ReportButton } from '../components/common'
 import { useAuth } from '../hooks/useAuth'
 import { useStartConversation } from '../hooks/useApi'
@@ -146,6 +147,23 @@ export function UserProfilePage() {
 
   return (
     <Layout>
+      <SEOHead
+        title={user.name}
+        description={`${user.name} Eulesia-alustalla`}
+        path={`/user/${userId}`}
+        type="profile"
+        image={user.avatarUrl}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'ProfilePage',
+          mainEntity: {
+            '@type': 'Person',
+            name: user.name,
+            ...(user.avatarUrl && { image: user.avatarUrl }),
+            url: `https://eulesia.eu/user/${userId}`
+          }
+        }}
+      />
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <button

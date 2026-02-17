@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ThreadCard, InlineThreadForm } from '../components/agora'
 import { ContentEndMarker, FollowButton } from '../components/common'
 import { useThreads, useMunicipalities } from '../hooks/useApi'
@@ -69,8 +70,23 @@ export function MunicipalityPage() {
     navigate(`/agora/thread/${threadId}`)
   }
 
+  const municipalityName = municipality?.name || t('agora:municipality.defaultName')
+
   return (
     <Layout>
+      <SEOHead
+        title={municipalityName}
+        description={`${municipalityName} – keskustelu ja päätöksenteko Eulesia-alustalla`}
+        path={`/kunnat/${municipalityId}`}
+        type="place"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Place',
+          name: municipalityName,
+          ...(municipality?.region && { containedInPlace: { '@type': 'AdministrativeArea', name: municipality.region } }),
+          url: `https://eulesia.eu/kunnat/${municipalityId}`
+        }}
+      />
       {/* Page header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-2">

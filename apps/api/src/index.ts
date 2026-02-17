@@ -10,6 +10,7 @@ import path from 'path'
 import { env } from './utils/env.js'
 import routes from './routes/index.js'
 import ogRoutes from './routes/og.js'
+import sitemapRoutes from './routes/sitemap.js'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
 import { initScheduler } from './services/scheduler.js'
 import { fullSync, startPeriodicSync, healthCheck as meiliHealthCheck } from './services/search/index.js'
@@ -102,8 +103,11 @@ app.get('/health', async (_req, res) => {
   })
 })
 
-// OG meta tag routes (under /og/* prefix, bot detection in Express)
+// OG meta tag routes (bot detection via Traefik)
 app.use(ogRoutes)
+
+// Dynamic sitemap (routed via Traefik for /sitemap.xml)
+app.use(sitemapRoutes)
 
 // API routes
 app.use('/api/v1', routes)
@@ -235,6 +239,15 @@ io.on('connection', (socket) => {
 
   socket.on('leave:dm', (conversationId: string) => {
     socket.leave(`dm:${conversationId}`)
+  })
+
+  // Typing indicators — broadcast to others in the same room/dm
+  socket.on('typing:room', (roomId: string) => {
+    socket.to(`room:${roomId}`).emit('user_typing', { roomId, userId })
+  })
+
+  socket.on('typing:dm', (conversationId: string) => {
+    socket.to(`dm:${conversationId}`).emit('user_typing_dm', { conversationId, userId })
   })
 
   socket.on('disconnect', () => {

@@ -610,6 +610,17 @@ export function useInviteToRoom(roomId: string) {
   })
 }
 
+export function useRemoveRoomMember(roomId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (memberId: string) => api.removeRoomMember(roomId, memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.room(roomId) })
+    }
+  })
+}
+
 export function useAcceptInvitation() {
   const queryClient = useQueryClient()
 

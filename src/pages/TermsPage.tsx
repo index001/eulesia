@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { FileText, ArrowLeft } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { useAuth } from '../hooks/useAuth'
 
 function PublicHeader() {
@@ -92,6 +93,11 @@ export function TermsPage() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Käyttöehdot"
+        description="Eulesia-alustan käyttöehdot. Lue palvelun käyttöä koskevat ehdot ja säännöt."
+        path="/terms"
+      />
       <TermsContent />
     </Layout>
   )

@@ -6,10 +6,16 @@ Allow: /
 Allow: /about
 Allow: /terms
 Allow: /privacy
+Allow: /agora
+Allow: /agora/thread/
+Allow: /agora/tag/
+Allow: /aiheet
+Allow: /kunnat
+Allow: /kunnat/
+Allow: /clubs/
+Allow: /user/
 
-# Authenticated content - crawlers can't access
-Disallow: /agora
-Disallow: /clubs
+# Authenticated/private content
 Disallow: /messages
 Disallow: /home
 Disallow: /map

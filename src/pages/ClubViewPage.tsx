@@ -7,6 +7,7 @@ import {
   MoreVertical, UserMinus
 } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ActorBadge, ContentEndMarker, FollowButton, LocationSearch, ReportButton } from '../components/common'
 import { useClub, useJoinClub, useLeaveClub, useCreateClubThread, useUpdateClub, useUpdateMemberRole, useRemoveMember } from '../hooks/useApi'
 import { api } from '../lib/api'
@@ -200,6 +201,15 @@ export function ClubViewPage() {
 
   return (
     <Layout>
+      {club && (
+        <SEOHead
+          title={club.name}
+          description={club.description ? club.description.substring(0, 160) : `${club.name} – klubi Eulesia-alustalla`}
+          path={`/clubs/${clubId}`}
+          image={club.coverImageUrl || undefined}
+          noIndex={!club.isPublic}
+        />
+      )}
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <button

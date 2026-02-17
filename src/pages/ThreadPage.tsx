@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Building2, ChevronDown, Pencil, Trash2, History } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ActorBadge, ScopeBadge, TagList, ContentEndMarker, ReportButton, ConfirmDeleteDialog, EditedIndicator, ContentWithPreviews, ShareButtons } from '../components/common'
 import { InstitutionalContextBox } from '../components/agora/InstitutionalContextBox'
 import { CommentThread } from '../components/agora/CommentThread'
@@ -166,8 +167,31 @@ export function ThreadPage() {
   const isInstitutional = thread.author.role === 'institution'
   const comments = thread.comments?.map(transformComment) || []
 
+  const threadJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'DiscussionForumPosting',
+    headline: thread.title,
+    text: thread.content.substring(0, 200),
+    author: { '@type': 'Person', name: author.name },
+    datePublished: thread.createdAt,
+    ...(thread.editedAt && { dateModified: thread.editedAt }),
+    interactionStatistic: {
+      '@type': 'InteractionCounter',
+      interactionType: 'https://schema.org/CommentAction',
+      userInteractionCount: comments.length
+    },
+    url: `https://eulesia.eu/agora/thread/${threadId}`
+  }
+
   return (
     <Layout>
+      <SEOHead
+        title={thread.title}
+        description={thread.content.substring(0, 160).replace(/[#*_~`>\n]+/g, ' ').trim()}
+        path={`/agora/thread/${threadId}`}
+        type="article"
+        jsonLd={threadJsonLd}
+      />
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <button

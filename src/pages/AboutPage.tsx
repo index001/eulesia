@@ -2,6 +2,7 @@ import { ArrowLeft, Globe, Code, Users, Building2, Shield, Sparkles, BookOpen, S
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { useAuth } from '../hooks/useAuth'
 
 function PublicHeader() {
@@ -466,6 +467,18 @@ export function AboutPage() {
   if (isAuthenticated) {
     return (
       <Layout>
+        <SEOHead
+          title="Tietoa Eulesiasta"
+          description="Eulesia on eurooppalainen kansalaisdemokratia-alusta, joka yhdistää kansalaiset, kunnat ja instituutiot."
+          path="/about"
+          jsonLd={{
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Eulesia',
+            url: 'https://eulesia.eu',
+            description: 'Eurooppalainen kansalaisdemokratia-alusta'
+          }}
+        />
         <AboutContent />
       </Layout>
     )

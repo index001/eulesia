@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Hash } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { FollowButton } from '../components/common'
 import { useTags } from '../hooks/useApi'
 import type { TagWithCategory } from '../lib/api'
@@ -65,6 +66,11 @@ export function TopicsPage() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Aiheet"
+        description="Selaa keskusteluaiheita Eulesia-alustalla. Talous, terveys, koulutus, ympäristö ja monta muuta aihealuetta."
+        path="/aiheet"
+      />
       {/* Header */}
       <div className="bg-gradient-to-b from-teal-50 to-white px-4 py-6">
         <div className="flex items-center gap-3 mb-2">

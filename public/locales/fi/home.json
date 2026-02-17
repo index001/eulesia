@@ -72,7 +72,11 @@
     "sendMessage": "Lähetä viesti",
     "sending": "Lähetetään...",
     "editMessage": "Muokkaa viestiä",
-    "deleteMessage": "Poista viesti"
+    "deleteMessage": "Poista viesti",
+    "typing": "kirjoittaa...",
+    "removeMember": "Poista jäsen",
+    "confirmRemoveMember": "Haluatko varmasti poistaa jäsenen {{name}} huoneesta?",
+    "memberRemoved": "Jäsen poistettu"
   },
   "userHome": {
     "homePageTitle": "Kotisivu",
