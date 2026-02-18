@@ -1,6 +1,11 @@
 {
   "title": "Agora",
   "subtitle": "Julkiset kansalaiskeskustelut",
+  "subtitle_0": "Kansalaisten yhteinen keskustelufoorumi",
+  "subtitle_1": "Keskustele, vaikuta, osallistu",
+  "subtitle_2": "Sinun äänelläsi on merkitystä",
+  "subtitle_3": "Demokratia syntyy keskustelemalla",
+  "subtitle_4": "Avoin tila yhteiskunnallisille keskusteluille",
   "loadError": "Keskustelujen lataaminen epäonnistui",
   "noThreads": "Ei keskusteluja valituilla suodattimilla",
   "editSubscriptions": "Muokkaa seuraamisia",

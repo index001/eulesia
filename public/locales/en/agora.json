@@ -1,6 +1,11 @@
 {
   "title": "Agora",
   "subtitle": "Public citizen discussions",
+  "subtitle_0": "A shared forum for civic dialogue",
+  "subtitle_1": "Discuss, influence, participate",
+  "subtitle_2": "Your voice matters",
+  "subtitle_3": "Democracy is built through dialogue",
+  "subtitle_4": "An open space for public discourse",
   "loadError": "Failed to load discussions",
   "noThreads": "No discussions match your filters",
   "editSubscriptions": "Edit subscriptions",
