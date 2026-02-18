@@ -56,7 +56,7 @@ function InlineCardPreview({ url }: { url: string }) {
       role="link"
       tabIndex={0}
       onClick={handleClick}
-      onKeyDown={(e) => { if (e.key === 'Enter') handleClick(e as any) }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(e as any) } }}
       className="border border-gray-200 rounded-lg overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer"
     >
       <div className="flex">

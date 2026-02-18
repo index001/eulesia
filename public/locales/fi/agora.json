@@ -67,6 +67,19 @@
     "locationPlaceholder": "Hae kuntaa, kaupunkia tai kylää...",
     "tags": "Aiheet",
     "customTag": "muu...",
+    "scopeLabel": "Minkä tason keskustelu?",
+    "locationLabel": "Sijainti",
+    "countryLabel": "Maa",
+    "tagsLabel": "Aiheet (valinnainen)",
+    "cancel": "Peruuta",
+    "validationRequired": "Otsikko ja sisältö ovat pakollisia",
+    "validationTitleMin": "Otsikon pitää olla vähintään 5 merkkiä",
+    "validationContentMin": "Sisällön pitää olla vähintään 10 merkkiä",
+    "validationLocation": "Valitse sijainti paikalliselle keskustelulle",
+    "createError": "Keskustelun luominen epäonnistui. Yritä uudelleen.",
+    "nationalInfo": "Näkyy koko Suomessa",
+    "europeanInfo": "Euroopan laajuinen keskustelu",
+    "loading": "Ladataan...",
     "publish": "Julkaise",
     "publishing": "Julkaistaan...",
     "preview": "Esikatselu",
@@ -117,7 +130,19 @@
   "topics": {
     "title": "Aiheet",
     "subtitle": "Selaa ja seuraa kiinnostavia aiheita. Seuraamasi aiheet näkyvät feedissäsi.",
-    "otherTopics": "Muut aiheet"
+    "otherTopics": "Muut aiheet",
+    "categories": {
+      "economy": "Talous & verotus",
+      "health": "Terveys & hyvinvointi",
+      "education": "Koulutus & tiede",
+      "environment": "Ympäristö & ilmasto",
+      "transport": "Liikenne & infra",
+      "security": "Turvallisuus & oikeus",
+      "work": "Työ & elinkeinot",
+      "culture": "Kulttuuri & yhteiskunta",
+      "eu": "EU & kansainvälinen",
+      "municipal": "Kuntapolitiikka"
+    }
   },
   "tag": {
     "threads": "keskustelua",

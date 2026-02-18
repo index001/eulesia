@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Store, Calendar, BookOpen, Bus, Newspaper, Heart, ChevronRight, Info, X, ExternalLink } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ContentEndMarker } from '../components/common'
 import { services, getServiceCategories } from '../data'
 import type { Service } from '../types'
@@ -49,6 +50,7 @@ export function ServicesPage() {
 
   return (
     <Layout>
+      <SEOHead title={t('title')} path="/services" noIndex />
       {/* Page header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div className="flex items-center gap-2 mb-1">

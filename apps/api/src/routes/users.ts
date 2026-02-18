@@ -5,18 +5,10 @@ import { db, users, municipalities, threads, threadTags, institutionTopics } fro
 import { authMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
-import { env } from '../utils/env.js'
+import { getSessionCookieOptions } from '../utils/cookies.js'
 import type { AuthenticatedRequest } from '../types/index.js'
 
 const router = Router()
-
-const sessionCookieOptions = {
-  httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  domain: env.COOKIE_DOMAIN,
-  path: '/'
-}
 
 // Validation schemas
 const updateUserSchema = z.object({
@@ -386,7 +378,7 @@ router.delete('/me', authMiddleware, asyncHandler(async (req: AuthenticatedReque
     .where(eq(users.id, userId))
 
   // 9. Clear session cookie
-  res.clearCookie('session', sessionCookieOptions)
+  res.clearCookie('session', getSessionCookieOptions(req))
 
   res.json({
     success: true,

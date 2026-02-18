@@ -36,3 +36,15 @@ docker/.env
 *.pem
 *.key
 *.crt
+
+# Capacitor native build artifacts
+ios/App/Pods/
+ios/App/App.xcworkspace/
+*.xcuserdata
+android/.gradle/
+android/app/build/
+android/build/
+android/capacitor-cordova-android-plugins/build/
+*.ipa
+*.apk
+*.aab

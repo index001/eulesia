@@ -9,18 +9,11 @@ import { authMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { env } from '../utils/env.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
+import { getSessionCookieOptions } from '../utils/cookies.js'
 import { indexUser } from '../services/search/meilisearch.js'
 import type { AuthenticatedRequest } from '../types/index.js'
 
 const router = Router()
-
-const sessionCookieOptions = {
-  httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  domain: env.COOKIE_DOMAIN,
-  path: '/'
-}
 
 // Validation schemas
 const magicLinkSchema = z.object({
@@ -189,7 +182,7 @@ router.post('/register', asyncHandler(async (req, res: Response) => {
 
   // Set session cookie
   res.cookie('session', sessionToken, {
-    ...sessionCookieOptions,
+    ...getSessionCookieOptions(req),
     expires: sessionExpiresAt
   })
 
@@ -245,7 +238,7 @@ router.post('/login', asyncHandler(async (req, res: Response) => {
 
   // Set session cookie
   res.cookie('session', sessionToken, {
-    ...sessionCookieOptions,
+    ...getSessionCookieOptions(req),
     expires: sessionExpiresAt
   })
 
@@ -330,7 +323,7 @@ router.get('/verify/:token', asyncHandler(async (req, res: Response) => {
 
   // Set session cookie
   res.cookie('session', sessionToken, {
-    ...sessionCookieOptions,
+    ...getSessionCookieOptions(req),
     expires: sessionExpiresAt
   })
 
@@ -344,7 +337,7 @@ router.post('/logout', authMiddleware, asyncHandler(async (req: AuthenticatedReq
     await db.delete(sessions).where(eq(sessions.id, req.sessionId))
   }
 
-  res.clearCookie('session', sessionCookieOptions)
+  res.clearCookie('session', getSessionCookieOptions(req))
   res.json({ success: true })
 }))
 

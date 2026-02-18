@@ -143,22 +143,22 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
     const trimmedContent = content.trim()
 
     if (!trimmedTitle || !trimmedContent) {
-      setError('Otsikko ja sisältö ovat pakollisia')
+      setError(t('threadForm.validationRequired'))
       return
     }
 
     if (trimmedTitle.length < 5) {
-      setError('Otsikon pitää olla vähintään 5 merkkiä')
+      setError(t('threadForm.validationTitleMin'))
       return
     }
 
     if (trimmedContent.length < 10) {
-      setError('Sisällön pitää olla vähintään 10 merkkiä')
+      setError(t('threadForm.validationContentMin'))
       return
     }
 
     if (scope === 'local' && !isPrefilled && !selectedLocation) {
-      setError('Valitse sijainti paikalliselle keskustelulle')
+      setError(t('threadForm.validationLocation'))
       return
     }
 
@@ -204,7 +204,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
 
       onSuccess(result.id)
     } catch (err) {
-      setError('Keskustelun luominen epäonnistui. Yritä uudelleen.')
+      setError(t('threadForm.createError'))
       console.error('Failed to create thread:', err)
     } finally {
       setIsSubmitting(false)
@@ -288,13 +288,13 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
           {!isPrefilled && scope === 'national' && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span>🇫🇮</span>
-              <span>Näkyy koko Suomessa</span>
+              <span>{t('threadForm.nationalInfo')}</span>
             </div>
           )}
           {!isPrefilled && scope === 'european' && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span>🇪🇺</span>
-              <span>Euroopan laajuinen keskustelu</span>
+              <span>{t('threadForm.europeanInfo')}</span>
             </div>
           )}
 
@@ -356,7 +356,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
                 ) : (
                   <ImageIcon className="w-4 h-4" />
                 )}
-                {isUploadingImage ? 'Ladataan...' : 'Lisää kuva'}
+                {isUploadingImage ? t('threadForm.loading') : t('threadForm.imageUpload')}
               </button>
             )}
           </div>
@@ -426,7 +426,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
               onClick={handleCancel}
               className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors"
             >
-              Peruuta
+              {t('threadForm.cancel')}
             </button>
             <button
               onClick={handleSubmit}

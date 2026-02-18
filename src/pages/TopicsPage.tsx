@@ -7,17 +7,18 @@ import { FollowButton } from '../components/common'
 import { useTags } from '../hooks/useApi'
 import type { TagWithCategory } from '../lib/api'
 
-const CATEGORY_LABELS: Record<string, string> = {
-  talous: 'Talous & verotus',
-  terveys: 'Terveys & hyvinvointi',
-  koulutus: 'Koulutus & tiede',
-  ympäristö: 'Ympäristö & ilmasto',
-  liikenne: 'Liikenne & infra',
-  turvallisuus: 'Turvallisuus & oikeus',
-  työ: 'Työ & elinkeinot',
-  kulttuuri: 'Kulttuuri & yhteiskunta',
-  eu: 'EU & kansainvälinen',
-  kunta: 'Kuntapolitiikka'
+// Maps category keys (from backend data) to i18n keys
+const CATEGORY_I18N_KEYS: Record<string, string> = {
+  talous: 'topics.categories.economy',
+  terveys: 'topics.categories.health',
+  koulutus: 'topics.categories.education',
+  ympäristö: 'topics.categories.environment',
+  liikenne: 'topics.categories.transport',
+  turvallisuus: 'topics.categories.security',
+  työ: 'topics.categories.work',
+  kulttuuri: 'topics.categories.culture',
+  eu: 'topics.categories.eu',
+  kunta: 'topics.categories.municipal'
 }
 
 const CATEGORY_ORDER = [
@@ -89,7 +90,7 @@ export function TopicsPage() {
         {orderedCategories.map(category => (
           <div key={category}>
             <h2 className="text-lg font-semibold text-gray-900 mb-3">
-              {CATEGORY_LABELS[category] || category}
+              {CATEGORY_I18N_KEYS[category] ? t(CATEGORY_I18N_KEYS[category]) : category}
             </h2>
             <div className="space-y-2">
               {grouped[category].map(tag => (

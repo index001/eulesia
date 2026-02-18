@@ -147,7 +147,7 @@ export function NewThreadModal({
 
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) {
-      setError('Otsikko ja sisältö ovat pakollisia')
+      setError(t('threadForm.validationRequired'))
       return
     }
 
@@ -174,7 +174,7 @@ export function NewThreadModal({
       onSuccess(result.id)
       handleClose()
     } catch (err) {
-      setError('Keskustelun luominen epäonnistui. Yritä uudelleen.')
+      setError(t('threadForm.createError'))
       console.error('Failed to create thread:', err)
     } finally {
       setIsSubmitting(false)
@@ -227,7 +227,7 @@ export function NewThreadModal({
           {!isPrefilled && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Minkä tason keskustelu?
+                {t('threadForm.scopeLabel')}
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {scopeOptions.map(({ value, icon: Icon, label, description }) => (
@@ -257,7 +257,7 @@ export function NewThreadModal({
           {!isPrefilled && scope !== 'european' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {scope === 'local' ? 'Sijainti' : 'Maa'}
+                {scope === 'local' ? t('threadForm.locationLabel') : t('threadForm.countryLabel')}
               </label>
               {scope === 'local' ? (
                 <>
@@ -362,7 +362,7 @@ export function NewThreadModal({
           {/* Content */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Sisältö
+              {t('threadForm.content')}
             </label>
             <textarea
               value={content}
@@ -379,7 +379,7 @@ export function NewThreadModal({
           {/* Tags */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Aiheet (valinnainen)
+              {t('threadForm.tagsLabel')}
             </label>
             <div className="flex flex-wrap gap-2 mb-2">
               {suggestedTags.map(tag => (
@@ -451,7 +451,7 @@ export function NewThreadModal({
             onClick={handleClose}
             className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
           >
-            Peruuta
+            {t('threadForm.cancel')}
           </button>
           <button
             onClick={handleSubmit}

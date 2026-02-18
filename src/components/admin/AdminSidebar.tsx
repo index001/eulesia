@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, Users, Flag, ScrollText, FileText,
-  BarChart3, Settings, ArrowLeft, Scale
+  BarChart3, Settings, ArrowLeft, Scale, Building2
 } from 'lucide-react'
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { to: '/admin/modlog', icon: ScrollText, labelKey: 'nav.modlog' },
   { to: '/admin/content', icon: FileText, labelKey: 'nav.content' },
   { to: '/admin/appeals', icon: Scale, labelKey: 'nav.appeals' },
+  { to: '/admin/institutions', icon: Building2, labelKey: 'nav.institutions' },
   { to: '/admin/transparency', icon: BarChart3, labelKey: 'nav.transparency' },
   { to: '/admin/settings', icon: Settings, labelKey: 'nav.settings' },
 ]

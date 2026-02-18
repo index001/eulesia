@@ -16,6 +16,7 @@ export const adminKeys = {
   settings: ['admin', 'settings'] as const,
   mySanctions: ['mySanctions'] as const,
   announcements: ['admin', 'announcements'] as const,
+  institutionClaims: ['admin', 'institutionClaims'] as const,
 }
 
 // Dashboard
@@ -307,6 +308,26 @@ export function useDeleteAnnouncement() {
     mutationFn: (id: string) => api.deleteAnnouncement(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.announcements })
+    }
+  })
+}
+
+// Institution claims (admin)
+export function useAdminInstitutionClaims() {
+  return useQuery({
+    queryKey: adminKeys.institutionClaims,
+    queryFn: () => api.getInstitutionClaims()
+  })
+}
+
+export function useAdminUpdateClaim() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ claimId, status }: { claimId: string; status: 'approved' | 'rejected' }) =>
+      api.updateInstitutionClaim(claimId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.institutionClaims })
+      queryClient.invalidateQueries({ queryKey: adminKeys.dashboard })
     }
   })
 }

@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Building2, ChevronDown, Pencil, Trash2, History } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
-import { ActorBadge, ScopeBadge, TagList, ContentEndMarker, ReportButton, ConfirmDeleteDialog, EditedIndicator, ContentWithPreviews, ShareButtons } from '../components/common'
+import { ActorBadge, ScopeBadge, TagList, ContentEndMarker, ReportButton, ConfirmDeleteDialog, EditedIndicator, ContentWithPreviews, ShareButtons, PageSkeleton } from '../components/common'
 import { InstitutionalContextBox } from '../components/agora/InstitutionalContextBox'
 import { CommentThread } from '../components/agora/CommentThread'
 import { ThreadVoteButtons } from '../components/agora/ThreadVoteButtons'
@@ -47,6 +47,7 @@ export function ThreadPage() {
   const [editContent, setEditContent] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditHistory, setShowEditHistory] = useState(false)
+  const threadContentRef = useRef<HTMLDivElement>(null)
 
   // Must be called before any early returns to maintain consistent hook call order
   const contentHtml = useMemo(
@@ -100,6 +101,10 @@ export function ThreadPage() {
     try {
       await editThreadMutation.mutateAsync({ title: editTitle, content: editContent })
       setIsEditingThread(false)
+      // Auto-scroll to the edited content after closing the edit form
+      setTimeout(() => {
+        threadContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
     } catch (err) {
       console.error('Failed to edit thread:', err)
     }
@@ -143,9 +148,7 @@ export function ThreadPage() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <PageSkeleton />
       </Layout>
     )
   }
@@ -297,7 +300,7 @@ export function ThreadPage() {
         )}
 
         {/* Thread content */}
-        <div className="bg-white rounded-xl border border-gray-200 flex">
+        <div ref={threadContentRef} className="bg-white rounded-xl border border-gray-200 flex">
           {/* Vote buttons */}
           <div className="flex-shrink-0 p-4 border-r border-gray-100">
             <ThreadVoteButtons

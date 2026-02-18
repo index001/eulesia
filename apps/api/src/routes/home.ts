@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express'
 import { z } from 'zod'
-import { eq, and, desc, sql } from 'drizzle-orm'
-import { db, rooms, roomMembers, roomMessages, roomInvitations, users, threads, clubMembers, clubs, editHistory } from '../db/index.js'
+import { eq, and, desc, sql, inArray } from 'drizzle-orm'
+import { db, rooms, roomMembers, roomMessages, roomInvitations, messageReactions, users, threads, clubMembers, clubs, editHistory, notifications } from '../db/index.js'
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { renderMarkdown } from '../utils/markdown.js'
@@ -252,6 +252,31 @@ router.get('/rooms/:roomId', optionalAuthMiddleware, asyncHandler(async (req: Au
     members = membersData.map(m => m.user)
   }
 
+  // Get reactions for all messages in the room
+  const messageIds = messagesData.map(m => m.message.id)
+  let reactionsMap: Record<string, { emoji: string; count: number; users: string[] }[]> = {}
+  if (messageIds.length > 0) {
+    const allReactions = await db
+      .select()
+      .from(messageReactions)
+      .where(inArray(messageReactions.messageId, messageIds))
+
+    // Group by messageId then emoji
+    const grouped: Record<string, Record<string, string[]>> = {}
+    for (const r of allReactions) {
+      if (!grouped[r.messageId]) grouped[r.messageId] = {}
+      if (!grouped[r.messageId][r.emoji]) grouped[r.messageId][r.emoji] = []
+      grouped[r.messageId][r.emoji].push(r.userId)
+    }
+    for (const [msgId, emojis] of Object.entries(grouped)) {
+      reactionsMap[msgId] = Object.entries(emojis).map(([emoji, userIds]) => ({
+        emoji,
+        count: userIds.length,
+        users: userIds
+      }))
+    }
+  }
+
   res.json({
     success: true,
     data: {
@@ -268,12 +293,14 @@ router.get('/rooms/:roomId', optionalAuthMiddleware, asyncHandler(async (req: Au
             contentHtml: null,
             createdAt: message.createdAt,
             isHidden: true,
-            author: null
+            author: null,
+            reactions: []
           }
         }
         return {
           ...message,
-          author: formatUserSummary(author)
+          author: formatUserSummary(author),
+          reactions: reactionsMap[message.id] || []
         }
       }).reverse(), // Oldest first
       isOwner,
@@ -521,6 +548,51 @@ router.delete('/rooms/:roomId/messages/:messageId', authMiddleware, asyncHandler
   res.json({ success: true, data: { deleted: true } })
 }))
 
+// POST /home/rooms/:roomId/messages/:messageId/reactions - Toggle reaction
+router.post('/rooms/:roomId/messages/:messageId/reactions', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { roomId, messageId } = req.params
+  const { emoji } = z.object({ emoji: z.string().min(1).max(20) }).parse(req.body)
+
+  // Verify message exists in room
+  const [message] = await db
+    .select()
+    .from(roomMessages)
+    .where(and(eq(roomMessages.id, messageId), eq(roomMessages.roomId, roomId)))
+    .limit(1)
+
+  if (!message) {
+    throw new AppError(404, 'Message not found')
+  }
+
+  // Check if reaction already exists (toggle)
+  const [existing] = await db
+    .select()
+    .from(messageReactions)
+    .where(and(
+      eq(messageReactions.messageId, messageId),
+      eq(messageReactions.userId, userId),
+      eq(messageReactions.emoji, emoji)
+    ))
+    .limit(1)
+
+  if (existing) {
+    // Remove reaction
+    await db.delete(messageReactions).where(eq(messageReactions.id, existing.id))
+    io.to(`room:${roomId}`).emit('room_reaction_updated', { roomId, messageId })
+    res.json({ success: true, data: { action: 'removed' } })
+  } else {
+    // Add reaction
+    await db.insert(messageReactions).values({
+      messageId,
+      userId,
+      emoji
+    })
+    io.to(`room:${roomId}`).emit('room_reaction_updated', { roomId, messageId })
+    res.json({ success: true, data: { action: 'added' } })
+  }
+}))
+
 // POST /home/rooms/:roomId/invite - Invite user to private room
 router.post('/rooms/:roomId/invite', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id
@@ -598,9 +670,100 @@ router.post('/rooms/:roomId/invite', authMiddleware, asyncHandler(async (req: Au
     })
     .returning()
 
+  // Notify invitee
+  const inviterName = req.user!.name || 'Someone'
+  await db.insert(notifications).values({
+    userId: inviteeId,
+    type: 'room_invite',
+    title: inviterName,
+    body: room.name,
+    link: '/home'
+  })
+  io.to(`user:${inviteeId}`).emit('new_notification', {
+    type: 'room_invite',
+    title: inviterName,
+    body: room.name
+  })
+
   res.status(201).json({
     success: true,
     data: invitation
+  })
+}))
+
+// POST /home/rooms/:roomId/members - Add member directly (owner only, private rooms)
+router.post('/rooms/:roomId/members', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { roomId } = req.params
+  const { userId: targetUserId } = z.object({ userId: z.string().uuid() }).parse(req.body)
+
+  const [room] = await db
+    .select()
+    .from(rooms)
+    .where(eq(rooms.id, roomId))
+    .limit(1)
+
+  if (!room) {
+    throw new AppError(404, 'Room not found')
+  }
+
+  if (room.ownerId !== userId) {
+    throw new AppError(403, 'Only the owner can add members')
+  }
+
+  if (room.visibility !== 'private') {
+    throw new AppError(400, 'Can only add members to private rooms')
+  }
+
+  // Verify target user exists
+  const [targetUser] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, targetUserId))
+    .limit(1)
+
+  if (!targetUser) {
+    throw new AppError(404, 'User not found')
+  }
+
+  // Check if already member
+  const [existingMember] = await db
+    .select()
+    .from(roomMembers)
+    .where(and(
+      eq(roomMembers.roomId, roomId),
+      eq(roomMembers.userId, targetUserId)
+    ))
+    .limit(1)
+
+  if (existingMember) {
+    throw new AppError(400, 'User is already a member')
+  }
+
+  // Add member directly
+  await db.insert(roomMembers).values({
+    roomId,
+    userId: targetUserId
+  })
+
+  // Notify the added user
+  const adderName = req.user!.name || 'Someone'
+  await db.insert(notifications).values({
+    userId: targetUserId,
+    type: 'room_invite',
+    title: adderName,
+    body: room.name,
+    link: `/home/rooms/${roomId}`
+  })
+  io.to(`user:${targetUserId}`).emit('new_notification', {
+    type: 'room_invite',
+    title: adderName,
+    body: room.name
+  })
+
+  res.status(201).json({
+    success: true,
+    data: { userId: targetUserId, name: targetUser.name }
   })
 }))
 

@@ -58,6 +58,10 @@
     "inviteHint": "The person will receive an invitation they can accept or decline.",
     "inviteSend": "Send Invitation",
     "inviteSending": "Sending...",
+    "addMemberTitle": "Add Member",
+    "addMemberSearchLabel": "Search by name",
+    "addMember": "Add Member",
+    "addingMember": "Adding...",
     "members": "Members",
     "owner": "Owner",
     "ownerHome": "{{name}}'s home",
@@ -76,7 +80,8 @@
     "typing": "is typing...",
     "removeMember": "Remove member",
     "confirmRemoveMember": "Are you sure you want to remove {{name}} from this room?",
-    "memberRemoved": "Member removed"
+    "memberRemoved": "Member removed",
+    "addReaction": "Add reaction"
   },
   "userHome": {
     "homePageTitle": "Home page",

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Eulesia</string>
+    <string name="title_activity_main">Eulesia</string>
+    <string name="package_name">eu.eulesia.app</string>
+    <string name="custom_url_scheme">eu.eulesia.app</string>
+</resources>

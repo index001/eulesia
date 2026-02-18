@@ -1,3 +1,5 @@
+import { Helmet } from 'react-helmet-async'
+
 const SITE_NAME = 'Eulesia'
 const SITE_URL = 'https://eulesia.eu'
 const DEFAULT_DESCRIPTION = 'Eurooppalainen kansalaisdemokratia-alusta'
@@ -30,7 +32,7 @@ export function SEOHead({
     : DEFAULT_IMAGE
 
   return (
-    <>
+    <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={desc} />
       <link rel="canonical" href={canonicalUrl} />
@@ -54,11 +56,10 @@ export function SEOHead({
       {noIndex && <meta name="robots" content="noindex, nofollow" />}
 
       {jsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
       )}
-    </>
+    </Helmet>
   )
 }

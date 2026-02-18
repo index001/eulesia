@@ -97,7 +97,10 @@
     "municipality": "Municipality",
     "agency": "Agency",
     "discussions_one": "{{count}} discussion",
-    "discussions_other": "{{count}} discussions"
+    "discussions_other": "{{count}} discussions",
+    "clubs": "Clubs",
+    "members_one": "{{count}} member",
+    "members_other": "{{count}} members"
   },
   "location": {
     "searchPlaceholder": "Search location...",
@@ -208,5 +211,8 @@
     "accept": "Got it",
     "essentialOnly": "Essential only",
     "learnMore": "Privacy policy"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content"
   }
 }

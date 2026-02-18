@@ -710,6 +710,11 @@ export function ClubViewPage() {
                   <div className="flex items-center justify-between">
                     <ActorBadge user={transformUser(thread.author)} size="sm" />
                     <div className="flex items-center gap-3 text-xs text-gray-500">
+                      {(thread.score ?? 0) !== 0 && (
+                        <span className={`font-medium ${(thread.score ?? 0) > 0 ? 'text-orange-600' : 'text-blue-600'}`}>
+                          {(thread.score ?? 0) > 0 ? '+' : ''}{thread.score}
+                        </span>
+                      )}
                       <span className="flex items-center gap-1">
                         <MessageSquare className="w-3.5 h-3.5" />
                         {thread.replyCount}

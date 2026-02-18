@@ -6,6 +6,7 @@
     "modlog": "Moderointiloki",
     "content": "Sisältö",
     "appeals": "Valitukset",
+    "institutions": "Instituutiot",
     "transparency": "DSA-raportti",
     "settings": "Asetukset",
     "backToApp": "Takaisin appiin"
@@ -209,6 +210,13 @@
     "hideAnnouncement": "Piilota",
     "showAnnouncement": "Näytä",
     "deleteAnnouncement": "Poista"
+  },
+  "institutions": {
+    "title": "Instituutiohakemukset",
+    "noPending": "Ei odottavia hallintahakemuksia.",
+    "requestedBy": "Hakija",
+    "approve": "Hyväksy",
+    "reject": "Hylkää"
   },
   "common": {
     "cancel": "Peruuta"

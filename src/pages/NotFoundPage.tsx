@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { Layout } from '../components/layout/Layout'
+import { SEOHead } from '../components/SEOHead'
 import { MapPin } from 'lucide-react'
 
 export function NotFoundPage() {
@@ -9,6 +10,8 @@ export function NotFoundPage() {
   const { isAuthenticated } = useAuth()
 
   const content = (
+    <>
+    <SEOHead title="404" path="" noIndex />
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="text-center max-w-md">
         <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -31,6 +34,7 @@ export function NotFoundPage() {
         </div>
       </div>
     </div>
+    </>
   )
 
   if (isAuthenticated) {

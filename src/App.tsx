@@ -5,35 +5,35 @@ import { SocketProvider } from './hooks/useSocket'
 import { GuideProvider } from './components/guide'
 import { CookieConsent } from './components/common/CookieConsent'
 import { ScrollToTop } from './components/common/ScrollToTop'
+import { DeepLinkHandler } from './hooks/useDeepLinks'
+import { BackButtonHandler } from './hooks/useBackButton'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { PageErrorBoundary } from './components/common/PageErrorBoundary'
-import {
-  LoginPage,
-  AgoraPage,
-  ThreadPage,
-  ClubsPage,
-  ClubViewPage,
-  ClubThreadPage,
-  HomePage,
-  RoomPage,
-  ProfilePage,
-  ServicesPage,
-  AboutPage,
-  MunicipalitiesPage,
-  MunicipalityPage,
-  UserProfilePage,
-  TagPage,
-  TopicsPage,
-  MessagesPage,
-  DMConversationPage,
-  UserHomePage,
-  TermsPage,
-  PrivacyPage,
-  PersonalDataPage,
-  NotFoundPage
-} from './pages'
+import { NotFoundPage } from './pages/NotFoundPage'
 
-// Lazy-loaded pages (heavy or rarely used)
+// Lazy-loaded pages — route-based code splitting
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const AgoraPage = lazy(() => import('./pages/AgoraPage').then(m => ({ default: m.AgoraPage })))
+const ThreadPage = lazy(() => import('./pages/ThreadPage').then(m => ({ default: m.ThreadPage })))
+const ClubsPage = lazy(() => import('./pages/ClubsPage').then(m => ({ default: m.ClubsPage })))
+const ClubViewPage = lazy(() => import('./pages/ClubViewPage').then(m => ({ default: m.ClubViewPage })))
+const ClubThreadPage = lazy(() => import('./pages/ClubThreadPage').then(m => ({ default: m.ClubThreadPage })))
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
+const RoomPage = lazy(() => import('./pages/RoomPage').then(m => ({ default: m.RoomPage })))
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
+const ServicesPage = lazy(() => import('./pages/ServicesPage').then(m => ({ default: m.ServicesPage })))
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
+const MunicipalitiesPage = lazy(() => import('./pages/MunicipalitiesPage').then(m => ({ default: m.MunicipalitiesPage })))
+const MunicipalityPage = lazy(() => import('./pages/MunicipalityPage').then(m => ({ default: m.MunicipalityPage })))
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage').then(m => ({ default: m.UserProfilePage })))
+const TagPage = lazy(() => import('./pages/TagPage').then(m => ({ default: m.TagPage })))
+const TopicsPage = lazy(() => import('./pages/TopicsPage').then(m => ({ default: m.TopicsPage })))
+const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })))
+const DMConversationPage = lazy(() => import('./pages/DMConversationPage').then(m => ({ default: m.DMConversationPage })))
+const UserHomePage = lazy(() => import('./pages/UserHomePage').then(m => ({ default: m.UserHomePage })))
+const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
+const PersonalDataPage = lazy(() => import('./pages/PersonalDataPage').then(m => ({ default: m.PersonalDataPage })))
 const MapPage = lazy(() => import('./pages/MapPage').then(m => ({ default: m.MapPage })))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })))
 const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage').then(m => ({ default: m.AdminUsersPage })))
@@ -45,6 +45,7 @@ const AdminContentPage = lazy(() => import('./pages/admin/AdminContentPage').the
 const AdminTransparencyPage = lazy(() => import('./pages/admin/AdminTransparencyPage').then(m => ({ default: m.AdminTransparencyPage })))
 const AdminAppealsPage = lazy(() => import('./pages/admin/AdminAppealsPage').then(m => ({ default: m.AdminAppealsPage })))
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage').then(m => ({ default: m.AdminSettingsPage })))
+const AdminInstitutionsPage = lazy(() => import('./pages/admin/AdminInstitutionsPage').then(m => ({ default: m.AdminInstitutionsPage })))
 
 function LoadingScreen() {
   return (
@@ -258,6 +259,7 @@ function AppRoutes() {
         <Route path="/admin/content" element={<AdminRoute><PageErrorBoundary><AdminContentPage /></PageErrorBoundary></AdminRoute>} />
         <Route path="/admin/transparency" element={<AdminRoute><PageErrorBoundary><AdminTransparencyPage /></PageErrorBoundary></AdminRoute>} />
         <Route path="/admin/appeals" element={<AdminRoute><PageErrorBoundary><AdminAppealsPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/institutions" element={<AdminRoute><PageErrorBoundary><AdminInstitutionsPage /></PageErrorBoundary></AdminRoute>} />
         <Route path="/admin/settings" element={<AdminRoute><PageErrorBoundary><AdminSettingsPage /></PageErrorBoundary></AdminRoute>} />
 
         {/* 404 */}
@@ -330,6 +332,8 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <ScrollToTop />
+        <DeepLinkHandler />
+        <BackButtonHandler />
         <AuthProvider>
           <SocketProvider>
             <GuideProvider>

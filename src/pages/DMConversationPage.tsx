@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Send, Pencil, Trash2, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ActorBadge, EditedIndicator, ConfirmDeleteDialog } from '../components/common'
 import { useConversation, useSendDM, useMarkRead, useEditDirectMessage, useDeleteDirectMessage } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
@@ -210,6 +211,7 @@ export function DMConversationPage() {
 
   return (
     <Layout>
+      <SEOHead title={t('title')} path={`/messages/${conversationId}`} noIndex />
       <div className="flex flex-col" style={{ height: 'calc(100dvh - 3.5rem - 5rem)' }}>
         {/* Header */}
         <div className="bg-teal-700 px-4 py-4 flex-shrink-0">

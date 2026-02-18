@@ -1,11 +1,12 @@
 import { useState, useRef, useCallback } from 'react'
 import { ContentWithPreviews } from '../components/common/ContentWithPreviews'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save, Search, Pencil, Check, UserMinus } from 'lucide-react'
+import { ArrowLeft, Lock, Globe, Send, Users, Settings, UserPlus, X, Trash2, Save, Search, Pencil, Check, UserMinus, SmilePlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ActorBadge, EditedIndicator, ConfirmDeleteDialog } from '../components/common'
-import { useRoom, useSendRoomMessage, useUpdateRoom, useDeleteRoom, useInviteToRoom, useRemoveRoomMember, useEditRoomMessage, useDeleteRoomMessage } from '../hooks/useApi'
+import { useRoom, useSendRoomMessage, useUpdateRoom, useDeleteRoom, useInviteToRoom, useAddRoomMember, useRemoveRoomMember, useEditRoomMessage, useDeleteRoomMessage, useToggleMessageReaction } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import { useSocket } from '../hooks/useSocket'
 import { formatRelativeTime } from '../lib/formatTime'
@@ -24,9 +25,11 @@ export function RoomPage() {
   const updateRoomMutation = useUpdateRoom(roomId || '')
   const deleteRoomMutation = useDeleteRoom()
   const inviteToRoomMutation = useInviteToRoom(roomId || '')
+  const addRoomMemberMutation = useAddRoomMember(roomId || '')
   const editMessageMutation = useEditRoomMessage(roomId || '')
   const deleteMessageMutation = useDeleteRoomMessage(roomId || '')
   const removeRoomMemberMutation = useRemoveRoomMember(roomId || '')
+  const toggleReactionMutation = useToggleMessageReaction(roomId || '')
 
   const { joinRoom, leaveRoom, emitTypingRoom, typingInRoom } = useSocket()
 
@@ -121,16 +124,16 @@ export function RoomPage() {
     }, 300)
   }, [currentUser?.id, roomData?.members, roomData?.owner.id])
 
-  const handleInvite = async () => {
+  const handleAddMember = async () => {
     if (!selectedUser) return
     try {
-      await inviteToRoomMutation.mutateAsync(selectedUser.id)
+      await addRoomMemberMutation.mutateAsync(selectedUser.id)
       setInviteSearch('')
       setInviteResults([])
       setSelectedUser(null)
       setShowInvite(false)
     } catch (err) {
-      console.error('Failed to send invitation:', err)
+      console.error('Failed to add member:', err)
     }
   }
 
@@ -161,6 +164,7 @@ export function RoomPage() {
 
   return (
     <Layout>
+      <SEOHead title={name} path={`/home/room/${roomId}`} noIndex />
       {/* Back navigation */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <button
@@ -197,13 +201,15 @@ export function RoomPage() {
           </div>
           {isOwner && (
             <div className="flex items-center gap-1 flex-shrink-0 ml-3">
-              <button
-                onClick={() => setShowInvite(true)}
-                className="p-2 hover:bg-white/60 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
-                aria-label={t('room.inviteTitle')}
-              >
-                <UserPlus className="w-5 h-5" />
-              </button>
+              {visibility === 'private' && (
+                <button
+                  onClick={() => setShowInvite(true)}
+                  className="p-2 hover:bg-white/60 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
+                  aria-label={t('room.inviteTitle')}
+                >
+                  <UserPlus className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={handleOpenSettings}
                 className="p-2 hover:bg-white/60 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
@@ -289,8 +295,10 @@ export function RoomPage() {
                 message={msg}
                 isOwnMessage={msg.author?.id === currentUser?.id}
                 isOwnerOrAdmin={isOwner || currentUser?.role === 'admin'}
+                currentUserId={currentUser?.id}
                 onEdit={(messageId, content) => editMessageMutation.mutate({ messageId, content })}
                 onDelete={(messageId) => deleteMessageMutation.mutate(messageId)}
+                onReact={(messageId, emoji) => toggleReactionMutation.mutate({ messageId, emoji })}
               />
             ))}
           </div>
@@ -398,18 +406,18 @@ export function RoomPage() {
         </div>
       )}
 
-      {/* Invite Modal */}
+      {/* Add Member Modal */}
       {showInvite && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="room-invite-title">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="room-add-member-title">
           <div className="bg-white rounded-xl w-full max-w-md">
             <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-              <h3 id="room-invite-title" className="font-semibold text-gray-900">{t('room.inviteTitle')}</h3>
+              <h3 id="room-add-member-title" className="font-semibold text-gray-900">{t('room.addMemberTitle')}</h3>
               <button onClick={() => { setShowInvite(false); setInviteSearch(''); setInviteResults([]); setSelectedUser(null) }} className="p-1 hover:bg-gray-100 rounded" aria-label={t('common:actions.close')}>
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
             <div className="p-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('room.inviteSearchLabel')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('room.addMemberSearchLabel')}</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -469,10 +477,6 @@ export function RoomPage() {
                   )}
                 </div>
               )}
-
-              <p className="text-xs text-gray-500 mt-2">
-                {t('room.inviteHint')}
-              </p>
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
               <button
@@ -482,12 +486,12 @@ export function RoomPage() {
                 {t('common:actions.cancel')}
               </button>
               <button
-                onClick={handleInvite}
-                disabled={inviteToRoomMutation.isPending || !selectedUser}
+                onClick={handleAddMember}
+                disabled={addRoomMemberMutation.isPending || !selectedUser}
                 className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
               >
                 <UserPlus className="w-4 h-4" />
-                {inviteToRoomMutation.isPending ? t('room.inviteSending') : t('room.inviteSend')}
+                {addRoomMemberMutation.isPending ? t('room.addingMember') : t('room.addMember')}
               </button>
             </div>
           </div>
@@ -501,15 +505,20 @@ interface MessageCardProps {
   message: RoomMessage
   isOwnMessage: boolean
   isOwnerOrAdmin: boolean
+  currentUserId?: string
   onEdit: (messageId: string, content: string) => void
   onDelete: (messageId: string) => void
+  onReact: (messageId: string, emoji: string) => void
 }
 
-function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete }: MessageCardProps) {
+const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '👎']
+
+function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, currentUserId, onEdit, onDelete, onReact }: MessageCardProps) {
   const { t } = useTranslation(['home', 'common'])
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
   // Deleted message placeholder
   if (message.isHidden) {
@@ -605,6 +614,51 @@ function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, onEdit, onDelete }
         <ContentWithPreviews html={message.contentHtml} className="prose prose-sm prose-gray max-w-none" />
       ) : (
         <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{message.content}</p>
+      )}
+
+      {/* Reactions */}
+      {!isEditing && (
+        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+          {message.reactions?.map((reaction) => {
+            const hasReacted = currentUserId ? reaction.users.includes(currentUserId) : false
+            return (
+              <button
+                key={reaction.emoji}
+                onClick={() => onReact(message.id, reaction.emoji)}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition-colors ${
+                  hasReacted
+                    ? 'bg-teal-50 border-teal-300 text-teal-700'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span>{reaction.emoji}</span>
+                <span>{reaction.count}</span>
+              </button>
+            )
+          })}
+          <div className="relative">
+            <button
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              title={t('room.addReaction')}
+            >
+              <SmilePlus className="w-4 h-4" />
+            </button>
+            {showEmojiPicker && (
+              <div className="absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg p-1.5 flex gap-0.5 z-10">
+                {REACTION_EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => { onReact(message.id, emoji); setShowEmojiPicker(false) }}
+                    className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-lg transition-colors"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       <ConfirmDeleteDialog

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ThreadCard, FeedFilters, FeedOnboarding, InlineThreadForm } from '../components/agora'
-import { ContentEndMarker } from '../components/common'
+import { ContentEndMarker, ThreadListSkeleton } from '../components/common'
 import { MapPin, Building2, Globe, Users } from 'lucide-react'
 import { useThreads, useVoteThread, useSubscriptions, useCompleteOnboarding } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
@@ -291,9 +291,7 @@ export function AgoraPage() {
         />
 
         {isLoading && page === 1 && (
-          <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          </div>
+          <ThreadListSkeleton count={4} />
         )}
 
         {error && (

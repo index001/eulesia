@@ -1,11 +1,13 @@
 import { Router, type Response } from 'express'
 import { z } from 'zod'
 import { eq, desc, and, or, sql, inArray } from 'drizzle-orm'
-import { db, clubs, clubMembers, clubThreads, clubComments, users } from '../db/index.js'
+import { db, clubs, clubMembers, clubThreads, clubComments, clubThreadVotes, clubCommentVotes, users, notifications } from '../db/index.js'
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { renderMarkdown } from '../utils/markdown.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
+import { io } from '../index.js'
+import { indexClub } from '../services/search/index.js'
 import type { AuthenticatedRequest } from '../types/index.js'
 
 const router = Router()
@@ -50,9 +52,13 @@ const createClubCommentSchema = z.object({
   language: z.string().max(10).optional()
 })
 
+const clubVoteSchema = z.object({
+  value: z.number().int().min(-1).max(1)
+})
+
 // GET /clubs - List clubs (public + user's closed clubs)
 router.get('/', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const { page = '1', limit = '20' } = req.query
+  const { page = '1', limit = '20', membership } = req.query
   const pageNum = Math.max(1, parseInt(page as string))
   const limitNum = Math.min(50, Math.max(1, parseInt(limit as string)))
   const offset = (pageNum - 1) * limitNum
@@ -73,10 +79,20 @@ router.get('/', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRe
     }, {} as Record<string, boolean>)
   }
 
-  // Show public clubs + closed clubs where user is a member
-  const whereCondition = memberClubIds.length > 0
-    ? or(eq(clubs.isPublic, true), inArray(clubs.id, memberClubIds))
-    : eq(clubs.isPublic, true)
+  // If membership=mine, only return user's clubs
+  let whereCondition
+  if (membership === 'mine' && memberClubIds.length > 0) {
+    whereCondition = inArray(clubs.id, memberClubIds)
+  } else if (membership === 'mine') {
+    // Not logged in or no memberships — return empty
+    res.json({ success: true, data: { items: [], total: 0, page: pageNum, limit: limitNum, hasMore: false } })
+    return
+  } else {
+    // Show public clubs + closed clubs where user is a member
+    whereCondition = memberClubIds.length > 0
+      ? or(eq(clubs.isPublic, true), inArray(clubs.id, memberClubIds))
+      : eq(clubs.isPublic, true)
+  }
 
   const clubList = await db
     .select({
@@ -230,6 +246,22 @@ router.get('/:id', optionalAuthMiddleware, asyncHandler(async (req: Authenticate
     .orderBy(desc(clubThreads.isPinned), desc(clubThreads.updatedAt))
     .limit(50)
 
+  // Get user's votes on threads
+  let threadVoteMap = new Map<string, number>()
+  if (req.user && threadList.length > 0) {
+    const threadIds = threadList.map(t => t.thread.id)
+    const votes = await db
+      .select({ threadId: clubThreadVotes.threadId, value: clubThreadVotes.value })
+      .from(clubThreadVotes)
+      .where(and(
+        inArray(clubThreadVotes.threadId, threadIds),
+        eq(clubThreadVotes.userId, req.user.id)
+      ))
+    for (const v of votes) {
+      threadVoteMap.set(v.threadId, v.value)
+    }
+  }
+
   res.json({
     success: true,
     data: {
@@ -238,6 +270,7 @@ router.get('/:id', optionalAuthMiddleware, asyncHandler(async (req: Authenticate
       members: allMembers.map(m => ({ ...m.user, role: m.role })),
       threads: threadList.map(({ thread, author }) => ({
         ...thread,
+        userVote: threadVoteMap.get(thread.id) || 0,
         author
       })),
       isMember,
@@ -287,6 +320,18 @@ router.post('/', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, 
     userId,
     role: 'admin'
   })
+
+  // Index in search
+  indexClub({
+    id: newClub.id,
+    name: newClub.name,
+    slug: newClub.slug,
+    description: newClub.description ?? undefined,
+    category: newClub.category ?? undefined,
+    memberCount: 1,
+    isPublic: newClub.isPublic ?? true,
+    createdAt: newClub.createdAt?.toISOString() ?? new Date().toISOString()
+  }).catch(() => {})
 
   res.status(201).json({
     success: true,
@@ -344,6 +389,18 @@ router.patch('/:id', authMiddleware, asyncHandler(async (req: AuthenticatedReque
     .set(updateData)
     .where(eq(clubs.id, clubId))
     .returning()
+
+  // Update search index
+  indexClub({
+    id: updatedClub.id,
+    name: updatedClub.name,
+    slug: updatedClub.slug,
+    description: updatedClub.description ?? undefined,
+    category: updatedClub.category ?? undefined,
+    memberCount: updatedClub.memberCount ?? 0,
+    isPublic: updatedClub.isPublic ?? true,
+    createdAt: updatedClub.createdAt?.toISOString() ?? new Date().toISOString()
+  }).catch(() => {})
 
   res.json({
     success: true,
@@ -554,6 +611,17 @@ router.get('/:clubId/threads/:threadId', optionalAuthMiddleware, asyncHandler(as
     throw new AppError(404, 'Thread not found')
   }
 
+  // Get user's vote on thread
+  let threadUserVote = 0
+  if (req.user) {
+    const [tv] = await db
+      .select({ value: clubThreadVotes.value })
+      .from(clubThreadVotes)
+      .where(and(eq(clubThreadVotes.threadId, threadId), eq(clubThreadVotes.userId, req.user.id)))
+      .limit(1)
+    threadUserVote = tv?.value || 0
+  }
+
   // Get comments
   const commentList = await db
     .select({
@@ -571,10 +639,27 @@ router.get('/:clubId/threads/:threadId', optionalAuthMiddleware, asyncHandler(as
     .where(eq(clubComments.threadId, threadId))
     .orderBy(clubComments.createdAt)
 
+  // Get user's votes on comments
+  let commentVoteMap = new Map<string, number>()
+  if (req.user && commentList.length > 0) {
+    const commentIds = commentList.map(c => c.comment.id)
+    const votes = await db
+      .select({ commentId: clubCommentVotes.commentId, value: clubCommentVotes.value })
+      .from(clubCommentVotes)
+      .where(and(
+        inArray(clubCommentVotes.commentId, commentIds),
+        eq(clubCommentVotes.userId, req.user.id)
+      ))
+    for (const v of votes) {
+      commentVoteMap.set(v.commentId, v.value)
+    }
+  }
+
   res.json({
     success: true,
     data: {
       ...threadData.thread,
+      userVote: threadUserVote,
       author: threadData.author,
       memberRole,
       comments: commentList.map(({ comment, author }) => {
@@ -586,6 +671,8 @@ router.get('/:clubId/threads/:threadId', optionalAuthMiddleware, asyncHandler(as
             authorId: comment.authorId,
             content: '',
             contentHtml: null,
+            score: 0,
+            userVote: 0,
             createdAt: comment.createdAt,
             isHidden: true,
             author: null
@@ -593,6 +680,7 @@ router.get('/:clubId/threads/:threadId', optionalAuthMiddleware, asyncHandler(as
         }
         return {
           ...comment,
+          userVote: commentVoteMap.get(comment.id) || 0,
           author
         }
       })
@@ -663,10 +751,169 @@ router.post('/:clubId/threads/:threadId/comments', authMiddleware, asyncHandler(
     })
     .where(eq(clubThreads.id, threadId))
 
+  // Notifications
+  const commenterName = req.user!.name || 'Someone'
+  const truncatedContent = data.content.length > 100 ? data.content.slice(0, 100) + '...' : data.content
+  const notifiedUserIds = new Set<string>()
+
+  // 1. Notify parent comment author (reply to their comment)
+  if (data.parentId) {
+    const [parentComment] = await db
+      .select({ authorId: clubComments.authorId })
+      .from(clubComments)
+      .where(eq(clubComments.id, data.parentId))
+      .limit(1)
+
+    if (parentComment && parentComment.authorId !== userId) {
+      notifiedUserIds.add(parentComment.authorId)
+      await db.insert(notifications).values({
+        userId: parentComment.authorId,
+        type: 'reply',
+        title: commenterName,
+        body: truncatedContent,
+        link: `/clubs/${clubId}/thread/${threadId}`
+      })
+      io.to(`user:${parentComment.authorId}`).emit('new_notification', {
+        type: 'reply',
+        title: commenterName,
+        body: truncatedContent
+      })
+    }
+  }
+
+  // 2. Notify thread author (new comment on their thread)
+  if (thread.authorId !== userId && !notifiedUserIds.has(thread.authorId)) {
+    notifiedUserIds.add(thread.authorId)
+    await db.insert(notifications).values({
+      userId: thread.authorId,
+      type: 'thread_reply',
+      title: commenterName,
+      body: truncatedContent,
+      link: `/clubs/${clubId}/thread/${threadId}`
+    })
+    io.to(`user:${thread.authorId}`).emit('new_notification', {
+      type: 'thread_reply',
+      title: commenterName,
+      body: truncatedContent
+    })
+  }
+
   res.status(201).json({
     success: true,
     data: newComment
   })
+}))
+
+// POST /clubs/:clubId/threads/:threadId/vote - Vote on a club thread
+router.post('/:clubId/threads/:threadId/vote', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { clubId, threadId } = req.params
+  const { value } = clubVoteSchema.parse(req.body)
+
+  // Verify membership
+  const [membership] = await db
+    .select()
+    .from(clubMembers)
+    .where(and(eq(clubMembers.clubId, clubId), eq(clubMembers.userId, userId)))
+    .limit(1)
+
+  if (!membership) {
+    throw new AppError(403, 'Must be a member to vote')
+  }
+
+  // Verify thread exists
+  const [thread] = await db
+    .select()
+    .from(clubThreads)
+    .where(and(eq(clubThreads.id, threadId), eq(clubThreads.clubId, clubId)))
+    .limit(1)
+
+  if (!thread) {
+    throw new AppError(404, 'Thread not found')
+  }
+
+  const [existingVote] = await db
+    .select()
+    .from(clubThreadVotes)
+    .where(and(eq(clubThreadVotes.threadId, threadId), eq(clubThreadVotes.userId, userId)))
+    .limit(1)
+
+  const oldValue = existingVote?.value || 0
+  const scoreDelta = value - oldValue
+
+  if (value === 0) {
+    if (existingVote) {
+      await db.delete(clubThreadVotes).where(and(eq(clubThreadVotes.threadId, threadId), eq(clubThreadVotes.userId, userId)))
+    }
+  } else if (existingVote) {
+    await db.update(clubThreadVotes).set({ value }).where(and(eq(clubThreadVotes.threadId, threadId), eq(clubThreadVotes.userId, userId)))
+  } else {
+    await db.insert(clubThreadVotes).values({ threadId, userId, value })
+  }
+
+  if (scoreDelta !== 0) {
+    await db.update(clubThreads).set({ score: sql`${clubThreads.score} + ${scoreDelta}` }).where(eq(clubThreads.id, threadId))
+  }
+
+  const [updated] = await db.select({ score: clubThreads.score }).from(clubThreads).where(eq(clubThreads.id, threadId)).limit(1)
+
+  res.json({ success: true, data: { threadId, score: updated.score, userVote: value } })
+}))
+
+// POST /clubs/:clubId/threads/:threadId/comments/:commentId/vote - Vote on a club comment
+router.post('/:clubId/threads/:threadId/comments/:commentId/vote', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { clubId, commentId } = req.params
+
+  const { value } = clubVoteSchema.parse(req.body)
+
+  // Verify membership
+  const [membership] = await db
+    .select()
+    .from(clubMembers)
+    .where(and(eq(clubMembers.clubId, clubId), eq(clubMembers.userId, userId)))
+    .limit(1)
+
+  if (!membership) {
+    throw new AppError(403, 'Must be a member to vote')
+  }
+
+  const [comment] = await db
+    .select()
+    .from(clubComments)
+    .where(eq(clubComments.id, commentId))
+    .limit(1)
+
+  if (!comment) {
+    throw new AppError(404, 'Comment not found')
+  }
+
+  const [existingVote] = await db
+    .select()
+    .from(clubCommentVotes)
+    .where(and(eq(clubCommentVotes.commentId, commentId), eq(clubCommentVotes.userId, userId)))
+    .limit(1)
+
+  const oldValue = existingVote?.value || 0
+  const scoreDelta = value - oldValue
+
+  if (value === 0) {
+    if (existingVote) {
+      await db.delete(clubCommentVotes).where(and(eq(clubCommentVotes.commentId, commentId), eq(clubCommentVotes.userId, userId)))
+    }
+  } else if (existingVote) {
+    await db.update(clubCommentVotes).set({ value }).where(and(eq(clubCommentVotes.commentId, commentId), eq(clubCommentVotes.userId, userId)))
+  } else {
+    await db.insert(clubCommentVotes).values({ commentId, userId, value })
+  }
+
+  if (scoreDelta !== 0) {
+    await db.update(clubComments).set({ score: sql`${clubComments.score} + ${scoreDelta}` }).where(eq(clubComments.id, commentId))
+  }
+
+  const [updated] = await db.select({ score: clubComments.score }).from(clubComments).where(eq(clubComments.id, commentId)).limit(1)
+
+  res.json({ success: true, data: { commentId, score: updated.score, userVote: value } })
 }))
 
 // ── Moderation endpoints ──

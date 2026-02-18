@@ -39,6 +39,7 @@
   "newClub": "New Club",
   "noClubs": "No clubs match your search",
   "clearFilters": "Clear filters",
+  "myClubs": "My Clubs",
   "allClubsShown": "All clubs shown",
   "failedToLoad": "Failed to load clubs",
   "members_one": "{{count}} member",

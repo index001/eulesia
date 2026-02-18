@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { MessageSquare } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { useConversations } from '../hooks/useApi'
 import { useGuide } from '../hooks/useGuide'
 import { formatMessageDate } from '../lib/formatTime'
@@ -79,6 +80,7 @@ export function MessagesPage() {
 
   return (
     <Layout>
+      <SEOHead title={t('title')} path="/messages" noIndex />
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-4" data-guide="messages-header">
         <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>

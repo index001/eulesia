@@ -58,6 +58,10 @@
     "inviteHint": "Henkilö saa kutsun, jonka voi hyväksyä tai hylätä.",
     "inviteSend": "Lähetä kutsu",
     "inviteSending": "Lähetetään...",
+    "addMemberTitle": "Lisää jäsen",
+    "addMemberSearchLabel": "Hae henkilön nimellä",
+    "addMember": "Lisää jäsen",
+    "addingMember": "Lisätään...",
     "members": "Jäsenet",
     "owner": "Omistaja",
     "ownerHome": "{{name}} – Koti",
@@ -76,7 +80,8 @@
     "typing": "kirjoittaa...",
     "removeMember": "Poista jäsen",
     "confirmRemoveMember": "Haluatko varmasti poistaa jäsenen {{name}} huoneesta?",
-    "memberRemoved": "Jäsen poistettu"
+    "memberRemoved": "Jäsen poistettu",
+    "addReaction": "Lisää reaktio"
   },
   "userHome": {
     "homePageTitle": "Kotisivu",

@@ -19,13 +19,19 @@ import { hashToken } from './utils/crypto.js'
 // Upload directory (relative to project root)
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads'
 
+// Build allowed origins list (web + Capacitor native apps)
+const allowedOrigins = [env.APP_URL]
+if (env.ALLOWED_ORIGINS) {
+  allowedOrigins.push(...env.ALLOWED_ORIGINS.split(',').map(s => s.trim()))
+}
+
 const app = express()
 const httpServer = createServer(app)
 
 // Socket.io setup
 const io = new Server(httpServer, {
   cors: {
-    origin: env.APP_URL,
+    origin: allowedOrigins,
     credentials: true
   }
 })
@@ -38,14 +44,14 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", env.APP_URL]
+      connectSrc: ["'self'", ...allowedOrigins]
     }
   }
 }))
 
 // CORS
 app.use(cors({
-  origin: env.APP_URL,
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -90,6 +96,34 @@ app.use('/uploads', (_req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   next()
 }, express.static(path.resolve(UPLOAD_DIR)))
+
+// Deep linking: Apple Universal Links
+app.get('/.well-known/apple-app-site-association', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  res.json({
+    applinks: {
+      apps: [],
+      details: [{
+        appIDs: [`${process.env.APPLE_TEAM_ID || 'TEAM_ID'}.eu.eulesia.app`],
+        components: [
+          { '/': '/api/v1/auth/verify/*' }
+        ]
+      }]
+    }
+  })
+})
+
+// Deep linking: Android App Links
+app.get('/.well-known/assetlinks.json', (_req, res) => {
+  res.json([{
+    relation: ['delegate_permission/common.handle_all_urls'],
+    target: {
+      namespace: 'android_app',
+      package_name: 'eu.eulesia.app',
+      sha256_cert_fingerprints: [process.env.ANDROID_CERT_FINGERPRINT || '']
+    }
+  }])
+})
 
 // Health check endpoint
 app.get('/health', async (_req, res) => {

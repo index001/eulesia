@@ -77,6 +77,13 @@
     "title": "Kieli",
     "description": "Valitse käyttöliittymän kieli"
   },
+  "theme": {
+    "title": "Teema",
+    "description": "Valitse sovelluksen ulkoasu",
+    "light": "Vaalea",
+    "dark": "Tumma",
+    "system": "Järjestelmä"
+  },
   "aboutEulesia": "Tietoa Eulesiasta",
   "aboutDesc": "Hallinto, säätiö, avoin lähdekoodi",
   "signOut": "Kirjaudu ulos",
@@ -109,5 +116,42 @@
   "sanctions": {
     "active": "Aktiiviset sanktiot",
     "expiresAt": "Päättyy {{date}}"
+  },
+  "institutions": {
+    "title": "Hallinnoimani instituutiot",
+    "myInstitutions": "Hallinnoimani tilit",
+    "noInstitutions": "Et hallinnoi vielä yhtään instituutiota.",
+    "claim": "Hae hallintaoikeutta",
+    "claimDesc": "Hae oikeutta hallinnoida kuntasi tai instituutiosi virallista tiliä Eulesiassa.",
+    "browse": "Selaa vapaita instituutioita",
+    "available": "Haettavissa olevat instituutiot",
+    "noAvailable": "Ei vapaita instituutiotilejä tällä hetkellä.",
+    "claimButton": "Hae hallintaa",
+    "pendingClaim": "Hakemus lähetetty",
+    "approved": "Hyväksytty",
+    "rejected": "Hylätty",
+    "pending": "Odottaa hyväksyntää",
+    "roleOwner": "Omistaja",
+    "roleEditor": "Muokkaaja",
+    "municipality": "Kunta",
+    "agency": "Virasto",
+    "ministry": "Ministeriö",
+    "organization": "Organisaatio",
+    "claimSent": "Hallintahakemus lähetetty! Ylläpitäjä käsittelee hakemuksesi.",
+    "claimError": "Hakemuksen lähettäminen epäonnistui",
+    "createOrg": "Luo organisaatio",
+    "createOrgDesc": "Luo yrityksellesi tai organisaatiollesi profiili Eulesiaan.",
+    "orgName": "Organisaation nimi",
+    "orgOfficialName": "Virallinen nimi",
+    "businessId": "Y-tunnus",
+    "businessIdPlaceholder": "1234567-8",
+    "businessIdCountry": "Maa",
+    "websiteUrl": "Verkkosivut",
+    "orgDescription": "Kuvaus",
+    "orgDescPlaceholder": "Lyhyt kuvaus organisaatiostasi",
+    "createOrgButton": "Luo organisaatio",
+    "orgCreated": "Organisaatio luotu! Ylläpitäjä vahvistaa tilin.",
+    "orgCreateError": "Organisaation luominen epäonnistui",
+    "businessIdInvalid": "Virheellinen y-tunnus"
   }
 }

@@ -67,6 +67,19 @@
     "locationPlaceholder": "Search municipality, city or village...",
     "tags": "Topics",
     "customTag": "other...",
+    "scopeLabel": "What level of discussion?",
+    "locationLabel": "Location",
+    "countryLabel": "Country",
+    "tagsLabel": "Topics (optional)",
+    "cancel": "Cancel",
+    "validationRequired": "Title and content are required",
+    "validationTitleMin": "Title must be at least 5 characters",
+    "validationContentMin": "Content must be at least 10 characters",
+    "validationLocation": "Select a location for local discussions",
+    "createError": "Failed to create discussion. Please try again.",
+    "nationalInfo": "Visible nationwide",
+    "europeanInfo": "Europe-wide discussion",
+    "loading": "Loading...",
     "publish": "Publish",
     "publishing": "Publishing...",
     "preview": "Preview",
@@ -117,7 +130,19 @@
   "topics": {
     "title": "Topics",
     "subtitle": "Browse and follow interesting topics. Followed topics appear in your feed.",
-    "otherTopics": "Other topics"
+    "otherTopics": "Other topics",
+    "categories": {
+      "economy": "Economy & taxation",
+      "health": "Health & wellbeing",
+      "education": "Education & science",
+      "environment": "Environment & climate",
+      "transport": "Transport & infrastructure",
+      "security": "Security & justice",
+      "work": "Work & industry",
+      "culture": "Culture & society",
+      "eu": "EU & international",
+      "municipal": "Municipal politics"
+    }
   },
   "tag": {
     "threads": "discussions",

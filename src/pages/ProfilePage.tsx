@@ -1,25 +1,35 @@
 import { useState, useEffect, useRef } from 'react'
-import { Shield, Bell, Eye, Database, LogOut, ChevronRight, Info, ExternalLink, Ticket, Plus, Copy, Check, Trash2, Users, Camera, Loader2, Globe, HelpCircle, AlertTriangle } from 'lucide-react'
+import { Shield, Bell, Eye, Database, LogOut, ChevronRight, Info, ExternalLink, Ticket, Plus, Copy, Check, Trash2, Users, Camera, Loader2, Globe, HelpCircle, AlertTriangle, Building2, CheckCircle, Clock, X, Sun, Moon, Monitor } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { LanguageSwitcher } from '../components/common/LanguageSwitcher'
 import { AppealButton } from '../components/common/AppealButton'
 import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../hooks/useTheme'
 import { useMySanctions } from '../hooks/useAdminApi'
 import { useGuide } from '../hooks/useGuide'
-import { useUpdateProfile, useExportData, useDeleteAccount } from '../hooks/useApi'
+import { useUpdateProfile, useExportData, useDeleteAccount, useMyInstitutions, useAvailableInstitutions, useClaimInstitution, useCreateOrganization } from '../hooks/useApi'
 import { guides } from '../data/guides'
 import { api, type InviteCode, type InvitedUser } from '../lib/api'
 
 export function ProfilePage() {
   const { t } = useTranslation(['profile', 'common', 'auth'])
   const { currentUser, logout, refreshUser } = useAuth()
+  const { theme, setTheme } = useTheme()
   const { data: mySanctions } = useMySanctions()
   const navigate = useNavigate()
   const updateProfileMutation = useUpdateProfile()
   const exportDataMutation = useExportData()
   const deleteAccountMutation = useDeleteAccount()
+  const { data: myInstitutions } = useMyInstitutions()
+  const [showAvailableInstitutions, setShowAvailableInstitutions] = useState(false)
+  const { data: availableInstitutions } = useAvailableInstitutions()
+  const claimInstitutionMutation = useClaimInstitution()
+  const createOrgMutation = useCreateOrganization()
+  const [showCreateOrg, setShowCreateOrg] = useState(false)
+  const [orgForm, setOrgForm] = useState({ name: '', institutionName: '', businessId: '', businessIdCountry: 'FI', websiteUrl: '', description: '' })
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const { startGuide, hasCompletedGuide, resetAllGuides } = useGuide()
@@ -211,6 +221,7 @@ export function ProfilePage() {
 
   return (
     <Layout>
+      <SEOHead title={t('profile:title')} path="/profile" noIndex />
       {/* Active sanctions */}
       {mySanctions && mySanctions.length > 0 && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-4">
@@ -331,6 +342,222 @@ export function ProfilePage() {
                   : t('identity.upgradeInfo')}
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Institution Management */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-purple-600" />
+              {t('institutions.title')}
+            </h2>
+          </div>
+          <div className="p-4 space-y-4">
+            {/* My managed institutions */}
+            {myInstitutions && myInstitutions.length > 0 ? (
+              <div className="space-y-2">
+                {myInstitutions.map(mgr => (
+                  <div key={mgr.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{mgr.institution.institutionName || mgr.institution.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {t(`institutions.${mgr.institution.institutionType}`)} · {t(`institutions.role${mgr.role === 'owner' ? 'Owner' : 'Editor'}`)}
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      {mgr.status === 'approved' && (
+                        <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
+                          <CheckCircle className="w-3 h-3" />
+                          {t('institutions.approved')}
+                        </span>
+                      )}
+                      {mgr.status === 'pending' && (
+                        <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded-full">
+                          <Clock className="w-3 h-3" />
+                          {t('institutions.pending')}
+                        </span>
+                      )}
+                      {mgr.status === 'rejected' && (
+                        <span className="inline-flex items-center gap-1 text-xs text-red-700 bg-red-50 px-2 py-1 rounded-full">
+                          <X className="w-3 h-3" />
+                          {t('institutions.rejected')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">{t('institutions.noInstitutions')}</p>
+            )}
+
+            {/* Claim an institution */}
+            <div className="pt-3 border-t border-gray-200">
+              <p className="text-sm text-gray-600 mb-3">{t('institutions.claimDesc')}</p>
+              <button
+                onClick={() => setShowAvailableInstitutions(!showAvailableInstitutions)}
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              >
+                {t('institutions.browse')}
+              </button>
+            </div>
+
+            {/* Available institutions list */}
+            {showAvailableInstitutions && (
+              <div className="space-y-2">
+                {claimInstitutionMutation.isSuccess && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                    {t('institutions.claimSent')}
+                  </div>
+                )}
+                {claimInstitutionMutation.isError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                    {t('institutions.claimError')}
+                  </div>
+                )}
+                {availableInstitutions && availableInstitutions.length > 0 ? (
+                  availableInstitutions.map(inst => (
+                    <div key={inst.id} className="flex items-center justify-between p-3 rounded-lg border border-purple-200 bg-purple-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{inst.institutionName || inst.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {t(`institutions.${inst.institutionType}`)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => claimInstitutionMutation.mutate({ institutionId: inst.id })}
+                        disabled={claimInstitutionMutation.isPending}
+                        className="px-3 py-1.5 bg-purple-600 text-white text-xs rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                      >
+                        {claimInstitutionMutation.isPending ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          t('institutions.claimButton')
+                        )}
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">{t('institutions.noAvailable')}</p>
+                )}
+              </div>
+            )}
+
+            {/* Create Organization */}
+            <div className="pt-3 border-t border-gray-200">
+              <p className="text-sm text-gray-600 mb-3">{t('institutions.createOrgDesc')}</p>
+              <button
+                onClick={() => setShowCreateOrg(!showCreateOrg)}
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              >
+                {t('institutions.createOrg')}
+              </button>
+            </div>
+
+            {showCreateOrg && (
+              <div className="space-y-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                {createOrgMutation.isSuccess && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                    {t('institutions.orgCreated')}
+                  </div>
+                )}
+                {createOrgMutation.isError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                    {t('institutions.orgCreateError')}
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.orgName')}</label>
+                  <input
+                    type="text"
+                    value={orgForm.name}
+                    onChange={e => setOrgForm(f => ({ ...f, name: e.target.value }))}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="Acme Oy"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.orgOfficialName')}</label>
+                  <input
+                    type="text"
+                    value={orgForm.institutionName}
+                    onChange={e => setOrgForm(f => ({ ...f, institutionName: e.target.value }))}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="Acme Oyj"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.businessId')}</label>
+                    <input
+                      type="text"
+                      value={orgForm.businessId}
+                      onChange={e => setOrgForm(f => ({ ...f, businessId: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      placeholder={t('institutions.businessIdPlaceholder')}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.businessIdCountry')}</label>
+                    <select
+                      value={orgForm.businessIdCountry}
+                      onChange={e => setOrgForm(f => ({ ...f, businessIdCountry: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    >
+                      <option value="FI">FI</option>
+                      <option value="SE">SE</option>
+                      <option value="EE">EE</option>
+                      <option value="DE">DE</option>
+                      <option value="FR">FR</option>
+                      <option value="NL">NL</option>
+                      <option value="IT">IT</option>
+                      <option value="ES">ES</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.websiteUrl')}</label>
+                  <input
+                    type="url"
+                    value={orgForm.websiteUrl}
+                    onChange={e => setOrgForm(f => ({ ...f, websiteUrl: e.target.value }))}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="https://example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.orgDescription')}</label>
+                  <textarea
+                    value={orgForm.description}
+                    onChange={e => setOrgForm(f => ({ ...f, description: e.target.value }))}
+                    rows={2}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    placeholder={t('institutions.orgDescPlaceholder')}
+                  />
+                </div>
+                <button
+                  onClick={() => createOrgMutation.mutate({
+                    name: orgForm.name,
+                    institutionName: orgForm.institutionName || orgForm.name,
+                    businessId: orgForm.businessId || undefined,
+                    businessIdCountry: orgForm.businessId ? orgForm.businessIdCountry : undefined,
+                    websiteUrl: orgForm.websiteUrl || undefined,
+                    description: orgForm.description || undefined
+                  })}
+                  disabled={createOrgMutation.isPending || !orgForm.name.trim()}
+                  className="w-full py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {createOrgMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {t('institutions.createOrgButton')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -604,16 +831,49 @@ export function ProfilePage() {
         </div>
 
         {/* Language */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <Globe className="w-4 h-4 text-blue-600" />
               {t('language.title')}
             </h2>
           </div>
           <div className="p-4">
-            <p className="text-sm text-gray-600 mb-3">{t('language.description')}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{t('language.description')}</p>
             <LanguageSwitcher />
+          </div>
+        </div>
+
+        {/* Theme */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Sun className="w-4 h-4 text-blue-600" />
+              {t('theme.title')}
+            </h2>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{t('theme.description')}</p>
+            <div className="flex gap-2">
+              {([
+                { value: 'light' as const, icon: Sun, label: t('theme.light') },
+                { value: 'dark' as const, icon: Moon, label: t('theme.dark') },
+                { value: 'system' as const, icon: Monitor, label: t('theme.system') },
+              ]).map(({ value, icon: Icon, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setTheme(value)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    theme === value
+                      ? 'bg-blue-800 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

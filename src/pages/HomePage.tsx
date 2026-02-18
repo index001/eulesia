@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Home, Plus, Lock, Globe, MessageSquare, Users, Settings, ChevronRight, BookOpen, Activity } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ContentEndMarker } from '../components/common'
 import { useHome, useCreateRoom, useInvitations, useAcceptInvitation, useDeclineInvitation } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
@@ -76,6 +77,7 @@ export function HomePage() {
 
   return (
     <Layout>
+      <SEOHead title={t('greeting', { name: currentUser?.name })} description={t('subtitle')} path="/home" noIndex />
       {/* Header */}
       <div className="bg-gradient-to-r from-teal-700 to-teal-600 px-4 py-5" data-guide="home-header">
         <div className="flex items-center justify-between">

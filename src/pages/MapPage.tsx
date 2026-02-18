@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout/Layout'
+import { SEOHead } from '../components/SEOHead'
 import { EulesiaMap, LocationDetails } from '../components/map'
 import { useGuide } from '../hooks/useGuide'
 import type { MapPoint } from '../lib/api'
@@ -32,6 +33,7 @@ export function MapPage() {
 
   return (
     <Layout fullWidth showFooter={false}>
+      <SEOHead title="Kartta" path="/map" noIndex />
       <div className="fixed inset-0 top-14 bottom-16" data-guide="map-header">
         <EulesiaMap
           filters={filters}

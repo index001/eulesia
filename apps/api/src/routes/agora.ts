@@ -994,7 +994,7 @@ router.patch('/threads/:id', authMiddleware, asyncHandler(async (req: Authentica
     editedBy: userId,
     previousContent: thread.content,
     previousContentHtml: thread.contentHtml,
-    previousTitle: data.title && data.title !== thread.title ? thread.title : null
+    previousTitle: thread.title
   })
 
   // Render new markdown

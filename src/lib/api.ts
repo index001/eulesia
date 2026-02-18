@@ -204,6 +204,13 @@ class ApiClient {
     return this.request(`/home/rooms/${roomId}/messages/${messageId}`, { method: 'DELETE' })
   }
 
+  async toggleMessageReaction(roomId: string, messageId: string, emoji: string): Promise<{ action: 'added' | 'removed' }> {
+    return this.request(`/home/rooms/${roomId}/messages/${messageId}/reactions`, {
+      method: 'POST',
+      body: JSON.stringify({ emoji })
+    })
+  }
+
   async editDirectMessage(conversationId: string, messageId: string, content: string): Promise<DirectMessage> {
     return this.request(`/dm/${conversationId}/messages/${messageId}`, {
       method: 'PATCH',
@@ -233,6 +240,7 @@ class ApiClient {
     if (params?.search) searchParams.set('search', params.search)
     if (params?.page) searchParams.set('page', params.page.toString())
     if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.membership) searchParams.set('membership', params.membership)
 
     const query = searchParams.toString()
     return this.request(`/clubs${query ? `?${query}` : ''}`)
@@ -313,6 +321,20 @@ class ApiClient {
     await this.request(`/clubs/${clubId}/threads/${threadId}/comments/${commentId}`, { method: 'DELETE' })
   }
 
+  async voteClubThread(clubId: string, threadId: string, value: number): Promise<{ threadId: string; score: number; userVote: number }> {
+    return this.request(`/clubs/${clubId}/threads/${threadId}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ value })
+    })
+  }
+
+  async voteClubComment(clubId: string, threadId: string, commentId: string, value: number): Promise<{ commentId: string; score: number; userVote: number }> {
+    return this.request(`/clubs/${clubId}/threads/${threadId}/comments/${commentId}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ value })
+    })
+  }
+
   // Home
   async getHome(userId: string): Promise<HomeData> {
     return this.request(`/home/${userId}`)
@@ -366,8 +388,15 @@ class ApiClient {
     await this.request(`/home/invitations/${invitationId}/decline`, { method: 'POST' })
   }
 
-  async leaveRoom(roomId: string): Promise<void> {
-    await this.request(`/home/rooms/${roomId}/members/me`, { method: 'DELETE' })
+  async leaveRoom(roomId: string, userId: string): Promise<void> {
+    await this.request(`/home/rooms/${roomId}/members/${userId}`, { method: 'DELETE' })
+  }
+
+  async addRoomMember(roomId: string, userId: string): Promise<{ userId: string; name: string }> {
+    return this.request(`/home/rooms/${roomId}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ userId })
+    })
   }
 
   async removeRoomMember(roomId: string, memberId: string): Promise<void> {
@@ -811,6 +840,46 @@ class ApiClient {
       method: 'DELETE'
     })
   }
+
+  // ─── Institution Management ────────────────────────────────
+
+  async getMyInstitutions(): Promise<InstitutionManager[]> {
+    return this.request('/institutions/my')
+  }
+
+  async getAvailableInstitutions(): Promise<AvailableInstitution[]> {
+    return this.request('/institutions/available')
+  }
+
+  async claimInstitution(institutionId: string, role: 'owner' | 'editor' = 'owner'): Promise<InstitutionClaim> {
+    return this.request(`/institutions/${institutionId}/claim`, {
+      method: 'POST',
+      body: JSON.stringify({ role })
+    })
+  }
+
+  async checkInstitutionAccess(institutionId: string): Promise<{ canManage: boolean; role: string | null }> {
+    return this.request(`/institutions/${institutionId}/check`)
+  }
+
+  async createOrganization(data: CreateOrganizationData): Promise<CreatedOrganization> {
+    return this.request('/institutions/create', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  // Admin: institution claims
+  async getInstitutionClaims(): Promise<InstitutionClaimWithUser[]> {
+    return this.request('/institutions/claims')
+  }
+
+  async updateInstitutionClaim(claimId: string, status: 'approved' | 'rejected'): Promise<{ status: string }> {
+    return this.request(`/institutions/claims/${claimId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    })
+  }
 }
 
 // Types
@@ -948,6 +1017,8 @@ export interface ClubThread {
   isPinned: boolean
   isLocked: boolean
   replyCount: number
+  score?: number
+  userVote?: number
   createdAt: string
   updatedAt: string
 }
@@ -980,6 +1051,12 @@ export interface RoomWithMessages extends Room {
   canPost: boolean
 }
 
+export interface MessageReaction {
+  emoji: string
+  count: number
+  users: string[]
+}
+
 export interface RoomMessage {
   id: string
   content: string
@@ -988,6 +1065,7 @@ export interface RoomMessage {
   editedAt?: string | null
   editedBy?: string | null
   isHidden?: boolean
+  reactions?: MessageReaction[]
   createdAt: string
   updatedAt: string
 }
@@ -1093,6 +1171,7 @@ export interface ClubFilters {
   search?: string
   page?: number
   limit?: number
+  membership?: 'mine'
 }
 
 // Create types
@@ -1370,6 +1449,15 @@ export interface SearchLocationResult {
   parentName?: string
 }
 
+export interface SearchClubResult {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  category?: string
+  memberCount: number
+}
+
 export interface SearchResults {
   users: SearchUserResult[]
   threads: SearchThreadResult[]
@@ -1377,6 +1465,7 @@ export interface SearchResults {
   municipalities: SearchMunicipalityResult[]
   locations: SearchLocationResult[]
   tags: SearchTagResult[]
+  clubs: SearchClubResult[]
   query: string
   processingTimeMs: number
 }
@@ -1613,6 +1702,79 @@ export interface SystemAnnouncement {
 export interface AdminAnnouncement extends SystemAnnouncement {
   active: boolean
   createdByName: string | null
+}
+
+// Institution management types
+export interface InstitutionManager {
+  id: string
+  role: 'owner' | 'editor'
+  status: 'pending' | 'approved' | 'rejected'
+  createdAt: string
+  approvedAt: string | null
+  institution: {
+    id: string
+    name: string
+    username: string
+    institutionType: 'municipality' | 'agency' | 'ministry'
+    institutionName: string
+    avatarUrl: string | null
+    municipalityId: string | null
+  }
+}
+
+export interface AvailableInstitution {
+  id: string
+  name: string
+  institutionType: 'municipality' | 'agency' | 'ministry'
+  institutionName: string
+  municipalityId: string | null
+  identityProvider: string
+}
+
+export interface InstitutionClaim {
+  id: string
+  institutionId: string
+  userId: string
+  role: 'owner' | 'editor'
+  status: 'pending' | 'approved' | 'rejected'
+  createdAt: string
+}
+
+export interface InstitutionClaimWithUser {
+  id: string
+  role: 'owner' | 'editor'
+  status: 'pending'
+  createdAt: string
+  institution: {
+    id: string
+    name: string
+    institutionName: string
+    institutionType: string
+  }
+  user: {
+    id: string
+    name: string
+    email: string
+  }
+}
+
+export interface CreateOrganizationData {
+  name: string
+  institutionName: string
+  businessId?: string
+  businessIdCountry?: string
+  websiteUrl?: string
+  description?: string
+  institutionType?: 'organization' | 'agency'
+}
+
+export interface CreatedOrganization {
+  id: string
+  name: string
+  username: string
+  institutionType: string
+  institutionName: string
+  businessId: string | null
 }
 
 // Export singleton instance

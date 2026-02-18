@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Search, Plus, X, Globe, Lock, Image as ImageIcon, Loader2, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { ClubCard } from '../components/clubs'
 import { ContentEndMarker, LocationSearch } from '../components/common'
 import { useClubs, useClubCategories, useCreateClub } from '../hooks/useApi'
@@ -54,6 +55,7 @@ export function ClubsPage() {
     category: selectedCategory || undefined,
     search: searchQuery || undefined
   })
+  const { data: myClubsData } = useClubs({ membership: 'mine' })
 
   const categories = useMemo(() => {
     return categoriesData?.map(c => c.category) || []
@@ -63,6 +65,11 @@ export function ClubsPage() {
     if (!clubsData?.items) return []
     return clubsData.items.map(transformClub)
   }, [clubsData])
+
+  const myClubs = useMemo(() => {
+    if (!myClubsData?.items) return []
+    return myClubsData.items.map(transformClub)
+  }, [myClubsData])
 
   const generateSlug = (name: string) => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -141,6 +148,7 @@ export function ClubsPage() {
 
   return (
     <Layout>
+      <SEOHead title={t('title')} description={t('subtitle')} path="/clubs" noIndex />
       {/* Page header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200" data-guide="clubs-header">
         <div className="flex items-start justify-between">
@@ -166,14 +174,14 @@ export function ClubsPage() {
       {/* Create Club Modal */}
       {showCreateForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white rounded-t-xl z-10">
+          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90dvh] flex flex-col">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
               <h3 className="font-semibold text-gray-900">{t('create.title')}</h3>
               <button onClick={() => { setShowCreateForm(false); resetForm() }} className="p-1 hover:bg-gray-100 rounded">
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            <form onSubmit={handleCreateClub} className="p-4 space-y-4">
+            <form id="create-club-form" onSubmit={handleCreateClub} className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.name')} *</label>
@@ -351,24 +359,25 @@ export function ClubsPage() {
                 )}
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => { setShowCreateForm(false); resetForm() }}
-                  className="flex-1 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  {t('common:actions.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={createClubMutation.isPending || !newClubName.trim() || generateSlug(newClubName.trim()).length < 3}
-                  className="flex-1 bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {createClubMutation.isPending ? t('create.creating') : t('create.create')}
-                </button>
-              </div>
             </form>
+            {/* Actions - fixed footer always visible on mobile */}
+            <div className="flex gap-2 p-4 border-t border-gray-200 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => { setShowCreateForm(false); resetForm() }}
+                className="flex-1 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                {t('common:actions.cancel')}
+              </button>
+              <button
+                type="submit"
+                form="create-club-form"
+                disabled={createClubMutation.isPending || !newClubName.trim() || generateSlug(newClubName.trim()).length < 3}
+                className="flex-1 bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {createClubMutation.isPending ? t('create.creating') : t('create.create')}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -414,6 +423,31 @@ export function ClubsPage() {
           ))}
         </div>
       </div>
+
+      {/* My Clubs section */}
+      {myClubs.length > 0 && !searchQuery && !selectedCategory && (
+        <div className="px-4 pt-4 pb-2">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('myClubs')}</h2>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+            {myClubs.map(club => (
+              <button
+                key={club.id}
+                onClick={() => navigate(`/clubs/${club.id}`)}
+                className="flex-shrink-0 w-28 text-center"
+              >
+                {club.coverImageUrl ? (
+                  <img src={club.coverImageUrl} alt="" className="w-16 h-16 rounded-xl object-cover mx-auto" />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 mx-auto flex items-center justify-center text-white font-bold text-lg">
+                    {club.name.charAt(0)}
+                  </div>
+                )}
+                <div className="mt-1.5 text-xs font-medium text-gray-900 truncate">{club.name}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Club list */}
       <div className="px-4 py-4">

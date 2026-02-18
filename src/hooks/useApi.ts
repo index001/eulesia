@@ -60,7 +60,12 @@ export const queryKeys = {
   linkPreview: (url: string) => ['linkPreview', url] as const,
 
   // System announcements
-  announcements: ['announcements'] as const
+  announcements: ['announcements'] as const,
+
+  // Institutions
+  myInstitutions: ['myInstitutions'] as const,
+  availableInstitutions: ['availableInstitutions'] as const,
+  institutionClaims: ['institutionClaims'] as const
 }
 
 // Auth hooks
@@ -278,6 +283,18 @@ export function useDeleteRoomMessage(roomId: string) {
 
   return useMutation({
     mutationFn: (messageId: string) => api.deleteRoomMessage(roomId, messageId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.room(roomId) })
+    }
+  })
+}
+
+export function useToggleMessageReaction(roomId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ messageId, emoji }: { messageId: string; emoji: string }) =>
+      api.toggleMessageReaction(roomId, messageId, emoji),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.room(roomId) })
     }
@@ -530,6 +547,65 @@ export function useDeleteClubComment(clubId: string, threadId: string) {
   })
 }
 
+export function useVoteClubThread(clubId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ threadId, value }: { threadId: string; value: number }) =>
+      api.voteClubThread(clubId, threadId, value),
+    onSuccess: (data) => {
+      // Update club cache (thread list)
+      queryClient.setQueryData(
+        queryKeys.club(clubId),
+        (old: any) => {
+          if (!old) return old
+          return {
+            ...old,
+            threads: old.threads.map((t: any) =>
+              t.id === data.threadId
+                ? { ...t, score: data.score, userVote: data.userVote }
+                : t
+            )
+          }
+        }
+      )
+      // Update individual thread cache
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.clubThread(clubId, data.threadId), exact: false },
+        (old: any) => {
+          if (!old) return old
+          return { ...old, score: data.score, userVote: data.userVote }
+        }
+      )
+    }
+  })
+}
+
+export function useVoteClubComment(clubId: string, threadId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ commentId, value }: { commentId: string; value: number }) =>
+      api.voteClubComment(clubId, threadId, commentId, value),
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        queryKeys.clubThread(clubId, threadId),
+        (old: any) => {
+          if (!old) return old
+          return {
+            ...old,
+            comments: old.comments.map((c: any) =>
+              c.id === data.commentId
+                ? { ...c, score: data.score, userVote: data.userVote }
+                : c
+            )
+          }
+        }
+      )
+    }
+  })
+}
+
 // Home hooks
 export function useHome(userId: string) {
   return useQuery({
@@ -604,6 +680,17 @@ export function useInviteToRoom(roomId: string) {
 
   return useMutation({
     mutationFn: (userId: string) => api.inviteToRoom(roomId, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.room(roomId) })
+    }
+  })
+}
+
+export function useAddRoomMember(roomId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (userId: string) => api.addRoomMember(roomId, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.room(roomId) })
     }
@@ -919,5 +1006,68 @@ export function useAnnouncements() {
     queryFn: () => api.getAnnouncements(),
     staleTime: 60_000, // 1 min
     refetchInterval: 5 * 60_000 // poll every 5 min
+  })
+}
+
+// Institution management hooks
+export function useMyInstitutions() {
+  const { isAuthenticated } = useAuth()
+  return useQuery({
+    queryKey: queryKeys.myInstitutions,
+    queryFn: () => api.getMyInstitutions(),
+    enabled: isAuthenticated
+  })
+}
+
+export function useAvailableInstitutions() {
+  const { isAuthenticated } = useAuth()
+  return useQuery({
+    queryKey: queryKeys.availableInstitutions,
+    queryFn: () => api.getAvailableInstitutions(),
+    enabled: isAuthenticated
+  })
+}
+
+export function useClaimInstitution() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ institutionId, role }: { institutionId: string; role?: 'owner' | 'editor' }) =>
+      api.claimInstitution(institutionId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.myInstitutions })
+      queryClient.invalidateQueries({ queryKey: queryKeys.availableInstitutions })
+    }
+  })
+}
+
+export function useInstitutionClaims() {
+  return useQuery({
+    queryKey: queryKeys.institutionClaims,
+    queryFn: () => api.getInstitutionClaims()
+  })
+}
+
+export function useUpdateInstitutionClaim() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ claimId, status }: { claimId: string; status: 'approved' | 'rejected' }) =>
+      api.updateInstitutionClaim(claimId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.institutionClaims })
+    }
+  })
+}
+
+export function useCreateOrganization() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: Parameters<typeof api.createOrganization>[0]) =>
+      api.createOrganization(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.myInstitutions })
+    }
   })
 }

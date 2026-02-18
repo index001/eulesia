@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm'
 
 // Enums
 export const userRoleEnum = pgEnum('user_role', ['citizen', 'institution', 'admin'])
-export const institutionTypeEnum = pgEnum('institution_type', ['municipality', 'agency', 'ministry'])
+export const institutionTypeEnum = pgEnum('institution_type', ['municipality', 'agency', 'ministry', 'organization'])
 export const identityLevelEnum = pgEnum('identity_level', ['basic', 'substantial', 'high'])
 export const scopeEnum = pgEnum('scope', ['local', 'national', 'european'])
 export const clubMemberRoleEnum = pgEnum('club_member_role', ['member', 'moderator', 'admin'])
@@ -15,6 +15,8 @@ export const inviteCodeStatusEnum = pgEnum('invite_code_status', ['available', '
 export const threadSourceEnum = pgEnum('thread_source', ['user', 'minutes_import', 'rss_import'])
 export const locationTypeEnum = pgEnum('location_type', ['country', 'region', 'municipality', 'village', 'district'])
 export const subscriptionNotifyEnum = pgEnum('subscription_notify', ['all', 'none', 'highlights'])
+export const institutionManagerRoleEnum = pgEnum('institution_manager_role', ['owner', 'editor'])
+export const institutionClaimStatusEnum = pgEnum('institution_claim_status', ['pending', 'approved', 'rejected'])
 
 // Moderation enums (DSA)
 export const reportReasonEnum = pgEnum('report_reason', ['illegal', 'harassment', 'spam', 'misinformation', 'other'])
@@ -144,6 +146,10 @@ export const users = pgTable('users', {
   role: userRoleEnum('role').default('citizen'),
   institutionType: institutionTypeEnum('institution_type'),
   institutionName: varchar('institution_name', { length: 255 }),
+  businessId: varchar('business_id', { length: 50 }),        // Y-tunnus (FI), org.nr (SE), etc.
+  businessIdCountry: varchar('business_id_country', { length: 2 }), // ISO country code
+  websiteUrl: varchar('website_url', { length: 500 }),
+  description: text('description'),
   municipalityId: uuid('municipality_id').references(() => municipalities.id),
 
   // Invite system
@@ -375,6 +381,7 @@ export const clubThreads = pgTable('club_threads', {
   isPinned: boolean('is_pinned').default(false),
   isLocked: boolean('is_locked').default(false),
   replyCount: integer('reply_count').default(0),
+  score: integer('score').default(0),
   isHidden: boolean('is_hidden').default(false),
   language: varchar('language', { length: 10 }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -392,11 +399,34 @@ export const clubComments = pgTable('club_comments', {
   authorId: uuid('author_id').notNull().references(() => users.id),
   content: text('content').notNull(),
   contentHtml: text('content_html'),
+  score: integer('score').default(0),
   isHidden: boolean('is_hidden').default(false),
   language: varchar('language', { length: 10 }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 })
+
+// Club Thread Votes
+export const clubThreadVotes = pgTable('club_thread_votes', {
+  threadId: uuid('thread_id').notNull().references(() => clubThreads.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  value: integer('value').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  pk: primaryKey({ columns: [table.threadId, table.userId] }),
+  threadIdx: index('club_thread_votes_thread_idx').on(table.threadId)
+}))
+
+// Club Comment Votes
+export const clubCommentVotes = pgTable('club_comment_votes', {
+  commentId: uuid('comment_id').notNull().references(() => clubComments.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  value: integer('value').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  pk: primaryKey({ columns: [table.commentId, table.userId] }),
+  commentIdx: index('club_comment_votes_comment_idx').on(table.commentId)
+}))
 
 // Home Rooms (User's personal spaces)
 export const rooms = pgTable('rooms', {
@@ -440,6 +470,18 @@ export const roomMessages = pgTable('room_messages', {
 }, (table) => ({
   roomIdx: index('room_messages_room_idx').on(table.roomId),
   createdIdx: index('room_messages_created_idx').on(table.createdAt)
+}))
+
+// Message Reactions
+export const messageReactions = pgTable('message_reactions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  messageId: uuid('message_id').notNull().references(() => roomMessages.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  emoji: varchar('emoji', { length: 20 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  messageIdx: index('message_reactions_message_idx').on(table.messageId),
+  uniqueReaction: index('message_reactions_unique_idx').on(table.messageId, table.userId, table.emoji)
 }))
 
 // Room Invitations
@@ -489,6 +531,22 @@ export const institutionTopics = pgTable('institution_topics', {
   description: text('description')
 }, (table) => ({
   topicTagIdx: index('institution_topics_topic_tag_idx').on(table.topicTag)
+}))
+
+// Institution Managers — links human users to institution accounts they manage
+export const institutionManagers = pgTable('institution_managers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  institutionId: uuid('institution_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: institutionManagerRoleEnum('role').notNull().default('editor'),
+  status: institutionClaimStatusEnum('status').notNull().default('pending'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  approvedBy: uuid('approved_by').references(() => users.id)
+}, (table) => ({
+  institutionIdx: index('institution_managers_institution_idx').on(table.institutionId),
+  userIdx: index('institution_managers_user_idx').on(table.userId),
+  uniqueManager: index('institution_managers_unique_idx').on(table.institutionId, table.userId)
 }))
 
 // Tag Categories — optional metadata for tags: category, display name, description
@@ -680,6 +738,24 @@ export const institutionTopicsRelations = relations(institutionTopics, ({ one })
   institution: one(users, {
     fields: [institutionTopics.institutionId],
     references: [users.id]
+  })
+}))
+
+export const institutionManagersRelations = relations(institutionManagers, ({ one }) => ({
+  institution: one(users, {
+    fields: [institutionManagers.institutionId],
+    references: [users.id],
+    relationName: 'managedInstitution'
+  }),
+  user: one(users, {
+    fields: [institutionManagers.userId],
+    references: [users.id],
+    relationName: 'institutionManager'
+  }),
+  approver: one(users, {
+    fields: [institutionManagers.approvedBy],
+    references: [users.id],
+    relationName: 'claimApprover'
   })
 }))
 

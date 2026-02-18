@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, X, User, MessageSquare, MapPin, Building2, Hash, Loader2 } from 'lucide-react'
+import { Search, X, User, Users, MessageSquare, MapPin, Building2, Hash, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useSearch } from '../../hooks/useApi'
 import type { SearchResults } from '../../lib/api'
@@ -69,7 +69,8 @@ export function SearchBar({ className = '', placeholder, autoFocus = false, onCl
     results.places.length > 0 ||
     results.municipalities.length > 0 ||
     results.locations.length > 0 ||
-    results.tags.length > 0
+    results.tags.length > 0 ||
+    results.clubs?.length > 0
   )
 
   return (
@@ -204,6 +205,29 @@ function SearchResultsList({ results, onResultClick }: SearchResultsListProps) {
                 )}
                 <span>·</span>
                 <span>{t('search.replies', { count: thread.replyCount })}</span>
+              </div>
+            </Link>
+          ))}
+        </ResultSection>
+      )}
+
+      {/* Clubs */}
+      {results.clubs?.length > 0 && (
+        <ResultSection title={t('search.clubs')} icon={Users}>
+          {results.clubs.map(club => (
+            <Link
+              key={club.id}
+              to={`/klubit/${club.slug}`}
+              onClick={onResultClick}
+              className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors"
+            >
+              <Users className="w-5 h-5 text-purple-500" />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-gray-900">{club.name}</div>
+                <div className="text-xs text-gray-500">
+                  {club.category && `${club.category} · `}
+                  {t('search.members', { count: club.memberCount })}
+                </div>
               </div>
             </Link>
           ))}

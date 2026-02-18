@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { useQueryClient } from '@tanstack/react-query'
+import { Capacitor } from '@capacitor/core'
+import { App as CapApp } from '@capacitor/app'
 import { useAuth } from './useAuth'
 import { queryKeys } from './useApi'
 import type { RoomMessage, RoomWithMessages, DirectMessage, ConversationWithMessages } from '../lib/api'
@@ -209,9 +211,23 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     setSocket(newSocket)
 
+    // Native app lifecycle: reconnect socket on resume
+    let resumeListener: Awaited<ReturnType<typeof CapApp.addListener>> | null = null
+    if (Capacitor.isNativePlatform()) {
+      CapApp.addListener('resume', () => {
+        if (!newSocket.connected) {
+          newSocket.connect()
+        }
+        queryClient.invalidateQueries({ queryKey: queryKeys.notifications })
+        queryClient.invalidateQueries({ queryKey: queryKeys.notificationUnreadCount })
+        queryClient.invalidateQueries({ queryKey: queryKeys.dmUnreadCount })
+      }).then(l => { resumeListener = l })
+    }
+
     return () => {
       newSocket.emit('leave:user', currentUser.id)
       newSocket.disconnect()
+      resumeListener?.remove()
     }
   }, [isAuthenticated, currentUser, queryClient])
 

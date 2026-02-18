@@ -1,11 +1,16 @@
 @import "tailwindcss";
 
+/* Dark mode: class-based variant for manual toggle */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Eulesia Design System */
 :root {
   --color-civic-blue: #1e40af;
   --color-civic-teal: #0d9488;
   --color-institution: #7c3aed;
   --color-home-purple: #581c87;
+  --topbar-height: 3.5rem;
+  --topbar-total: calc(env(safe-area-inset-top, 0px) + var(--topbar-height));
 }
 
 /* Base typography - calm, legible, civic */
@@ -15,6 +20,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  @apply bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100;
 }
 
 /* Prevent infinite scroll feel - content ends */

@@ -39,6 +39,7 @@
   "newClub": "Uusi klubi",
   "noClubs": "Ei klubeja hakuehdoilla",
   "clearFilters": "Tyhjennä suodattimet",
+  "myClubs": "Omat klubit",
   "allClubsShown": "Kaikki klubit näytetty",
   "failedToLoad": "Klubien lataaminen epäonnistui",
   "members_one": "{{count}} jäsen",

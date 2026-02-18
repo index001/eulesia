@@ -26,10 +26,14 @@ function NotificationItem({
 
   return (
     <div
-      className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors ${
+      role="button"
+      tabIndex={0}
+      className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 ${
         !notification.read ? 'bg-blue-50/50' : ''
       }`}
       onClick={() => onNavigate(notification)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNavigate(notification) } }}
+      aria-label={notification.title}
     >
       <div className="flex-shrink-0 mt-0.5">
         {notification.type === 'dm' ? (
@@ -39,6 +43,10 @@ function NotificationItem({
         ) : notification.type === 'new_follower' ? (
           <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
             <UserPlus className="w-4 h-4 text-green-600" />
+          </div>
+        ) : notification.type === 'room_invite' ? (
+          <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
+            <UserPlus className="w-4 h-4 text-teal-600" />
           </div>
         ) : notification.type === 'reply' || notification.type === 'thread_reply' ? (
           <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
@@ -74,6 +82,7 @@ function NotificationItem({
           }}
           className="p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity"
           title={t('actions.delete')}
+          aria-label={t('actions.delete')}
         >
           <Trash2 className="w-3 h-3 text-gray-400" />
         </button>
@@ -123,14 +132,14 @@ export function TopBar() {
     : 'U'
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+    <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-50 pt-[env(safe-area-inset-top)]">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2 flex-shrink-0">
           <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">E</span>
           </div>
-          <span className="font-semibold text-gray-900 text-lg hidden sm:block">Eulesia</span>
+          <span className="font-semibold text-gray-900 dark:text-gray-100 text-lg hidden sm:block">Eulesia</span>
         </Link>
 
         {/* Search bar - desktop */}
@@ -143,7 +152,8 @@ export function TopBar() {
           {/* Search button - mobile */}
           <button
             onClick={() => setShowMobileSearch(true)}
-            className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            aria-label={t('search.placeholder')}
           >
             <Search className="w-5 h-5" />
           </button>
@@ -154,7 +164,9 @@ export function TopBar() {
               <div className="relative" ref={notificationRef} data-guide="notifications">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  aria-label={t('notifications.title')}
+                  aria-expanded={showNotifications}
                 >
                   <Bell className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -166,9 +178,9 @@ export function TopBar() {
 
                 {/* Notifications dropdown */}
                 {showNotifications && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
-                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">{t('notifications.title')}</h3>
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('notifications.title')}</h3>
                       <div className="flex items-center gap-1">
                         {unreadCount > 0 && (
                           <button
@@ -183,6 +195,7 @@ export function TopBar() {
                         <button
                           onClick={() => setShowNotifications(false)}
                           className="p-1 hover:bg-gray-100 rounded"
+                          aria-label={t('actions.close')}
                         >
                           <X className="w-4 h-4 text-gray-500" />
                         </button>
@@ -217,7 +230,7 @@ export function TopBar() {
               >
                 <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
                   {currentUser.avatarUrl ? (
-                    <img src={currentUser.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
+                    <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-full h-full rounded-full object-cover" />
                   ) : (
                     <span className="text-white text-xs font-medium">
                       {avatarInitials}
@@ -246,12 +259,13 @@ export function TopBar() {
 
       {/* Mobile search overlay */}
       {showMobileSearch && (
-        <div className="fixed inset-0 bg-white z-50 md:hidden">
-          <div className="p-4">
+        <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 md:hidden">
+          <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))]">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowMobileSearch(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
+                aria-label={t('actions.close')}
               >
                 <X className="w-5 h-5 text-gray-600" />
               </button>

@@ -97,7 +97,10 @@
     "municipality": "Kunta",
     "agency": "Virasto",
     "discussions_one": "{{count}} keskustelu",
-    "discussions_other": "{{count}} keskustelua"
+    "discussions_other": "{{count}} keskustelua",
+    "clubs": "Klubit",
+    "members_one": "{{count}} jäsen",
+    "members_other": "{{count}} jäsentä"
   },
   "location": {
     "searchPlaceholder": "Hae paikkaa...",
@@ -208,5 +211,8 @@
     "accept": "Selvä",
     "essentialOnly": "Vain välttämättömät",
     "learnMore": "Tietosuojaseloste"
+  },
+  "a11y": {
+    "skipToContent": "Siirry sisältöön"
   }
 }

@@ -20,7 +20,8 @@ export const INDEXES = {
   PLACES: 'places',
   MUNICIPALITIES: 'municipalities',
   LOCATIONS: 'locations',
-  TAGS: 'tags'
+  TAGS: 'tags',
+  CLUBS: 'clubs'
 } as const
 
 // Document types for each index
@@ -91,6 +92,17 @@ export interface LocationDocument {
   parentName?: string
 }
 
+export interface ClubDocument {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  category?: string
+  memberCount: number
+  isPublic: boolean
+  createdAt: string
+}
+
 export interface TagDocument {
   tag: string
   count: number
@@ -104,6 +116,7 @@ export interface SearchResults {
   municipalities: MunicipalityDocument[]
   locations: LocationDocument[]
   tags: TagDocument[]
+  clubs: ClubDocument[]
   query: string
   processingTimeMs: number
 }
@@ -164,6 +177,15 @@ export async function initializeIndexes(): Promise<void> {
   await tagsIndex.updateSettings({
     searchableAttributes: ['tag'],
     sortableAttributes: ['count'],
+    rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
+  })
+
+  // Clubs index
+  const clubsIndex = client.index(INDEXES.CLUBS)
+  await clubsIndex.updateSettings({
+    searchableAttributes: ['name', 'description', 'category'],
+    filterableAttributes: ['isPublic', 'category'],
+    sortableAttributes: ['memberCount', 'createdAt', 'name'],
     rankingRules: ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness']
   })
 
@@ -252,6 +274,21 @@ export async function indexTags(tags: TagDocument[]): Promise<void> {
 }
 
 /**
+ * Index a single club
+ */
+export async function indexClub(club: ClubDocument): Promise<void> {
+  await client.index(INDEXES.CLUBS).addDocuments([club], { primaryKey: 'id' })
+}
+
+/**
+ * Index multiple clubs
+ */
+export async function indexClubs(clubs: ClubDocument[]): Promise<void> {
+  if (clubs.length === 0) return
+  await client.index(INDEXES.CLUBS).addDocuments(clubs, { primaryKey: 'id' })
+}
+
+/**
  * Delete a document from an index
  */
 export async function deleteDocument(indexName: string, documentId: string): Promise<void> {
@@ -306,6 +343,13 @@ export async function search(query: string, options?: {
         q: query,
         limit,
         attributesToRetrieve: ['tag', 'count']
+      },
+      {
+        indexUid: INDEXES.CLUBS,
+        q: query,
+        limit,
+        filter: 'isPublic = true',
+        attributesToRetrieve: ['id', 'name', 'slug', 'description', 'category', 'memberCount']
       }
     ]
   })
@@ -319,6 +363,7 @@ export async function search(query: string, options?: {
     municipalities: results.results[3]?.hits as MunicipalityDocument[] || [],
     locations: results.results[4]?.hits as LocationDocument[] || [],
     tags: results.results[5]?.hits as TagDocument[] || [],
+    clubs: results.results[6]?.hits as ClubDocument[] || [],
     query,
     processingTimeMs
   }

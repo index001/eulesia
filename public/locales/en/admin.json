@@ -6,6 +6,7 @@
     "modlog": "Mod Log",
     "content": "Content",
     "appeals": "Appeals",
+    "institutions": "Institutions",
     "transparency": "DSA Report",
     "settings": "Settings",
     "backToApp": "Back to app"
@@ -209,6 +210,13 @@
     "hideAnnouncement": "Hide",
     "showAnnouncement": "Show",
     "deleteAnnouncement": "Delete"
+  },
+  "institutions": {
+    "title": "Institution Claims",
+    "noPending": "No pending institution claims.",
+    "requestedBy": "Requested by",
+    "approve": "Approve",
+    "reject": "Reject"
   },
   "common": {
     "cancel": "Cancel"

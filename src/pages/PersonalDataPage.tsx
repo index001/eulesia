@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { api } from '../lib/api'
 
 interface DataExport {
@@ -67,6 +68,7 @@ export function PersonalDataPage() {
 
   return (
     <Layout>
+      <SEOHead title={t('personalData.title')} path="/profile/data" noIndex />
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <Link
           to="/profile"

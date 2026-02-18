@@ -20,6 +20,9 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
 
+  // Capacitor native app origins (comma-separated)
+  ALLOWED_ORIGINS: z.string().optional(),
+
   // eIDAS (future)
   EIDAS_ENABLED: z.string().transform(v => v === 'true').default('false')
 })

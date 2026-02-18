@@ -2,16 +2,8 @@ import type { Response, NextFunction } from 'express'
 import { eq, and, gt, isNull, or, inArray } from 'drizzle-orm'
 import { db, sessions, users, userSanctions } from '../db/index.js'
 import { hashToken } from '../utils/crypto.js'
-import { env } from '../utils/env.js'
+import { getSessionCookieOptions } from '../utils/cookies.js'
 import type { AuthenticatedRequest } from '../types/index.js'
-
-const sessionCookieOptions = {
-  httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  domain: env.COOKIE_DOMAIN,
-  path: '/'
-}
 
 export async function authMiddleware(
   req: AuthenticatedRequest,
@@ -40,7 +32,7 @@ export async function authMiddleware(
       .limit(1)
 
     if (!session) {
-      res.clearCookie('session', sessionCookieOptions)
+      res.clearCookie('session', getSessionCookieOptions(req))
       res.status(401).json({ success: false, error: 'Session expired' })
       return
     }
@@ -52,7 +44,7 @@ export async function authMiddleware(
       .limit(1)
 
     if (!user) {
-      res.clearCookie('session', sessionCookieOptions)
+      res.clearCookie('session', getSessionCookieOptions(req))
       res.status(401).json({ success: false, error: 'User not found' })
       return
     }
@@ -128,7 +120,7 @@ export async function optionalAuthMiddleware(
       .limit(1)
 
     if (!session) {
-      res.clearCookie('session', sessionCookieOptions)
+      res.clearCookie('session', getSessionCookieOptions(req))
       next()
       return
     }
@@ -140,7 +132,7 @@ export async function optionalAuthMiddleware(
       .limit(1)
 
     if (!user) {
-      res.clearCookie('session', sessionCookieOptions)
+      res.clearCookie('session', getSessionCookieOptions(req))
       next()
       return
     }

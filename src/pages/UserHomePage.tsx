@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Home, Globe, Lock, MessageSquare, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
+import { SEOHead } from '../components/SEOHead'
 import { useHome } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import type { Room } from '../lib/api'
@@ -57,6 +58,7 @@ export function UserHomePage() {
 
   return (
     <Layout>
+      <SEOHead title={`${homeData.owner.name} – ${t('userHome.homePageTitle')}`} path={`/home/${userId}`} noIndex />
       {/* Header */}
       <div className="bg-gradient-to-r from-teal-700 to-teal-600 px-4 py-5">
         <div className="flex items-center gap-3">

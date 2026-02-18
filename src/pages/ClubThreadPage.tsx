@@ -7,7 +7,8 @@ import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ActorBadge, ContentEndMarker } from '../components/common'
 import { CommentThread } from '../components/agora/CommentThread'
-import { useClubThread, useAddClubComment, useUpdateClubThread, useDeleteClubThread, useDeleteClubComment, useCurrentUser } from '../hooks/useApi'
+import { useClubThread, useAddClubComment, useUpdateClubThread, useDeleteClubThread, useDeleteClubComment, useVoteClubThread, useVoteClubComment, useCurrentUser } from '../hooks/useApi'
+import { ThreadVoteButtons } from '../components/agora/ThreadVoteButtons'
 import { formatRelativeTime } from '../lib/formatTime'
 import { transformAuthor, transformComment } from '../utils/transforms'
 
@@ -33,6 +34,8 @@ export function ClubThreadPage() {
   const updateThreadMutation = useUpdateClubThread(clubId || '', threadId || '')
   const deleteThreadMutation = useDeleteClubThread(clubId || '')
   const deleteCommentMutation = useDeleteClubComment(clubId || '', threadId || '')
+  const voteThreadMutation = useVoteClubThread(clubId || '')
+  const voteCommentMutation = useVoteClubComment(clubId || '', threadId || '')
 
   const [commentContent, setCommentContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -53,8 +56,9 @@ export function ClubThreadPage() {
     }
   }
 
-  const handleVote = async (_commentId: string, _value: number) => {
-    // Club comments don't have voting yet
+  const handleVote = async (commentId: string, value: number) => {
+    if (!clubId || !threadId) return
+    voteCommentMutation.mutate({ commentId, value })
   }
 
   const handleReply = async (parentId: string, content: string) => {
@@ -183,8 +187,16 @@ export function ClubThreadPage() {
           {thread.title}
         </h1>
 
-        {/* Meta */}
+        {/* Meta + Vote */}
         <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+          <ThreadVoteButtons
+            threadId={threadId || ''}
+            score={thread.score || 0}
+            userVote={thread.userVote || 0}
+            onVote={(value) => threadId && voteThreadMutation.mutate({ threadId, value })}
+            isLoading={voteThreadMutation.isPending}
+            size="sm"
+          />
           <span>{t('clubs:published', { time: formatRelativeTime(thread.createdAt) })}</span>
         </div>
 
