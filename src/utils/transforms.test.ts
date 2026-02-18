@@ -56,7 +56,7 @@ describe('transformAuthor', () => {
       name: 'City of Helsinki',
       role: 'institution',
       identityVerified: true,
-      avatarUrl: null,
+      avatarUrl: undefined,
       institutionType: 'municipality',
       institutionName: 'Helsingin kaupunki'
     }

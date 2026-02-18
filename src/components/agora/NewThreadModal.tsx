@@ -80,7 +80,7 @@ export function NewThreadModal({
 
   // Form state
   const [scope, setScope] = useState<Scope>('local')
-  const [country, setCountry] = useState(() => getDefaultCountry(currentUser?.locale))
+  const [country, setCountry] = useState(() => getDefaultCountry(currentUser?.settings?.locale))
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -201,16 +201,16 @@ export function NewThreadModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="new-thread-title">
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          <h2 id="new-thread-title" className="text-lg font-semibold text-gray-900">{t('threadForm.collapsed')}</h2>
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+          <h2 id="new-thread-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('threadForm.collapsed')}</h2>
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
             aria-label={t('common:actions.close')}
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
@@ -226,7 +226,7 @@ export function NewThreadModal({
           {/* Scope selection - only show when not prefilled */}
           {!isPrefilled && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('threadForm.scopeLabel')}
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -237,14 +237,14 @@ export function NewThreadModal({
                     className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
                       scope === value
                         ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
                     }`}
                   >
-                    <Icon className={`w-6 h-6 mb-1 ${scope === value ? 'text-blue-600' : 'text-gray-500'}`} />
-                    <span className={`text-sm font-medium ${scope === value ? 'text-blue-700' : 'text-gray-700'}`}>
+                    <Icon className={`w-6 h-6 mb-1 ${scope === value ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'}`} />
+                    <span className={`text-sm font-medium ${scope === value ? 'text-blue-700' : 'text-gray-700 dark:text-gray-300'}`}>
                       {label}
                     </span>
-                    <span className="text-xs text-gray-500 text-center mt-0.5">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 text-center mt-0.5">
                       {description}
                     </span>
                   </button>
@@ -256,7 +256,7 @@ export function NewThreadModal({
           {/* Location field (for local and national) - only show when not prefilled */}
           {!isPrefilled && scope !== 'european' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {scope === 'local' ? t('threadForm.locationLabel') : t('threadForm.countryLabel')}
               </label>
               {scope === 'local' ? (
@@ -265,16 +265,16 @@ export function NewThreadModal({
                     <button
                       type="button"
                       onClick={() => setCountryDropdownOpen(prev => !prev)}
-                      className="flex items-center justify-between w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                      className="flex items-center justify-between w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-lg">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.flag}</span>
-                        <span className="text-gray-700">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.name}</span>
+                        <span className="text-gray-700 dark:text-gray-300">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.name}</span>
                       </div>
-                      <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {countryDropdownOpen && (
-                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                         {SUPPORTED_COUNTRIES.map(c => (
                           <button
                             key={c.code}
@@ -284,8 +284,8 @@ export function NewThreadModal({
                               setCountryDropdownOpen(false)
                               setSelectedLocation(null)
                             }}
-                            className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
-                              country === c.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                            className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                              country === c.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700 dark:text-gray-300'
                             }`}
                           >
                             <span className="text-lg">{c.flag}</span>
@@ -308,16 +308,16 @@ export function NewThreadModal({
                   <button
                     type="button"
                     onClick={() => setCountryDropdownOpen(prev => !prev)}
-                    className="flex items-center justify-between w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                    className="flex items-center justify-between w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.flag}</span>
-                      <span className="text-gray-700">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.name}</span>
+                      <span className="text-gray-700 dark:text-gray-300">{SUPPORTED_COUNTRIES.find(c => c.code === country)?.name}</span>
                     </div>
-                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {countryDropdownOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                       {SUPPORTED_COUNTRIES.map(c => (
                         <button
                           key={c.code}
@@ -326,8 +326,8 @@ export function NewThreadModal({
                             setCountry(c.code)
                             setCountryDropdownOpen(false)
                           }}
-                          className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
-                            country === c.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                            country === c.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700 dark:text-gray-300'
                           }`}
                         >
                           <span className="text-lg">{c.flag}</span>
@@ -343,7 +343,7 @@ export function NewThreadModal({
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('threadForm.title')}
             </label>
             <input
@@ -351,17 +351,17 @@ export function NewThreadModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('threadForm.collapsed')}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-800 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               maxLength={500}
             />
-            <div className="mt-1 text-xs text-gray-400 text-right">
+            <div className="mt-1 text-xs text-gray-400 dark:text-gray-500 text-right">
               {title.length}/500
             </div>
           </div>
 
           {/* Content */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('threadForm.content')}
             </label>
             <textarea
@@ -369,16 +369,16 @@ export function NewThreadModal({
               onChange={(e) => setContent(e.target.value)}
               placeholder={t('threadForm.contentPlaceholder')}
               rows={5}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-800 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             />
-            <div className="mt-1 text-xs text-gray-400">
+            <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">
               {t('threadForm.markdown')}
             </div>
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('threadForm.tagsLabel')}
             </label>
             <div className="flex flex-wrap gap-2 mb-2">
@@ -389,7 +389,7 @@ export function NewThreadModal({
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                     selectedTags.includes(tag)
                       ? 'bg-teal-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
                   <Hash className="w-3 h-3" />
@@ -405,14 +405,14 @@ export function NewThreadModal({
                 onChange={(e) => setCustomTag(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomTag())}
                 placeholder={t('threadForm.customTag')}
-                className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-3 py-1.5 border border-gray-200 dark:border-gray-800 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button
                 onClick={handleAddCustomTag}
                 disabled={!customTag.trim()}
-                className="p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+                className="p-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
               >
-                <Plus className="w-4 h-4 text-gray-600" />
+                <Plus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
             {/* Selected custom tags */}
@@ -446,10 +446,10 @@ export function NewThreadModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-100 dark:border-gray-800">
           <button
             onClick={handleClose}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors"
           >
             {t('threadForm.cancel')}
           </button>

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ActorBadge, EditedIndicator, ConfirmDeleteDialog } from '../components/common'
-import { useRoom, useSendRoomMessage, useUpdateRoom, useDeleteRoom, useInviteToRoom, useAddRoomMember, useRemoveRoomMember, useEditRoomMessage, useDeleteRoomMessage, useToggleMessageReaction } from '../hooks/useApi'
+import { useRoom, useSendRoomMessage, useUpdateRoom, useDeleteRoom, useAddRoomMember, useRemoveRoomMember, useEditRoomMessage, useDeleteRoomMessage, useToggleMessageReaction } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import { useSocket } from '../hooks/useSocket'
 import { formatRelativeTime } from '../lib/formatTime'
@@ -24,7 +24,6 @@ export function RoomPage() {
   const sendMessageMutation = useSendRoomMessage(roomId || '')
   const updateRoomMutation = useUpdateRoom(roomId || '')
   const deleteRoomMutation = useDeleteRoom()
-  const inviteToRoomMutation = useInviteToRoom(roomId || '')
   const addRoomMemberMutation = useAddRoomMember(roomId || '')
   const editMessageMutation = useEditRoomMessage(roomId || '')
   const deleteMessageMutation = useDeleteRoomMessage(roomId || '')
