@@ -90,10 +90,10 @@ export function TagPage() {
         path={`/agora/tag/${tagName}`}
       />
       {/* Back navigation */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-2">
         <button
           onClick={() => window.history.back()}
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('common:actions.back')}
@@ -101,15 +101,15 @@ export function TagPage() {
       </div>
 
       {/* Tag header */}
-      <div className="bg-gradient-to-b from-teal-50 to-white px-4 py-6">
+      <div className="bg-gradient-to-b from-teal-50 to-white dark:from-teal-900/30 dark:to-gray-900 px-4 py-3">
         <div className="flex items-start gap-3">
           <div className="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center flex-shrink-0">
             <Hash className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-gray-900">{displayName}</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{displayName}</h1>
             {description && (
-              <p className="text-sm text-gray-600 mt-1">{description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{description}</p>
             )}
             {data.tagMeta?.category && (
               <div className="flex items-center gap-1.5 mt-2">
@@ -122,12 +122,12 @@ export function TagPage() {
 
         {/* Institution link if this is an institution topic */}
         {data.institution && (
-          <div className="mt-4 p-3 bg-violet-50 border border-violet-200 rounded-lg">
+          <div className="mt-3 p-3 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-lg">
             <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-violet-600" />
+              <Building2 className="w-4 h-4 text-violet-600 dark:text-violet-400" />
               <Link
                 to={`/user/${data.institution.institutionId}`}
-                className="text-sm font-medium text-violet-700 hover:underline"
+                className="text-sm font-medium text-violet-700 dark:text-violet-400 hover:underline"
               >
                 {data.institution.institutionName}
               </Link>
@@ -138,7 +138,7 @@ export function TagPage() {
                   <Link
                     key={tag}
                     to={`/agora/tag/${encodeURIComponent(tag)}`}
-                    className="text-xs bg-violet-100 text-violet-600 px-2 py-0.5 rounded-full hover:bg-violet-200"
+                    className="text-xs bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 px-2 py-0.5 rounded-full hover:bg-violet-200 dark:hover:bg-violet-900/50"
                   >
                     {tag.replace(/-/g, ' ')}
                   </Link>
@@ -149,11 +149,11 @@ export function TagPage() {
         )}
 
         {/* Follow button */}
-        <div className="mt-4">
+        <div className="mt-2">
           <FollowButton entityType="tag" entityId={decodedTag} />
         </div>
 
-        <div className="mt-3 text-sm text-gray-500">
+        <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           {t('tag.thread', { count: data.total })}
         </div>
       </div>

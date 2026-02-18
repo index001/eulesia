@@ -147,7 +147,7 @@ export function ClubThreadPage() {
         />
       )}
       {/* Back navigation */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-2">
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
@@ -158,9 +158,9 @@ export function ClubThreadPage() {
       </div>
 
       {/* Thread header */}
-      <div className="px-4 py-6 bg-gradient-to-b from-purple-50 to-white">
+      <div className="px-4 py-3 bg-gradient-to-b from-purple-50 to-white dark:from-purple-900/20 dark:to-gray-900">
         {/* Club indicator + locked badge */}
-        <div className="flex items-center gap-2 text-sm text-purple-700 mb-3">
+        <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-400 mb-2">
           <Users className="w-4 h-4" />
           <span className="font-medium">{t('clubs:clubThread')}</span>
           {thread.isLocked && (
@@ -183,12 +183,12 @@ export function ClubThreadPage() {
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           {thread.title}
         </h1>
 
         {/* Meta + Vote */}
-        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-4">
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-2">
           <ThreadVoteButtons
             threadId={threadId || ''}
             score={thread.score || 0}
@@ -202,7 +202,7 @@ export function ClubThreadPage() {
 
         {/* Moderation actions */}
         {(isModOrAdmin || isThreadAuthor) && (
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             {isModOrAdmin && (
               <>
                 <button
@@ -234,7 +234,7 @@ export function ClubThreadPage() {
         )}
 
         {/* Author */}
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+        <div className="pt-2 border-t border-gray-200 dark:border-gray-800">
           <ActorBadge user={author} />
         </div>
       </div>

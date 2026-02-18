@@ -196,7 +196,7 @@ export function ThreadPage() {
         jsonLd={threadJsonLd}
       />
       {/* Back navigation */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-2">
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
@@ -207,17 +207,17 @@ export function ThreadPage() {
       </div>
 
       {/* Thread header */}
-      <div className={`px-4 py-6 ${isInstitutional ? 'bg-violet-50 dark:bg-violet-900/20' : 'bg-white dark:bg-gray-900'}`}>
+      <div className={`px-4 py-2 sm:py-3 ${isInstitutional ? 'bg-violet-50 dark:bg-violet-900/20' : 'bg-white dark:bg-gray-900'}`}>
         {/* Institutional indicator */}
         {isInstitutional && (
-          <div className="flex items-center gap-1.5 text-sm text-violet-700 mb-3">
+          <div className="flex items-center gap-1.5 text-sm text-violet-700 mb-1">
             <Building2 className="w-4 h-4" />
             <span className="font-medium">{t('thread.officialChannel')}</span>
           </div>
         )}
 
         {/* Scope and meta */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-1">
           <ScopeBadge
             scope={thread.scope}
             municipalityName={thread.municipality?.name}
@@ -231,8 +231,8 @@ export function ThreadPage() {
         </div>
 
         {/* Title */}
-        <div className="flex items-start gap-3 mb-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex-1">
+        <div className="flex items-start gap-2 mb-1.5 sm:mb-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 flex-1 leading-tight">
             {thread.title}
           </h1>
           {currentUser && (canEditThread || canDeleteThread) && (
@@ -269,12 +269,12 @@ export function ThreadPage() {
         </div>
 
         {/* Tags */}
-        <div className="mb-4">
+        <div className="mb-1.5 sm:mb-2">
           <TagList tags={thread.tags || []} size="md" />
         </div>
 
         {/* Author + Share + Report */}
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+        <div className="pt-2 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <ActorBadge user={author} />
           <div className="flex items-center gap-1">
             <ShareButtons
@@ -288,7 +288,7 @@ export function ThreadPage() {
       </div>
 
       {/* Main content area */}
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-3 sm:py-4 space-y-4 sm:space-y-6">
         {/* Institutional context box - if applicable */}
         {thread.institutionalContext && (
           <InstitutionalContextBox
@@ -302,7 +302,7 @@ export function ThreadPage() {
         {/* Thread content */}
         <div ref={threadContentRef} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 flex">
           {/* Vote buttons */}
-          <div className="flex-shrink-0 p-4 border-r border-gray-100 dark:border-gray-800">
+          <div className="flex-shrink-0 p-2 sm:p-4 border-r border-gray-100 dark:border-gray-800">
             <ThreadVoteButtons
               threadId={thread.id}
               score={thread.score ?? 0}
@@ -314,7 +314,7 @@ export function ThreadPage() {
           </div>
 
           {/* Content */}
-          <div className="flex-grow p-6">
+          <div className="flex-grow p-3 sm:p-6">
             {isEditingThread ? (
               <div className="space-y-3">
                 <div>
