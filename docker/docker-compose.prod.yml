@@ -44,6 +44,7 @@ services:
       MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
       MEILI_URL: http://meilisearch:7700
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      ALLOWED_ORIGINS: capacitor://localhost,https://localhost
       UPLOAD_DIR: /app/uploads
     volumes:
       - uploads_data:/app/uploads
