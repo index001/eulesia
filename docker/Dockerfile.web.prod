@@ -6,7 +6,7 @@ ARG VITE_API_URL
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json ./
+COPY package*.json .npmrc ./
 RUN npm ci
 
 # Copy source and build
