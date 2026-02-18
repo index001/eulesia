@@ -150,11 +150,11 @@ export function ClubsPage() {
     <Layout>
       <SEOHead title={t('title')} description={t('subtitle')} path="/clubs" noIndex />
       {/* Page header */}
-      <div className="bg-white px-4 py-4 border-b border-gray-200" data-guide="clubs-header">
+      <div className="bg-white dark:bg-gray-900 px-4 py-4 border-b border-gray-200 dark:border-gray-800" data-guide="clubs-header">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('title')}</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               {t('subtitle')}
             </p>
           </div>
@@ -174,55 +174,55 @@ export function ClubsPage() {
       {/* Create Club Modal */}
       {showCreateForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90dvh] flex flex-col">
-            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-              <h3 className="font-semibold text-gray-900">{t('create.title')}</h3>
-              <button onClick={() => { setShowCreateForm(false); resetForm() }} className="p-1 hover:bg-gray-100 rounded">
-                <X className="w-5 h-5 text-gray-500" />
+          <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-lg max-h-[90dvh] flex flex-col">
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('create.title')}</h3>
+              <button onClick={() => { setShowCreateForm(false); resetForm() }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             <form id="create-club-form" onSubmit={handleCreateClub} className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
               {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.name')} *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('create.name')} *</label>
                 <input
                   type="text"
                   value={newClubName}
                   onChange={(e) => setNewClubName(e.target.value)}
                   placeholder={t('create.namePlaceholder')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                   required
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.description')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('create.description')}</label>
                 <textarea
                   value={newClubDescription}
                   onChange={(e) => setNewClubDescription(e.target.value)}
                   placeholder={t('create.descriptionPlaceholder')}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none dark:bg-gray-800 dark:text-gray-100"
                 />
               </div>
 
               {/* Category — free text input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.category')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('create.category')}</label>
                 <input
                   type="text"
                   value={newClubCategory}
                   onChange={(e) => setNewClubCategory(e.target.value)}
                   placeholder={t('create.categoryPlaceholder')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                 />
               </div>
 
               {/* Cover Image */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.coverImage')}</label>
-                <p className="text-xs text-gray-500 mb-2">{t('create.coverImageHint')}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('create.coverImage')}</label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t('create.coverImageHint')}</p>
                 {newClubCoverImage ? (
                   <div className="relative">
                     <img
@@ -243,7 +243,7 @@ export function ClubsPage() {
                     type="button"
                     onClick={() => imageInputRef.current?.click()}
                     disabled={isUploadingImage}
-                    className="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center gap-2 text-gray-500 hover:border-teal-400 hover:text-teal-600 transition-colors disabled:opacity-50"
+                    className="w-full h-24 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:border-teal-400 hover:text-teal-600 transition-colors disabled:opacity-50"
                   >
                     {isUploadingImage ? (
                       <>
@@ -269,8 +269,8 @@ export function ClubsPage() {
 
               {/* Location */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.location')}</label>
-                <p className="text-xs text-gray-500 mb-2">{t('create.locationHint')}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('create.location')}</label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t('create.locationHint')}</p>
                 <LocationSearch
                   value={newClubLocation}
                   onChange={setNewClubLocation}
@@ -279,7 +279,7 @@ export function ClubsPage() {
 
               {/* Visibility — Open/Closed radio */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('create.visibility')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('create.visibility')}</label>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -292,7 +292,7 @@ export function ClubsPage() {
                     <Globe className="w-4 h-4 text-green-600" />
                     <div>
                       <span className="text-sm font-medium">{t('create.open')}</span>
-                      <p className="text-xs text-gray-500">{t('create.openHint')}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('create.openHint')}</p>
                     </div>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -306,7 +306,7 @@ export function ClubsPage() {
                     <Lock className="w-4 h-4 text-amber-600" />
                     <div>
                       <span className="text-sm font-medium">{t('create.closed')}</span>
-                      <p className="text-xs text-gray-500">{t('create.closedHint')}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('create.closedHint')}</p>
                     </div>
                   </label>
                 </div>
@@ -314,19 +314,19 @@ export function ClubsPage() {
 
               {/* Rules */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('create.rules')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('create.rules')}</label>
                 {newClubRules.length > 0 && (
                   <ol className="space-y-1 mb-2">
                     {newClubRules.map((rule, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-1.5 rounded-lg">
-                        <span className="text-gray-400 font-medium">{i + 1}.</span>
-                        <span className="flex-1 text-gray-700">{rule}</span>
+                      <li key={i} className="flex items-center gap-2 text-sm bg-gray-50 dark:bg-gray-800/50 px-3 py-1.5 rounded-lg">
+                        <span className="text-gray-400 dark:text-gray-500 font-medium">{i + 1}.</span>
+                        <span className="flex-1 text-gray-700 dark:text-gray-300">{rule}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveRule(i)}
-                          className="p-0.5 hover:bg-gray-200 rounded"
+                          className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                         >
-                          <Trash2 className="w-3.5 h-3.5 text-gray-400" />
+                          <Trash2 className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                         </button>
                       </li>
                     ))}
@@ -345,7 +345,7 @@ export function ClubsPage() {
                         }
                       }}
                       placeholder={t('create.rulePlaceholder')}
-                      className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                     />
                     <button
                       type="button"
@@ -361,11 +361,11 @@ export function ClubsPage() {
 
             </form>
             {/* Actions - fixed footer always visible on mobile */}
-            <div className="flex gap-2 p-4 border-t border-gray-200 flex-shrink-0">
+            <div className="flex gap-2 p-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => { setShowCreateForm(false); resetForm() }}
-                className="flex-1 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 {t('common:actions.cancel')}
               </button>
@@ -383,16 +383,16 @@ export function ClubsPage() {
       )}
 
       {/* Search and filters */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 sticky top-14 z-40" data-guide="clubs-search">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 sticky top-14 z-40" data-guide="clubs-search">
         {/* Search */}
         <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder={t('search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 dark:text-gray-100"
           />
         </div>
 
@@ -403,7 +403,7 @@ export function ClubsPage() {
             className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               selectedCategory === null
                 ? 'bg-teal-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
             {t('allCategories')}
@@ -415,7 +415,7 @@ export function ClubsPage() {
               className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 selectedCategory === category
                   ? 'bg-teal-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               {category}
@@ -427,7 +427,7 @@ export function ClubsPage() {
       {/* My Clubs section */}
       {myClubs.length > 0 && !searchQuery && !selectedCategory && (
         <div className="px-4 pt-4 pb-2">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('myClubs')}</h2>
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{t('myClubs')}</h2>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
             {myClubs.map(club => (
               <button
@@ -442,7 +442,7 @@ export function ClubsPage() {
                     {club.name.charAt(0)}
                   </div>
                 )}
-                <div className="mt-1.5 text-xs font-medium text-gray-900 truncate">{club.name}</div>
+                <div className="mt-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{club.name}</div>
               </button>
             ))}
           </div>
@@ -475,7 +475,7 @@ export function ClubsPage() {
         )}
 
         {!isLoading && !error && clubs.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             <p>{t('noClubs')}</p>
             <button
               onClick={() => {

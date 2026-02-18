@@ -86,7 +86,7 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
                   <a
                     key={i}
                     href={doc.url}
-                    className="flex items-center gap-2 p-2 bg-white rounded-lg text-sm text-violet-700 hover:bg-violet-100 transition-colors"
+                    className="flex items-center gap-2 p-2 bg-white dark:bg-gray-900 rounded-lg text-sm text-violet-700 hover:bg-violet-100 transition-colors"
                   >
                     <FileText className="w-4 h-4" />
                     {doc.title}
@@ -172,9 +172,9 @@ export function InstitutionalContextBox({ context, isAiGenerated, sourceInstitut
             {expandedSection === 'faq' && (
               <div className="px-4 pb-3 space-y-3">
                 {faq.map((item, i) => (
-                  <div key={i} className="bg-white rounded-lg p-3">
+                  <div key={i} className="bg-white dark:bg-gray-900 rounded-lg p-3">
                     <p className="text-sm font-medium text-violet-900 mb-1">{item.q}</p>
-                    <p className="text-sm text-gray-600">{item.a}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{item.a}</p>
                   </div>
                 ))}
               </div>

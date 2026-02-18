@@ -28,8 +28,8 @@ function NotificationItem({
     <div
       role="button"
       tabIndex={0}
-      className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 ${
-        !notification.read ? 'bg-blue-50/50' : ''
+      className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 ${
+        !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''
       }`}
       onClick={() => onNavigate(notification)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNavigate(notification) } }}
@@ -57,17 +57,17 @@ function NotificationItem({
             <AtSign className="w-4 h-4 text-orange-600" />
           </div>
         ) : (
-          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-            <Bell className="w-4 h-4 text-gray-500" />
+          <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+            <Bell className="w-4 h-4 text-gray-500 dark:text-gray-400" />
           </div>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm ${!notification.read ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
+        <p className={`text-sm ${!notification.read ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
           {notification.title}
         </p>
         {notification.body && (
-          <p className="text-xs text-gray-500 truncate mt-0.5">{notification.body}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{notification.body}</p>
         )}
         <p className="text-xs text-gray-400 mt-1">{formatRelativeTimeShort(notification.createdAt)}</p>
       </div>
@@ -80,7 +80,7 @@ function NotificationItem({
             e.stopPropagation()
             deleteNotification.mutate(notification.id)
           }}
-          className="p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+          className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity"
           title={t('actions.delete')}
           aria-label={t('actions.delete')}
         >
@@ -185,7 +185,7 @@ export function TopBar() {
                         {unreadCount > 0 && (
                           <button
                             onClick={() => markAllRead.mutate()}
-                            className="p-1 hover:bg-gray-100 rounded text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
                             title={t('notifications.markAllReadTitle')}
                           >
                             <Check className="w-3.5 h-3.5" />
@@ -194,16 +194,16 @@ export function TopBar() {
                         )}
                         <button
                           onClick={() => setShowNotifications(false)}
-                          className="p-1 hover:bg-gray-100 rounded"
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
                           aria-label={t('actions.close')}
                         >
-                          <X className="w-4 h-4 text-gray-500" />
+                          <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                         </button>
                       </div>
                     </div>
 
                     {notifications && notifications.length > 0 ? (
-                      <div className="max-h-96 overflow-y-auto divide-y divide-gray-100">
+                      <div className="max-h-96 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
                         {notifications.map((notification) => (
                           <NotificationItem
                             key={notification.id}
@@ -215,7 +215,7 @@ export function TopBar() {
                     ) : (
                       <div className="p-8 text-center">
                         <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">{t('notifications.empty')}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('notifications.empty')}</p>
                         <p className="text-xs text-gray-400 mt-1">{t('notifications.emptyHint')}</p>
                       </div>
                     )}
@@ -226,7 +226,7 @@ export function TopBar() {
               {/* Profile */}
               <Link
                 to="/profile"
-                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
                   {currentUser.avatarUrl ? (
@@ -264,10 +264,10 @@ export function TopBar() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowMobileSearch(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                 aria-label={t('actions.close')}
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
               <div className="flex-1">
                 <SearchBar

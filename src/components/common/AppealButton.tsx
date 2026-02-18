@@ -36,29 +36,29 @@ export function AppealButton({ sanctionId }: AppealButtonProps) {
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)} />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+          <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md p-6 z-10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">{t('appeal.title')}</h2>
-              <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-gray-100 rounded">
-                <X className="w-5 h-5 text-gray-500" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('appeal.title')}</h2>
+              <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">{t('appeal.reason')}</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">{t('appeal.reason')}</label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder={t('appeal.reasonPlaceholder')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm resize-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                   rows={4}
                 />
-                <p className="text-xs text-gray-500 mt-1">{t('appeal.minimumLength')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('appeal.minimumLength')}</p>
               </div>
 
               <div className="flex gap-2 justify-end">
-                <button onClick={() => setIsOpen(false)} className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button onClick={() => setIsOpen(false)} className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300">
                   {t('appeal.cancel')}
                 </button>
                 <button

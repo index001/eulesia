@@ -22,7 +22,7 @@ function ConversationItem({ conversation }: { conversation: Conversation }) {
   return (
     <Link
       to={`/messages/${conversation.id}`}
-      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100"
+      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800"
     >
       {/* Avatar */}
       <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -38,15 +38,15 @@ function ConversationItem({ conversation }: { conversation: Conversation }) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <span className={`text-sm truncate ${unreadCount > 0 ? 'font-bold text-gray-900' : 'font-medium text-gray-900'}`}>
+          <span className={`text-sm truncate ${unreadCount > 0 ? 'font-bold text-gray-900 dark:text-gray-100' : 'font-medium text-gray-900 dark:text-gray-100'}`}>
             {otherUser.name}
           </span>
-          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
             {formatMessageDate(lastMessage?.createdAt || updatedAt)}
           </span>
         </div>
         <div className="flex items-center justify-between mt-0.5">
-          <p className={`text-sm truncate ${unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+          <p className={`text-sm truncate ${unreadCount > 0 ? 'text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
             {lastMessage
               ? lastMessage.content.substring(0, 80)
               : t('noMessagesPreview')
@@ -82,8 +82,8 @@ export function MessagesPage() {
     <Layout>
       <SEOHead title={t('title')} path="/messages" noIndex />
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4" data-guide="messages-header">
-        <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-4" data-guide="messages-header">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('title')}</h1>
       </div>
 
       {/* Conversations list */}
@@ -92,16 +92,16 @@ export function MessagesPage() {
           <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : conversations && conversations.length > 0 ? (
-        <div className="bg-white" data-guide="messages-conversation">
+        <div className="bg-white dark:bg-gray-900" data-guide="messages-conversation">
           {conversations.map(conv => (
             <ConversationItem key={conv.id} conversation={conv} />
           ))}
         </div>
       ) : (
         <div className="text-center py-16 px-4">
-          <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-lg font-medium text-gray-900 mb-2">{t('noConversations')}</h2>
-          <p className="text-sm text-gray-500">
+          <MessageSquare className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">{t('noConversations')}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {t('noConversationsHint')}
           </p>
         </div>

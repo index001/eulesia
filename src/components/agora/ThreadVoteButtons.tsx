@@ -71,8 +71,8 @@ export function ThreadVoteButtons({
         className={`
           ${classes.button} rounded transition-colors
           ${userVote === 1
-            ? 'text-orange-500 bg-orange-50'
-            : 'text-gray-400 hover:text-orange-500 hover:bg-orange-50'
+            ? 'text-orange-500 bg-orange-50 dark:bg-orange-900/30'
+            : 'text-gray-400 dark:text-gray-500 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30'
           }
           disabled:opacity-50 disabled:cursor-not-allowed
         `}
@@ -86,7 +86,7 @@ export function ThreadVoteButtons({
       <span
         className={`
           ${classes.score} font-semibold tabular-nums
-          ${userVote === 1 ? 'text-orange-500' : userVote === -1 ? 'text-blue-500' : 'text-gray-700'}
+          ${userVote === 1 ? 'text-orange-500' : userVote === -1 ? 'text-blue-500' : 'text-gray-700 dark:text-gray-300'}
         `}
         aria-label={t('actions.score', { score: formatScore(score) })}
       >
@@ -100,8 +100,8 @@ export function ThreadVoteButtons({
         className={`
           ${classes.button} rounded transition-colors
           ${userVote === -1
-            ? 'text-blue-500 bg-blue-50'
-            : 'text-gray-400 hover:text-blue-500 hover:bg-blue-50'
+            ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/30'
+            : 'text-gray-400 dark:text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30'
           }
           disabled:opacity-50 disabled:cursor-not-allowed
         `}

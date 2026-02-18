@@ -24,18 +24,18 @@ export function AdminContentPage() {
 
   return (
     <AdminLayout>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('content.title')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">{t('content.title')}</h1>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 max-w-xl">
-        <h2 className="font-semibold text-gray-900 mb-4">{t('content.manageContent')}</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 max-w-xl">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('content.manageContent')}</h2>
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">{t('content.contentType')}</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">{t('content.contentType')}</label>
             <select
               value={contentType}
               onChange={(e) => setContentType(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-gray-100"
             >
               <option value="thread">{t('content.thread')}</option>
               <option value="comment">{t('content.comment')}</option>
@@ -45,15 +45,15 @@ export function AdminContentPage() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">{t('content.contentId')}</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">{t('content.contentId')}</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 value={contentId}
                 onChange={(e) => setContentId(e.target.value)}
                 placeholder="UUID..."
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm dark:bg-gray-900 dark:text-gray-100"
               />
             </div>
           </div>
@@ -86,12 +86,12 @@ export function AdminContentPage() {
           </div>
 
           {removeContentMutation.isSuccess && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 rounded-lg text-sm text-green-800">
               {t('content.hiddenSuccess')}
             </div>
           )}
           {restoreContentMutation.isSuccess && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 rounded-lg text-sm text-green-800">
               {t('content.restoredSuccess')}
             </div>
           )}

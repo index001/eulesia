@@ -88,7 +88,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
   const hasSelections = selectedMunicipalities.length > 0 || selectedTags.length > 0
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 max-w-lg mx-auto">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 max-w-lg mx-auto">
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
           <svg
@@ -105,10 +105,10 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
             />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           {t('agora:onboarding.welcome')}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           {t('agora:onboarding.emptyFeed')}
         </p>
       </div>
@@ -117,7 +117,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <MapPin className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">{t('agora:onboarding.municipalities')}</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('agora:onboarding.municipalities')}</h3>
         </div>
         <div className="flex flex-wrap gap-2">
           {topMunicipalities.map((m: Municipality) => (
@@ -127,7 +127,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 selectedMunicipalities.includes(m.id)
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               {selectedMunicipalities.includes(m.id) && (
@@ -144,7 +144,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Hash className="w-5 h-5 text-teal-600" />
-            <h3 className="font-semibold text-gray-900">{t('agora:onboarding.topics')}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('agora:onboarding.topics')}</h3>
           </div>
           <Link
             to="/aiheet"
@@ -164,7 +164,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 selectedTags.includes(tag.tag)
                   ? 'bg-teal-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               {selectedTags.includes(tag.tag) && (
@@ -190,7 +190,7 @@ export function FeedOnboarding({ onComplete }: FeedOnboardingProps) {
       <div className="flex gap-3">
         <button
           onClick={onComplete}
-          className="flex-1 px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors"
+          className="flex-1 px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors"
         >
           {t('common:actions.skip')}
         </button>

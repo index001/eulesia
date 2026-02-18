@@ -72,14 +72,14 @@ export function AdminUserDetailPage() {
   return (
     <AdminLayout>
       {/* Back */}
-      <Link to="/admin/users" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6">
+      <Link to="/admin/users" className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6">
         <ArrowLeft className="w-4 h-4" />
         {t('users.backToUsers')}
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* User info */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
               {user.avatarUrl ? (
@@ -89,21 +89,21 @@ export function AdminUserDetailPage() {
               )}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">{user.name}</h1>
-              <p className="text-sm text-gray-500">@{user.username}</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{user.name}</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">@{user.username}</p>
             </div>
           </div>
 
           <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
               <Calendar className="w-4 h-4" />
               {t('userDetail.joined', { date: formatDateLong(user.createdAt) })}
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
               <MessageSquare className="w-4 h-4" />
               {t('userDetail.threads', { count: user.threadCount })}
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
               <FileText className="w-4 h-4" />
               {t('userDetail.comments', { count: user.commentCount })}
             </div>
@@ -113,7 +113,7 @@ export function AdminUserDetailPage() {
                 {t('userDetail.verified')}
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
                 <Shield className="w-4 h-4" />
                 {t('userDetail.notVerified')}
               </div>
@@ -121,8 +121,8 @@ export function AdminUserDetailPage() {
           </div>
 
           {/* Verify / Unverify */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <label className="text-sm font-medium text-gray-700 block mb-2">{t('userDetail.verification')}</label>
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">{t('userDetail.verification')}</label>
             {user.identityVerified ? (
               <button
                 onClick={() => id && toggleVerificationMutation.mutate({ id, verified: false })}
@@ -157,8 +157,8 @@ export function AdminUserDetailPage() {
           </div>
 
           {/* Invite codes */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5 mb-2">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 mb-2">
               <TicketCheck className="w-3.5 h-3.5" />
               {t('userDetail.inviteCodes')}
             </label>
@@ -166,15 +166,15 @@ export function AdminUserDetailPage() {
               <button
                 onClick={() => id && user.inviteCodesRemaining > 0 && setInviteCountMutation.mutate({ userId: id, count: user.inviteCodesRemaining - 1 })}
                 disabled={setInviteCountMutation.isPending || user.inviteCodesRemaining <= 0}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors"
               >
                 −
               </button>
-              <span className="w-10 text-center font-semibold text-gray-900">{user.inviteCodesRemaining ?? 0}</span>
+              <span className="w-10 text-center font-semibold text-gray-900 dark:text-gray-100">{user.inviteCodesRemaining ?? 0}</span>
               <button
                 onClick={() => id && setInviteCountMutation.mutate({ userId: id, count: (user.inviteCodesRemaining ?? 0) + 1 })}
                 disabled={setInviteCountMutation.isPending}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors"
               >
                 +
               </button>
@@ -185,13 +185,13 @@ export function AdminUserDetailPage() {
           </div>
 
           {/* Role change */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <label className="text-sm font-medium text-gray-700 block mb-2">{t('userDetail.role')}</label>
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">{t('userDetail.role')}</label>
             <select
               value={user.role}
               onChange={(e) => handleRoleChange(e.target.value as any)}
               disabled={changeRoleMutation.isPending}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-gray-100"
             >
               <option value="citizen">{t('users.citizen')}</option>
               <option value="institution">{t('users.institution')}</option>
@@ -204,7 +204,7 @@ export function AdminUserDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Active sanctions warning */}
           {activeSanctions.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-xl p-4">
               <div className="flex items-center gap-2 text-red-800 font-medium mb-2">
                 <AlertTriangle className="w-4 h-4" />
                 {t('userDetail.activeSanctions', { count: activeSanctions.length })}
@@ -233,9 +233,9 @@ export function AdminUserDetailPage() {
           )}
 
           {/* Sanction form */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-gray-900">{t('userDetail.sanctions')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('userDetail.sanctions')}</h2>
               {!showSanctionForm && user.role !== 'admin' && (
                 <button
                   onClick={() => setShowSanctionForm(true)}
@@ -247,13 +247,13 @@ export function AdminUserDetailPage() {
             </div>
 
             {showSanctionForm && (
-              <div className="border border-gray-200 rounded-lg p-4 mb-4 space-y-3">
+              <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4 mb-4 space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">{t('userDetail.sanctionType')}</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">{t('userDetail.sanctionType')}</label>
                   <select
                     value={sanctionType}
                     onChange={(e) => setSanctionType(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-gray-100"
                   >
                     <option value="warning">{t('userDetail.warning')}</option>
                     <option value="suspension">{t('userDetail.suspension')}</option>
@@ -261,29 +261,29 @@ export function AdminUserDetailPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">{t('userDetail.reason')}</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">{t('userDetail.reason')}</label>
                   <textarea
                     value={sanctionReason}
                     onChange={(e) => setSanctionReason(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm resize-none dark:bg-gray-900 dark:text-gray-100"
                     rows={3}
                   />
                 </div>
                 {sanctionType !== 'ban' && (
                   <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1">{t('userDetail.expiryDate')}</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">{t('userDetail.expiryDate')}</label>
                     <input
                       type="datetime-local"
                       value={sanctionExpiry}
                       onChange={(e) => setSanctionExpiry(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm dark:bg-gray-900 dark:text-gray-100"
                     />
                   </div>
                 )}
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => setShowSanctionForm(false)}
-                    className="text-sm px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="text-sm px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300"
                   >
                     {t('common.cancel')}
                   </button>
@@ -301,12 +301,12 @@ export function AdminUserDetailPage() {
             {/* Sanction history */}
             <div className="space-y-2">
               {user.sanctions?.map(s => (
-                <div key={s.id} className={`p-3 rounded-lg ${s.revokedAt ? 'bg-gray-50' : 'bg-red-50'}`}>
+                <div key={s.id} className={`p-3 rounded-lg ${s.revokedAt ? 'bg-gray-50 dark:bg-gray-800/50' : 'bg-red-50 dark:bg-red-900/20'}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium capitalize">{s.sanctionType}</span>
-                    <span className="text-xs text-gray-500">{formatRelativeTime(s.issuedAt)}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(s.issuedAt)}</span>
                   </div>
-                  <p className="text-xs text-gray-600 mt-1">{s.reason}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{s.reason}</p>
                   {s.revokedAt && (
                     <span className="text-xs text-green-600 mt-1 inline-block">
                       {t('userDetail.revokedAt', { date: formatRelativeTime(s.revokedAt) })}
@@ -315,7 +315,7 @@ export function AdminUserDetailPage() {
                 </div>
               ))}
               {!user.sanctions?.length && (
-                <p className="text-sm text-gray-500 py-4">{t('userDetail.noSanctions')}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 py-4">{t('userDetail.noSanctions')}</p>
               )}
             </div>
           </div>
@@ -325,7 +325,7 @@ export function AdminUserDetailPage() {
       {/* Role change confirmation modal */}
       {pendingRole && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setPendingRole(null)}>
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-6 max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               {pendingRole === 'admin' ? (
                 <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -337,13 +337,13 @@ export function AdminUserDetailPage() {
                 </div>
               )}
               <div>
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                   {pendingRole === 'admin' ? t('userDetail.confirmAdminTitle') : t('userDetail.confirmRoleTitle')}
                 </h3>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               {pendingRole === 'admin'
                 ? t('userDetail.confirmAdminDesc', { name: user.name })
                 : t('userDetail.confirmRoleDesc', { name: user.name, role: t(`users.${pendingRole}`) })
@@ -358,7 +358,7 @@ export function AdminUserDetailPage() {
                   value={adminConfirmText}
                   onChange={e => setAdminConfirmText(e.target.value)}
                   placeholder={t('userDetail.confirmAdminPlaceholder')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm dark:bg-gray-900 dark:text-gray-100"
                   autoFocus
                 />
               </div>
@@ -367,7 +367,7 @@ export function AdminUserDetailPage() {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setPendingRole(null)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300"
               >
                 {t('common.cancel')}
               </button>

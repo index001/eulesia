@@ -34,13 +34,13 @@ export function CookieConsent() {
 
   return (
     <div className="fixed bottom-20 left-0 right-0 z-50 px-4 pb-4 animate-in slide-in-from-bottom duration-500 sm:bottom-4">
-      <div className="max-w-lg mx-auto bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+      <div className="max-w-lg mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-4">
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center mt-0.5">
+          <div className="flex-shrink-0 w-8 h-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mt-0.5">
             <Cookie className="w-4 h-4 text-blue-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('cookies.message')}
               {' '}
               <Link to="/privacy" className="text-blue-600 hover:text-blue-800 underline">
@@ -56,7 +56,7 @@ export function CookieConsent() {
               </button>
               <button
                 onClick={reject}
-                className="px-4 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
               >
                 {t('cookies.essentialOnly')}
               </button>

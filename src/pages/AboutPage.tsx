@@ -27,9 +27,9 @@ function PublicHeader() {
 
 function SectionCard({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           {icon}
           {title}
         </h2>
@@ -49,10 +49,10 @@ function AboutContent() {
     <>
       {/* Back navigation (only for authenticated users) */}
       {isAuthenticated && (
-        <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
           <Link
             to="/profile"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             {t('back')}
@@ -84,13 +84,13 @@ function AboutContent() {
 
         {/* Introduction — 3 paragraphs, no card wrapper */}
         <div className="space-y-4 py-2">
-          <p className="text-gray-800 leading-relaxed">
+          <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
             {t('intro.p1')}
           </p>
-          <p className="text-gray-800 leading-relaxed">
+          <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
             {t('intro.p2')}
           </p>
-          <p className="text-gray-800 leading-relaxed">
+          <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
             {t('intro.p3')}
           </p>
         </div>
@@ -101,13 +101,13 @@ function AboutContent() {
           title={t('problem.title')}
         >
           <div className="space-y-3">
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('problem.p1')}
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('problem.p2')}
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('problem.p3')}
             </p>
           </div>
@@ -119,25 +119,25 @@ function AboutContent() {
           title={t('comparison.title')}
         >
           <div className="space-y-4">
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('comparison.description')}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                <p className="font-medium text-gray-900 text-sm">{t('comparison.quadrant1Title')}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('comparison.quadrant1Platforms')}</p>
-                <p className="text-xs text-gray-600 mt-1.5">{t('comparison.quadrant1Desc')}</p>
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-100 dark:border-gray-800">
+                <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('comparison.quadrant1Title')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('comparison.quadrant1Platforms')}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5">{t('comparison.quadrant1Desc')}</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                <p className="font-medium text-gray-900 text-sm">{t('comparison.quadrant2Title')}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('comparison.quadrant2Platforms')}</p>
-                <p className="text-xs text-gray-600 mt-1.5">{t('comparison.quadrant2Desc')}</p>
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-100 dark:border-gray-800">
+                <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('comparison.quadrant2Title')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('comparison.quadrant2Platforms')}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5">{t('comparison.quadrant2Desc')}</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                <p className="font-medium text-gray-900 text-sm">{t('comparison.quadrant3Title')}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('comparison.quadrant3Platforms')}</p>
-                <p className="text-xs text-gray-600 mt-1.5">{t('comparison.quadrant3Desc')}</p>
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-100 dark:border-gray-800">
+                <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('comparison.quadrant3Title')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('comparison.quadrant3Platforms')}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5">{t('comparison.quadrant3Desc')}</p>
               </div>
               <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                 <p className="font-medium text-blue-900 text-sm">{t('comparison.quadrant4Title')}</p>
@@ -153,7 +153,7 @@ function AboutContent() {
           title={t('fourSpaces.title')}
         >
           <div className="space-y-4">
-            <p className="text-sm text-gray-700 leading-relaxed mb-2">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2">
               {t('fourSpaces.description')}
             </p>
 
@@ -162,8 +162,8 @@ function AboutContent() {
                 <Landmark className="w-4 h-4 text-blue-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{t('fourSpaces.agora')}</h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('fourSpaces.agora')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {t('fourSpaces.agoraDesc')}
                 </p>
               </div>
@@ -174,8 +174,8 @@ function AboutContent() {
                 <Users className="w-4 h-4 text-violet-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{t('fourSpaces.clubs')}</h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('fourSpaces.clubs')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {t('fourSpaces.clubsDesc')}
                 </p>
               </div>
@@ -186,8 +186,8 @@ function AboutContent() {
                 <Shield className="w-4 h-4 text-teal-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{t('fourSpaces.home')}</h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('fourSpaces.home')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {t('fourSpaces.homeDesc')}
                 </p>
               </div>
@@ -198,8 +198,8 @@ function AboutContent() {
                 <Building2 className="w-4 h-4 text-amber-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{t('fourSpaces.services')}</h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('fourSpaces.services')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {t('fourSpaces.servicesDesc')}
                 </p>
               </div>
@@ -213,32 +213,32 @@ function AboutContent() {
           title={t('principles.title')}
         >
           <div className="space-y-3">
-            <p className="text-sm text-gray-700 leading-relaxed mb-2">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2">
               {t('principles.description')}
             </p>
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">{t('principles.identity')}</p>
-              <p className="text-xs text-gray-600 mt-1">{t('principles.identityDesc')}</p>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('principles.identity')}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('principles.identityDesc')}</p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">{t('principles.institutional')}</p>
-              <p className="text-xs text-gray-600 mt-1">{t('principles.institutionalDesc')}</p>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('principles.institutional')}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('principles.institutionalDesc')}</p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">{t('principles.socialAgency')}</p>
-              <p className="text-xs text-gray-600 mt-1">{t('principles.socialAgencyDesc')}</p>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('principles.socialAgency')}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('principles.socialAgencyDesc')}</p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">{t('principles.noAttention')}</p>
-              <p className="text-xs text-gray-600 mt-1">{t('principles.noAttentionDesc')}</p>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('principles.noAttention')}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('principles.noAttentionDesc')}</p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">{t('principles.publicGovernance')}</p>
-              <p className="text-xs text-gray-600 mt-1">{t('principles.publicGovernanceDesc')}</p>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('principles.publicGovernance')}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('principles.publicGovernanceDesc')}</p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="font-medium text-gray-900 text-sm">{t('principles.privacy')}</p>
-              <p className="text-xs text-gray-600 mt-1">{t('principles.privacyDesc')}</p>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('principles.privacy')}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('principles.privacyDesc')}</p>
             </div>
           </div>
         </SectionCard>
@@ -249,10 +249,10 @@ function AboutContent() {
           title={t('automated.title')}
         >
           <div className="space-y-3">
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('automated.p1')}
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('automated.p2')}
             </p>
           </div>
@@ -269,8 +269,8 @@ function AboutContent() {
                 <Users className="w-4 h-4 text-blue-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{t('forWhom.citizens')}</h3>
-                <p className="text-sm text-gray-600 mt-1">{t('forWhom.citizensDesc')}</p>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('forWhom.citizens')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{t('forWhom.citizensDesc')}</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -278,8 +278,8 @@ function AboutContent() {
                 <Building2 className="w-4 h-4 text-violet-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{t('forWhom.municipalities')}</h3>
-                <p className="text-sm text-gray-600 mt-1">{t('forWhom.municipalitiesDesc')}</p>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('forWhom.municipalities')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{t('forWhom.municipalitiesDesc')}</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -287,8 +287,8 @@ function AboutContent() {
                 <GraduationCap className="w-4 h-4 text-teal-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{t('forWhom.researchers')}</h3>
-                <p className="text-sm text-gray-600 mt-1">{t('forWhom.researchersDesc')}</p>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('forWhom.researchers')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{t('forWhom.researchersDesc')}</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -296,8 +296,8 @@ function AboutContent() {
                 <Code className="w-4 h-4 text-amber-700" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{t('forWhom.developers')}</h3>
-                <p className="text-sm text-gray-600 mt-1">{t('forWhom.developersDesc')}</p>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('forWhom.developers')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{t('forWhom.developersDesc')}</p>
               </div>
             </div>
           </div>
@@ -309,14 +309,14 @@ function AboutContent() {
           title={t('research.title')}
         >
           <div className="space-y-3">
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('research.p1')}
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('research.p2')}
             </p>
             {t('research.paper') && (
-              <p className="text-xs text-gray-500 italic mt-2 border-t border-gray-100 pt-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-2 border-t border-gray-100 dark:border-gray-800 pt-3">
                 {t('research.paper')}
               </p>
             )}
@@ -328,7 +328,7 @@ function AboutContent() {
           icon={<Code className="w-4 h-4 text-blue-600" />}
           title={t('openSource.title')}
         >
-          <p className="text-sm text-gray-700 mb-3">
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
             {t('openSource.description')}
           </p>
           <a
@@ -364,7 +364,7 @@ function AboutContent() {
               <h3 className="font-medium text-blue-900 text-sm">{t('roadmap.now')}</h3>
               <ul className="mt-1.5 space-y-1">
                 {(t('roadmap.nowItems', { returnObjects: true }) as string[]).map((item, i) => (
-                  <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                  <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
                     <span className="text-blue-400 mt-1 flex-shrink-0">•</span>
                     {item}
                   </li>
@@ -373,12 +373,12 @@ function AboutContent() {
             </div>
 
             {/* Q2-Q3 2026 */}
-            <div className="relative pl-6 border-l-2 border-gray-200">
+            <div className="relative pl-6 border-l-2 border-gray-200 dark:border-gray-800">
               <div className="absolute -left-[7px] top-0.5 w-3 h-3 bg-gray-300 rounded-full" />
-              <h3 className="font-medium text-gray-700 text-sm">{t('roadmap.q2q3')}</h3>
+              <h3 className="font-medium text-gray-700 dark:text-gray-300 text-sm">{t('roadmap.q2q3')}</h3>
               <ul className="mt-1.5 space-y-1">
                 {(t('roadmap.q2q3Items', { returnObjects: true }) as string[]).map((item, i) => (
-                  <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                  <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
                     <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
                     {item}
                   </li>
@@ -387,12 +387,12 @@ function AboutContent() {
             </div>
 
             {/* Late 2026 */}
-            <div className="relative pl-6 border-l-2 border-gray-200">
+            <div className="relative pl-6 border-l-2 border-gray-200 dark:border-gray-800">
               <div className="absolute -left-[7px] top-0.5 w-3 h-3 bg-gray-300 rounded-full" />
-              <h3 className="font-medium text-gray-700 text-sm">{t('roadmap.late2026')}</h3>
+              <h3 className="font-medium text-gray-700 dark:text-gray-300 text-sm">{t('roadmap.late2026')}</h3>
               <ul className="mt-1.5 space-y-1">
                 {(t('roadmap.late2026Items', { returnObjects: true }) as string[]).map((item, i) => (
-                  <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                  <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
                     <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
                     {item}
                   </li>
@@ -408,10 +408,10 @@ function AboutContent() {
           title={t('organization.title')}
         >
           <div className="space-y-3">
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('organization.p1')}
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {t('organization.p2')}
             </p>
             <a
@@ -429,10 +429,10 @@ function AboutContent() {
           icon={<Coins className="w-4 h-4 text-blue-600" />}
           title={t('funding.title')}
         >
-          <p className="text-sm text-gray-700 mb-2">{t('funding.description')}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{t('funding.description')}</p>
           <ul className="space-y-1">
             {(t('funding.items', { returnObjects: true }) as string[]).map((item, i) => (
-              <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+              <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-blue-400 mt-1 flex-shrink-0">•</span>
                 {item}
               </li>
@@ -485,7 +485,7 @@ export function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-800/50">
       <PublicHeader />
       <div className="max-w-4xl mx-auto">
         <AboutContent />

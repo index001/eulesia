@@ -13,7 +13,7 @@ export function TagList({ tags, onTagClick, size = 'sm', linkToTagPage = true }:
   return (
     <div className="flex flex-wrap gap-1.5">
       {tags.map(tag => {
-        const className = `${sizeClasses} bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors`
+        const className = `${sizeClasses} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors`
 
         if (linkToTagPage) {
           return (

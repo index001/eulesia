@@ -54,13 +54,13 @@ function ThreadListItem({ thread }: { thread: UserThread }) {
     <Link
       key={thread.id}
       to={`/agora/thread/${thread.id}`}
-      className="block bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow"
+      className="block bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow"
     >
-      <h3 className="font-semibold text-gray-900 line-clamp-2">{thread.title}</h3>
-      <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+      <h3 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">{thread.title}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
         {thread.content.substring(0, 150)}...
       </p>
-      <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
+      <div className="flex items-center gap-3 mt-3 text-xs text-gray-500 dark:text-gray-400">
         {thread.municipalityName && (
           <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
             {thread.municipalityName}
@@ -75,7 +75,7 @@ function ThreadListItem({ thread }: { thread: UserThread }) {
       {thread.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-2">
           {thread.tags.slice(0, 3).map(tag => (
-            <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+            <span key={tag} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded">
               {tag}
             </span>
           ))}
@@ -136,7 +136,7 @@ export function UserProfilePage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">{t('profile:userProfile.notFound')}</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('profile:userProfile.notFound')}</p>
           <Link to="/agora" className="text-blue-600 hover:underline mt-2 inline-block">
             {t('profile:userProfile.backToAgora')}
           </Link>
@@ -165,10 +165,10 @@ export function UserProfilePage() {
         }}
       />
       {/* Back navigation */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <button
           onClick={() => window.history.back()}
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('profile:userProfile.back')}
@@ -191,7 +191,7 @@ export function UserProfilePage() {
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-gray-900 truncate">{user.name}</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">{user.name}</h1>
 
             {isInstitution && user.institutionName && (
               <div className="flex items-center gap-1.5 text-sm text-teal-700 mt-1">
@@ -207,7 +207,7 @@ export function UserProfilePage() {
               </div>
             )}
 
-            <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
+            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-2">
               <Calendar className="w-3 h-3" />
               <span>{t('profile:userProfile.joined', { date: formatDateLong(user.createdAt) })}</span>
             </div>
@@ -234,7 +234,7 @@ export function UserProfilePage() {
             </button>
             <Link
               to={`/home/${userId}`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <Home className="w-4 h-4" />
               {t('profile:userProfile.visitHome')}
@@ -248,14 +248,14 @@ export function UserProfilePage() {
             {/* Follow institution (official posts) */}
             <div className="flex items-center gap-3">
               <FollowButton entityType="user" entityId={userId} />
-              <span className="text-xs text-gray-500">{t('profile:userProfile.followOfficialPosts')}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{t('profile:userProfile.followOfficialPosts')}</span>
             </div>
 
             {/* Follow topic (AI summaries + citizen discussion) */}
             {hasTopic && (
               <div className="flex items-center gap-3">
                 <FollowButton entityType="tag" entityId={user.institutionTopic!.topicTag} />
-                <span className="text-xs text-gray-500">{t('profile:userProfile.followAiSummaries')}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{t('profile:userProfile.followAiSummaries')}</span>
               </div>
             )}
           </div>
@@ -272,7 +272,7 @@ export function UserProfilePage() {
         {isOwnProfile && (
           <Link
             to="/profile"
-            className="mt-4 inline-block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+            className="mt-4 inline-block px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
             {t('profile:userProfile.editProfile')}
           </Link>
@@ -316,7 +316,7 @@ export function UserProfilePage() {
         {/* Section 1: Official posts (institution's own threads) */}
         {isInstitution && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-violet-600" />
               {t('profile:userProfile.officialPosts', { count: user.threads.length })}
             </h2>
@@ -327,7 +327,7 @@ export function UserProfilePage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500 py-4">{t('profile:userProfile.noOfficialPosts')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 py-4">{t('profile:userProfile.noOfficialPosts')}</p>
             )}
           </div>
         )}
@@ -335,7 +335,7 @@ export function UserProfilePage() {
         {/* Section 2: Bot AI summaries */}
         {isInstitution && user.botSummaries && user.botSummaries.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <Bot className="w-5 h-5 text-purple-600" />
               {t('profile:userProfile.aiSummaries', { count: user.botSummaries.length })}
             </h2>
@@ -350,7 +350,7 @@ export function UserProfilePage() {
         {/* Section 3: Citizen discussion */}
         {isInstitution && user.citizenDiscussions && user.citizenDiscussions.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-teal-600" />
               {t('profile:userProfile.citizenDiscussion', { count: user.citizenDiscussions.length })}
             </h2>
@@ -365,7 +365,7 @@ export function UserProfilePage() {
         {/* Non-institution: just show threads */}
         {!isInstitution && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
               {t('profile:userProfile.discussions', { count: user.threads.length })}
             </h2>
             {user.threads.length > 0 ? (
@@ -375,7 +375,7 @@ export function UserProfilePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <p>{t('profile:userProfile.noPublicDiscussions')}</p>
               </div>
             )}

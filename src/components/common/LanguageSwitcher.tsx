@@ -32,16 +32,16 @@ export function LanguageSwitcher({ variant = 'default', className = '' }: Langua
   if (variant === 'compact') {
     return (
       <div className={`inline-flex items-center gap-1 ${className}`}>
-        <Globe className="w-3.5 h-3.5 text-gray-500" />
+        <Globe className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
         {languages.map((lang, i) => (
           <span key={lang.code}>
-            {i > 0 && <span className="text-gray-400 mx-0.5">/</span>}
+            {i > 0 && <span className="text-gray-400 dark:text-gray-500 mx-0.5">/</span>}
             <button
               onClick={() => handleChange(lang.code)}
               className={`text-sm transition-colors ${
                 i18n.language === lang.code
-                  ? 'font-semibold text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'font-semibold text-gray-900 dark:text-gray-100'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
               {lang.label}
@@ -54,7 +54,7 @@ export function LanguageSwitcher({ variant = 'default', className = '' }: Langua
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <Globe className="w-4 h-4 text-gray-500" />
+      <Globe className="w-4 h-4 text-gray-500 dark:text-gray-400" />
       {languages.map(lang => (
         <button
           key={lang.code}
@@ -62,7 +62,7 @@ export function LanguageSwitcher({ variant = 'default', className = '' }: Langua
           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
             i18n.language === lang.code
               ? 'bg-blue-800 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
           }`}
         >
           {lang.label}

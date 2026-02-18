@@ -40,44 +40,44 @@ export function MapPopup({ point, onViewDetails }: MapPopupProps) {
           <Icon className={`w-5 h-5 ${config.color}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate">{point.name}</h3>
-          <p className="text-xs text-gray-500 capitalize">{point.type}</p>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">{point.name}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{point.type}</p>
         </div>
       </div>
 
       {/* Meta info */}
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
         {point.meta.threadCount !== undefined && (
-          <span className="flex items-center gap-1 text-gray-600">
+          <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
             <MessageCircle className="w-3.5 h-3.5" />
             {point.meta.threadCount} threads
           </span>
         )}
         {point.meta.memberCount !== undefined && (
-          <span className="flex items-center gap-1 text-gray-600">
+          <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
             <Users className="w-3.5 h-3.5" />
             {point.meta.memberCount} members
           </span>
         )}
         {point.meta.category && (
-          <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+          <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded">
             {point.meta.category}
           </span>
         )}
         {point.meta.scope && (
-          <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded capitalize">
+          <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded capitalize">
             {point.meta.scope}
           </span>
         )}
         {point.meta.language && (
-          <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded uppercase">
+          <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded uppercase">
             {point.meta.language}
           </span>
         )}
       </div>
 
       {/* Action buttons */}
-      <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex gap-2">
         {link ? (
           <Link
             to={link}

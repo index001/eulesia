@@ -18,7 +18,7 @@ function ToggleSwitch({
       type="button"
       onClick={() => !disabled && onChange(!enabled)}
       className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-        enabled ? 'bg-blue-600' : 'bg-gray-200'
+        enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       <span
@@ -87,7 +87,7 @@ export function AdminSettingsPage() {
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('settings.title')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('settings.title')}</h1>
         {hasChanges && (
           <button
             onClick={handleSave}
@@ -106,14 +106,14 @@ export function AdminSettingsPage() {
 
       <div className="space-y-6 max-w-2xl">
         {/* Invite system */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
               <TicketCheck className="w-4 h-4 text-blue-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900">{t('settings.inviteSystem')}</h2>
-              <p className="text-xs text-gray-500">{t('settings.inviteSystemDesc')}</p>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.inviteSystem')}</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('settings.inviteSystemDesc')}</p>
             </div>
           </div>
 
@@ -121,8 +121,8 @@ export function AdminSettingsPage() {
             {/* Invite toggle */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">{t('settings.invitesEnabled')}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('settings.invitesEnabledDesc')}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('settings.invitesEnabled')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('settings.invitesEnabledDesc')}</p>
               </div>
               <ToggleSwitch
                 enabled={invitesEnabled}
@@ -136,8 +136,8 @@ export function AdminSettingsPage() {
             {/* Default invite count */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">{t('settings.defaultInviteCount')}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('settings.defaultInviteCountDesc')}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('settings.defaultInviteCount')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('settings.defaultInviteCountDesc')}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -147,11 +147,11 @@ export function AdminSettingsPage() {
                       setHasChanges(true)
                     }
                   }}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   −
                 </button>
-                <span className="w-10 text-center font-semibold text-gray-900">{defaultInviteCount}</span>
+                <span className="w-10 text-center font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">{defaultInviteCount}</span>
                 <button
                   onClick={() => {
                     if (defaultInviteCount < 50) {
@@ -159,7 +159,7 @@ export function AdminSettingsPage() {
                       setHasChanges(true)
                     }
                   }}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   +
                 </button>
@@ -169,14 +169,14 @@ export function AdminSettingsPage() {
         </div>
 
         {/* Admin invite generation */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
             <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
               <Gift className="w-4 h-4 text-amber-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900">{t('settings.generateInvites')}</h2>
-              <p className="text-xs text-gray-500">{t('settings.generateInvitesDesc')}</p>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.generateInvites')}</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('settings.generateInvitesDesc')}</p>
             </div>
           </div>
 
@@ -186,14 +186,14 @@ export function AdminSettingsPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setGenerateCount(Math.max(1, generateCount - 1))}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   −
                 </button>
-                <span className="w-10 text-center font-semibold text-gray-900">{generateCount}</span>
+                <span className="w-10 text-center font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">{generateCount}</span>
                 <button
                   onClick={() => setGenerateCount(Math.min(50, generateCount + 1))}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   +
                 </button>
@@ -231,23 +231,23 @@ export function AdminSettingsPage() {
                         setCopiedAll(true)
                         setTimeout(() => setCopiedAll(false), 2000)
                       }}
-                      className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 transition-colors"
                     >
                       {copiedAll ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
                       {copiedAll ? t('settings.copied') : t('settings.copyAll')}
                     </button>
                   )}
                 </div>
-                <div className="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden">
                   {adminInvites.map(code => (
                     <div key={code.id} className="flex items-center justify-between px-4 py-2.5 bg-gray-50/50">
                       <div className="flex items-center gap-3">
-                        <code className={`text-sm font-mono ${code.status === 'available' ? 'text-gray-900' : 'text-gray-400 line-through'}`}>
+                        <code className={`text-sm font-mono ${code.status === 'available' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500 line-through'}`}>
                           {code.code}
                         </code>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           code.status === 'available' ? 'bg-green-100 text-green-700' :
-                          code.status === 'used' ? 'bg-gray-100 text-gray-500' :
+                          code.status === 'used' ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400' :
                           'bg-red-100 text-red-600'
                         }`}>
                           {code.status === 'available' ? t('settings.inviteAvailable') :
@@ -276,28 +276,28 @@ export function AdminSettingsPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500 italic">{t('settings.noInviteCodes')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 italic">{t('settings.noInviteCodes')}</p>
             )}
           </div>
         </div>
 
         {/* Registration */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
             <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
               <Users className="w-4 h-4 text-green-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900">{t('settings.registration')}</h2>
-              <p className="text-xs text-gray-500">{t('settings.registrationDesc')}</p>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.registration')}</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('settings.registrationDesc')}</p>
             </div>
           </div>
 
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">{t('settings.registrationOpen')}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t('settings.registrationOpenDesc')}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('settings.registrationOpen')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('settings.registrationOpenDesc')}</p>
               </div>
               <ToggleSwitch
                 enabled={registrationOpen}
@@ -311,14 +311,14 @@ export function AdminSettingsPage() {
         </div>
 
         {/* System announcements */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
             <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
               <Megaphone className="w-4 h-4 text-red-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900">{t('settings.announcements')}</h2>
-              <p className="text-xs text-gray-500">{t('settings.announcementsDesc')}</p>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.announcements')}</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('settings.announcementsDesc')}</p>
             </div>
           </div>
 
@@ -330,7 +330,7 @@ export function AdminSettingsPage() {
                 value={announcementTitle}
                 onChange={(e) => setAnnouncementTitle(e.target.value)}
                 placeholder={t('settings.announcementTitle')}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-gray-100"
                 maxLength={200}
               />
               <textarea
@@ -338,7 +338,7 @@ export function AdminSettingsPage() {
                 onChange={(e) => setAnnouncementMessage(e.target.value)}
                 placeholder={t('settings.announcementMessage')}
                 rows={2}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-gray-100 resize-none"
                 maxLength={2000}
               />
               <div className="flex items-center gap-3">
@@ -352,7 +352,7 @@ export function AdminSettingsPage() {
                           ? type === 'info' ? 'bg-blue-600 text-white' :
                             type === 'warning' ? 'bg-amber-500 text-white' :
                             'bg-red-600 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`}
                     >
                       {t(`settings.announcementType.${type}`)}
@@ -391,22 +391,22 @@ export function AdminSettingsPage() {
             {/* Existing announcements */}
             {adminAnnouncements && adminAnnouncements.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   {t('settings.existingAnnouncements')}
                 </p>
-                <div className="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden">
                   {adminAnnouncements.map(a => (
-                    <div key={a.id} className={`flex items-center justify-between px-4 py-3 ${a.active ? 'bg-white' : 'bg-gray-50'}`}>
+                    <div key={a.id} className={`flex items-center justify-between px-4 py-3 ${a.active ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
                           a.type === 'info' ? 'bg-blue-500' :
                           a.type === 'warning' ? 'bg-amber-500' : 'bg-red-500'
                         }`} />
                         <div className="min-w-0">
-                          <p className={`text-sm font-medium truncate ${a.active ? 'text-gray-900' : 'text-gray-400'}`}>
+                          <p className={`text-sm font-medium truncate ${a.active ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}`}>
                             {a.title}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-gray-400 dark:text-gray-500">
                             {a.createdByName} — {new Date(a.createdAt).toLocaleDateString('fi')}
                           </p>
                         </div>
@@ -436,38 +436,38 @@ export function AdminSettingsPage() {
         </div>
 
         {/* DSA compliance info */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
             <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
               <ShieldCheck className="w-4 h-4 text-purple-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900">{t('settings.platformSettings')}</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.platformSettings')}</h2>
             </div>
           </div>
 
           <div className="p-6 space-y-4">
-            <div className="p-4 bg-gray-50 rounded-lg flex items-start gap-3">
-              <Info className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg flex items-start gap-3">
+              <Info className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
               <div>
-                <h3 className="text-sm font-medium text-gray-700">{t('settings.dsaCompliance')}</h3>
-                <p className="text-xs text-gray-500 mt-1">{t('settings.dsaDescription')}</p>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.dsaCompliance')}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('settings.dsaDescription')}</p>
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 rounded-lg flex items-start gap-3">
-              <Info className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg flex items-start gap-3">
+              <Info className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
               <div>
-                <h3 className="text-sm font-medium text-gray-700">{t('settings.moderationPolicy')}</h3>
-                <p className="text-xs text-gray-500 mt-1">{t('settings.moderationDescription')}</p>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.moderationPolicy')}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('settings.moderationDescription')}</p>
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 rounded-lg flex items-start gap-3">
-              <Info className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg flex items-start gap-3">
+              <Info className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
               <div>
-                <h3 className="text-sm font-medium text-gray-700">{t('settings.autoModeration')}</h3>
-                <p className="text-xs text-gray-500 mt-1">{t('settings.autoModerationDescription')}</p>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.autoModeration')}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('settings.autoModerationDescription')}</p>
               </div>
             </div>
           </div>

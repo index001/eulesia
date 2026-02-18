@@ -165,10 +165,10 @@ export function RoomPage() {
     <Layout>
       <SEOHead title={name} path={`/home/room/${roomId}`} noIndex />
       {/* Back navigation */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('room.backToHome')}
@@ -185,17 +185,17 @@ export function RoomPage() {
               ) : (
                 <Lock className="w-4 h-4 text-amber-600" />
               )}
-              <span className="text-xs font-medium text-gray-500 uppercase">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 {visibility === 'public' ? t('room.public') : t('room.private')}
               </span>
-              <span className="text-xs text-gray-400">&bull;</span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-400 dark:text-gray-500">&bull;</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {t('room.ownerHome', { name: owner.name })}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">{name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{name}</h1>
             {description && (
-              <p className="text-sm text-gray-600 mt-2">{description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{description}</p>
             )}
           </div>
           {isOwner && (
@@ -203,7 +203,7 @@ export function RoomPage() {
               {visibility === 'private' && (
                 <button
                   onClick={() => setShowInvite(true)}
-                  className="p-2 hover:bg-white/60 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
+                  className="p-2 hover:bg-white/60 dark:hover:bg-gray-800/60 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                   aria-label={t('room.inviteTitle')}
                 >
                   <UserPlus className="w-5 h-5" />
@@ -211,7 +211,7 @@ export function RoomPage() {
               )}
               <button
                 onClick={handleOpenSettings}
-                className="p-2 hover:bg-white/60 rounded-lg text-gray-500 hover:text-gray-700 transition-colors"
+                className="p-2 hover:bg-white/60 dark:hover:bg-gray-800/60 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                 aria-label={t('room.settings')}
               >
                 <Settings className="w-5 h-5" />
@@ -222,9 +222,9 @@ export function RoomPage() {
 
         {/* Members */}
         {visibility === 'private' && (
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200/60">
-            <Users className="w-4 h-4 text-gray-400" />
-            <span className="text-xs text-gray-500">{t('rooms.members', { count: members.length + 1 })}</span>
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200/60 dark:border-gray-700/60">
+            <Users className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <span className="text-xs text-gray-500 dark:text-gray-400">{t('rooms.members', { count: members.length + 1 })}</span>
           </div>
         )}
       </div>
@@ -233,7 +233,7 @@ export function RoomPage() {
       <div className="px-4 py-6 space-y-6">
         {/* Message input at the top like Agora comment box */}
         {canPost ? (
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
             <form onSubmit={handleSendMessage}>
               <textarea
                 value={newMessage}
@@ -250,7 +250,7 @@ export function RoomPage() {
                   }
                 }}
                 placeholder={t('room.writeMessage')}
-                className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full p-3 border border-gray-200 dark:border-gray-800 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                 rows={3}
               />
               <div className="flex justify-end mt-3">
@@ -275,7 +275,7 @@ export function RoomPage() {
 
         {/* Typing indicator */}
         {roomId && (typingInRoom[roomId]?.length ?? 0) > 0 && (
-          <div className="flex items-center gap-2 px-1 text-sm text-gray-500">
+          <div className="flex items-center gap-2 px-1 text-sm text-gray-500 dark:text-gray-400">
             <span className="flex gap-0.5">
               <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -302,7 +302,7 @@ export function RoomPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <p>{t('room.noMessages')}</p>
             <p className="text-sm mt-1">{t('room.noMessagesHint')}</p>
           </div>
@@ -312,25 +312,25 @@ export function RoomPage() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="room-settings-title">
-          <div className="bg-white rounded-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-              <h3 id="room-settings-title" className="font-semibold text-gray-900">{t('room.settings')}</h3>
-              <button onClick={() => setShowSettings(false)} className="p-1 hover:bg-gray-100 rounded" aria-label={t('common:actions.close')}>
-                <X className="w-5 h-5 text-gray-500" />
+          <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <h3 id="room-settings-title" className="font-semibold text-gray-900 dark:text-gray-100">{t('room.settings')}</h3>
+              <button onClick={() => setShowSettings(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded" aria-label={t('common:actions.close')}>
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('room.editName')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('room.editName')}</label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-gray-800 dark:text-gray-100"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('room.editDescription')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('room.editDescription')}</label>
                 <textarea
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
@@ -342,19 +342,19 @@ export function RoomPage() {
               {/* Members list */}
               {visibility === 'private' && members.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('room.members')}</label>
-                  <div className="border border-gray-200 rounded-lg divide-y divide-gray-100">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('room.members')}</label>
+                  <div className="border border-gray-200 dark:border-gray-800 rounded-lg divide-y divide-gray-100 dark:divide-gray-800">
                     {members.map((member) => (
                       <div key={member.id} className="flex items-center justify-between px-3 py-2">
                         <div className="flex items-center gap-2 min-w-0">
                           {member.avatarUrl ? (
                             <img src={member.avatarUrl} alt={member.name} className="w-7 h-7 rounded-full object-cover" />
                           ) : (
-                            <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                            <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-400">
                               {member.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                             </div>
                           )}
-                          <span className="text-sm text-gray-900 truncate">{member.name}</span>
+                          <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{member.name}</span>
                         </div>
                         <button
                           onClick={() => {
@@ -363,7 +363,7 @@ export function RoomPage() {
                             }
                           }}
                           disabled={removeRoomMemberMutation.isPending}
-                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                          className="p-1 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50"
                           aria-label={t('room.removeMember')}
                           title={t('room.removeMember')}
                         >
@@ -375,7 +375,7 @@ export function RoomPage() {
                 </div>
               )}
             </div>
-            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+            <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
               <button
                 onClick={handleDeleteRoom}
                 disabled={deleteRoomMutation.isPending}
@@ -387,7 +387,7 @@ export function RoomPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowSettings(false)}
-                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                 >
                   {t('common:actions.cancel')}
                 </button>
@@ -408,35 +408,35 @@ export function RoomPage() {
       {/* Add Member Modal */}
       {showInvite && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="room-add-member-title">
-          <div className="bg-white rounded-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-              <h3 id="room-add-member-title" className="font-semibold text-gray-900">{t('room.addMemberTitle')}</h3>
-              <button onClick={() => { setShowInvite(false); setInviteSearch(''); setInviteResults([]); setSelectedUser(null) }} className="p-1 hover:bg-gray-100 rounded" aria-label={t('common:actions.close')}>
-                <X className="w-5 h-5 text-gray-500" />
+          <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <h3 id="room-add-member-title" className="font-semibold text-gray-900 dark:text-gray-100">{t('room.addMemberTitle')}</h3>
+              <button onClick={() => { setShowInvite(false); setInviteSearch(''); setInviteResults([]); setSelectedUser(null) }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded" aria-label={t('common:actions.close')}>
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             <div className="p-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('room.addMemberSearchLabel')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('room.addMemberSearchLabel')}</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   value={inviteSearch}
                   onChange={(e) => handleInviteSearch(e.target.value)}
                   placeholder={t('room.invitePlaceholder')}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-gray-800 dark:text-gray-100"
                   autoFocus
                 />
               </div>
 
               {inviteSearch.trim().length >= 2 && (
-                <div className="mt-2 border border-gray-200 rounded-lg overflow-hidden">
+                <div className="mt-2 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
                   {isSearching ? (
-                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                    <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
                       {t('room.inviteSearching')}
                     </div>
                   ) : inviteResults.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                    <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
                       {t('room.inviteNoResults')}
                     </div>
                   ) : (
@@ -444,24 +444,24 @@ export function RoomPage() {
                       <button
                         key={user.id}
                         onClick={() => setSelectedUser(user)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
                           selectedUser?.id === user.id ? 'bg-teal-50 border-l-2 border-teal-600' : ''
                         }`}
                       >
                         {user.avatarUrl ? (
                           <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
+                          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-gray-600 dark:text-gray-400">
                             {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
                           {user.institutionName && (
-                            <p className="text-xs text-gray-500 truncate">{user.institutionName}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.institutionName}</p>
                           )}
                           {user.municipalityName && !user.institutionName && (
-                            <p className="text-xs text-gray-500 truncate">{user.municipalityName}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.municipalityName}</p>
                           )}
                         </div>
                         {selectedUser?.id === user.id && (
@@ -477,10 +477,10 @@ export function RoomPage() {
                 </div>
               )}
             </div>
-            <div className="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
+            <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-2">
               <button
                 onClick={() => { setShowInvite(false); setInviteSearch(''); setInviteResults([]); setSelectedUser(null) }}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
               >
                 {t('common:actions.cancel')}
               </button>
@@ -522,8 +522,8 @@ function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, currentUserId, onE
   // Deleted message placeholder
   if (message.isHidden) {
     return (
-      <div className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
-        <span className="text-sm text-gray-400 italic">{t('common:messageDeleted')}</span>
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3 border border-gray-200 dark:border-gray-800">
+        <span className="text-sm text-gray-400 dark:text-gray-500 italic">{t('common:messageDeleted')}</span>
       </div>
     )
   }
@@ -546,12 +546,12 @@ function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, currentUserId, onE
   const author = message.author ? transformAuthor(message.author) : null
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
       {/* Header: author + time + actions */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           {author && <ActorBadge user={author} size="sm" />}
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {formatRelativeTime(message.createdAt)}
           </span>
           {message.editedAt && (
@@ -563,7 +563,7 @@ function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, currentUserId, onE
             {canEdit && (
               <button
                 onClick={handleStartEdit}
-                className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 title={t('common:actions.edit')}
               >
                 <Pencil className="w-3.5 h-3.5" />
@@ -588,14 +588,14 @@ function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, currentUserId, onE
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className="w-full p-3 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            className="w-full p-3 text-sm border border-gray-200 dark:border-gray-800 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
             rows={4}
             autoFocus
           />
           <div className="flex gap-2 mt-2 justify-end">
             <button
               onClick={() => setIsEditing(false)}
-              className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
             >
               {t('common:actions.cancel')}
             </button>
@@ -612,7 +612,7 @@ function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, currentUserId, onE
       ) : message.contentHtml ? (
         <ContentWithPreviews html={message.contentHtml} className="prose prose-sm prose-gray max-w-none" />
       ) : (
-        <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{message.content}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{message.content}</p>
       )}
 
       {/* Reactions */}
@@ -627,7 +627,7 @@ function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, currentUserId, onE
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition-colors ${
                   hasReacted
                     ? 'bg-teal-50 border-teal-300 text-teal-700'
-                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                    : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 <span>{reaction.emoji}</span>
@@ -638,18 +638,18 @@ function MessageCard({ message, isOwnMessage, isOwnerOrAdmin, currentUserId, onE
           <div className="relative">
             <button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="p-1 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               title={t('room.addReaction')}
             >
               <SmilePlus className="w-4 h-4" />
             </button>
             {showEmojiPicker && (
-              <div className="absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg p-1.5 flex gap-0.5 z-10">
+              <div className="absolute bottom-full left-0 mb-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-1.5 flex gap-0.5 z-10">
                 {REACTION_EMOJIS.map((emoji) => (
                   <button
                     key={emoji}
                     onClick={() => { onReact(message.id, emoji); setShowEmojiPicker(false) }}
-                    className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-lg transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-lg transition-colors"
                   >
                     {emoji}
                   </button>

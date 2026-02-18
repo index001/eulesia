@@ -21,18 +21,18 @@ function ServiceCard({ service, onClick }: { service: Service; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow"
+      className="w-full text-left bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow"
     >
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-gray-600" />
+        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900">{service.name}</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{service.provider}</p>
-          <p className="text-sm text-gray-600 mt-2 line-clamp-2">{service.description}</p>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{service.name}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{service.provider}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">{service.description}</p>
         </div>
-        <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 mt-2" />
+        <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0 mt-2" />
       </div>
     </button>
   )
@@ -52,12 +52,12 @@ export function ServicesPage() {
     <Layout>
       <SEOHead title={t('title')} path="/services" noIndex />
       {/* Page header */}
-      <div className="bg-white px-4 py-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-900 px-4 py-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-2 mb-1">
-          <Store className="w-5 h-5 text-gray-700" />
-          <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
+          <Store className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('title')}</h1>
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           {t('subtitle')}
         </p>
       </div>
@@ -77,7 +77,7 @@ export function ServicesPage() {
       <div className="px-4 py-6 space-y-6">
         {categories.map(category => (
           <div key={category}>
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
               {category}
             </h2>
             <div className="space-y-3">
@@ -89,11 +89,11 @@ export function ServicesPage() {
         ))}
 
         {/* No attention economy note */}
-        <div className="bg-gray-100 rounded-xl p-4 text-center">
-          <p className="text-sm text-gray-600">
+        <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {t('noEngagement')}
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {t('noEngagementSub')}
           </p>
         </div>
@@ -104,25 +104,25 @@ export function ServicesPage() {
       {/* Service Detail Modal */}
       {selectedService && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-md max-h-[80vh] overflow-y-auto">
-            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">{selectedService.name}</h3>
-              <button onClick={() => setSelectedService(null)} className="p-1 hover:bg-gray-100 rounded">
-                <X className="w-5 h-5 text-gray-500" />
+          <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{selectedService.name}</h3>
+              <button onClick={() => setSelectedService(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('provider')}</p>
-                <p className="text-sm text-gray-900">{selectedService.provider}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{t('provider')}</p>
+                <p className="text-sm text-gray-900 dark:text-gray-100">{selectedService.provider}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('category')}</p>
-                <p className="text-sm text-gray-900">{selectedService.category}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{t('category')}</p>
+                <p className="text-sm text-gray-900 dark:text-gray-100">{selectedService.category}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('description')}</p>
-                <p className="text-sm text-gray-700">{selectedService.description}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{t('description')}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">{selectedService.description}</p>
               </div>
               {selectedService.url && (
                 <a

@@ -10,14 +10,14 @@ export function LinkPreview({ url }: LinkPreviewProps) {
 
   if (isLoading) {
     return (
-      <div className="my-2 border border-gray-200 rounded-lg overflow-hidden animate-pulse">
+      <div className="my-2 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden animate-pulse">
         <div className="flex">
           <div className="flex-1 p-3 space-y-2">
-            <div className="h-3 bg-gray-200 rounded w-1/3" />
-            <div className="h-4 bg-gray-200 rounded w-3/4" />
-            <div className="h-3 bg-gray-200 rounded w-full" />
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full" />
           </div>
-          <div className="w-24 h-20 bg-gray-200 flex-shrink-0" />
+          <div className="w-24 h-20 bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
         </div>
       </div>
     )
@@ -30,7 +30,7 @@ export function LinkPreview({ url }: LinkPreviewProps) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="my-2 block border border-gray-200 rounded-lg overflow-hidden hover:bg-gray-50 transition-colors no-underline"
+      className="my-2 block border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors no-underline"
     >
       <div className="flex">
         <div className="flex-1 p-3 min-w-0">
@@ -44,27 +44,27 @@ export function LinkPreview({ url }: LinkPreviewProps) {
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
             )}
-            <span className="text-xs text-gray-500 truncate">
+            <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
               {data.siteName || new URL(url).hostname}
             </span>
-            <ExternalLink className="w-3 h-3 text-gray-400 flex-shrink-0" />
+            <ExternalLink className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
           </div>
           {/* Title */}
           {data.title && (
-            <p className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug">
               {data.title}
             </p>
           )}
           {/* Description */}
           {data.description && (
-            <p className="text-xs text-gray-500 line-clamp-2 mt-0.5 leading-relaxed">
+            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5 leading-relaxed">
               {data.description}
             </p>
           )}
         </div>
         {/* Image */}
         {data.imageUrl && (
-          <div className="w-28 flex-shrink-0 bg-gray-100">
+          <div className="w-28 flex-shrink-0 bg-gray-100 dark:bg-gray-800">
             <img
               src={data.imageUrl}
               alt=""

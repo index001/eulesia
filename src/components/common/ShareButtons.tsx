@@ -111,7 +111,7 @@ export function ShareButtons({ url, title, compact = false }: ShareButtonsProps)
       <div className="relative">
         <button
           onClick={handleShareClick}
-          className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+          className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           title={t('share.share')}
         >
           <Share2 className="w-4 h-4" />
@@ -120,21 +120,21 @@ export function ShareButtons({ url, title, compact = false }: ShareButtonsProps)
         {showPopup && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setShowPopup(false)} />
-            <div className="absolute right-0 top-full mt-1 z-20 bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-56">
+            <div className="absolute right-0 top-full mt-1 z-20 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 p-3 w-56">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-900">{t('share.share')}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('share.share')}</span>
                 <button
                   onClick={() => setShowPopup(false)}
-                  className="p-0.5 hover:bg-gray-100 rounded"
+                  className="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
                 >
-                  <X className="w-3.5 h-3.5 text-gray-400" />
+                  <X className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                 </button>
               </div>
 
               {/* Copy link */}
               <button
                 onClick={handleCopy}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 transition-colors"
               >
                 {copied ? (
                   <>
@@ -176,7 +176,7 @@ export function ShareButtons({ url, title, compact = false }: ShareButtonsProps)
     <div className="flex items-center gap-2">
       <button
         onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
       >
         {copied ? (
           <>
@@ -207,7 +207,7 @@ export function ShareButtons({ url, title, compact = false }: ShareButtonsProps)
       {canNativeShare && (
         <button
           onClick={handleNativeShare}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         >
           <Share2 className="w-4 h-4" />
           <span>{t('share.more')}</span>

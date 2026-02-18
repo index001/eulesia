@@ -31,14 +31,14 @@ export function AdminAppealsPage() {
 
   return (
     <AdminLayout>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('appeals.title')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">{t('appeals.title')}</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+          className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-gray-100"
         >
           <option value="">{t('appeals.allStatuses')}</option>
           <option value="pending">{t('appeals.pending')}</option>
@@ -55,38 +55,38 @@ export function AdminAppealsPage() {
         <>
           <div className="space-y-3">
             {data?.items?.map(appeal => (
-              <div key={appeal.id} className="bg-white rounded-xl border border-gray-200 p-5">
+              <div key={appeal.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <span className="text-sm font-medium text-gray-900">{appeal.userName}</span>
-                    <span className="text-xs text-gray-500 ml-2">{formatRelativeTime(appeal.createdAt)}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{appeal.userName}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{formatRelativeTime(appeal.createdAt)}</span>
                   </div>
                   <StatusBadge status={appeal.status} />
                 </div>
 
-                <p className="text-sm text-gray-700 mb-3">{appeal.reason}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">{appeal.reason}</p>
 
                 {appeal.adminResponse && (
-                  <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                    <p className="text-xs text-gray-500 mb-1">{t('appeals.adminResponse')}</p>
-                    <p className="text-sm text-gray-700">{appeal.adminResponse}</p>
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('appeals.adminResponse')}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{appeal.adminResponse}</p>
                   </div>
                 )}
 
                 {appeal.status === 'pending' && (
                   respondingId === appeal.id ? (
-                    <div className="space-y-3 pt-3 border-t border-gray-200">
+                    <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-800">
                       <textarea
                         value={responseText}
                         onChange={(e) => setResponseText(e.target.value)}
                         placeholder={t('appeals.responsePlaceholder')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm resize-none dark:bg-gray-900 dark:text-gray-100"
                         rows={3}
                       />
                       <div className="flex gap-2 justify-end">
                         <button
                           onClick={() => { setRespondingId(null); setResponseText('') }}
-                          className="text-sm px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50"
+                          className="text-sm px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300"
                         >
                           {t('common.cancel')}
                         </button>
@@ -118,20 +118,20 @@ export function AdminAppealsPage() {
               </div>
             ))}
             {!data?.items?.length && (
-              <div className="text-center py-12 text-gray-500">{t('appeals.noAppeals')}</div>
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">{t('appeals.noAppeals')}</div>
             )}
           </div>
 
           {data && data.total > 20 && (
             <div className="flex items-center justify-between mt-4">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {(page - 1) * 20 + 1}-{Math.min(page * 20, data.total)} / {data.total}
               </span>
               <div className="flex gap-2">
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => setPage(p => p + 1)} disabled={!data.hasMore} className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
+                <button onClick={() => setPage(p => p + 1)} disabled={!data.hasMore} className="p-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -150,7 +150,7 @@ function StatusBadge({ status }: { status: string }) {
     rejected: 'bg-red-100 text-red-800'
   }
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[status] || 'bg-gray-100 text-gray-800'}`}>
+    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[status] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
       {status}
     </span>
   )

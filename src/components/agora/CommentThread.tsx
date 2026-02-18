@@ -84,12 +84,12 @@ function CommentItem({
       <div className={depth > 0 ? 'relative' : ''}>
         {depth > 0 && depth <= maxVisualDepth && (
           <div
-            className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200"
+            className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"
             style={{ marginLeft: -12 }}
           />
         )}
         <div className="py-2 px-3">
-          <p className="text-sm text-gray-400 italic">
+          <p className="text-sm text-gray-400 dark:text-gray-500 italic">
             {t('common:messageDeleted')}
           </p>
         </div>
@@ -163,7 +163,7 @@ function CommentItem({
           role="button"
           tabIndex={0}
           aria-label={isCollapsed ? t('common:actions.expand') : t('common:actions.collapse')}
-          className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200 hover:bg-blue-400 cursor-pointer"
+          className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 cursor-pointer"
           style={{ marginLeft: -12 }}
           onClick={() => setIsCollapsed(!isCollapsed)}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsCollapsed(!isCollapsed) } }}
@@ -177,8 +177,8 @@ function CommentItem({
           <div className="flex flex-col items-center gap-0.5 pt-1">
             <button
               onClick={() => onVote(comment.id, userVote === 1 ? 0 : 1)}
-              className={`p-0.5 rounded hover:bg-gray-100 transition-colors ${
-                userVote === 1 ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
+              className={`p-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+                userVote === 1 ? 'text-orange-500' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               }`}
               aria-label={t('common:actions.upvote')}
               aria-pressed={userVote === 1}
@@ -187,7 +187,7 @@ function CommentItem({
             </button>
             <span
               className={`text-xs font-medium min-w-[20px] text-center ${
-                score > 0 ? 'text-orange-600' : score < 0 ? 'text-blue-600' : 'text-gray-500'
+                score > 0 ? 'text-orange-600' : score < 0 ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'
               }`}
               aria-label={`${score} ${t('common:actions.points')}`}
             >
@@ -195,8 +195,8 @@ function CommentItem({
             </span>
             <button
               onClick={() => onVote(comment.id, userVote === -1 ? 0 : -1)}
-              className={`p-0.5 rounded hover:bg-gray-100 transition-colors ${
-                userVote === -1 ? 'text-blue-500' : 'text-gray-400 hover:text-gray-600'
+              className={`p-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+                userVote === -1 ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               }`}
               aria-label={t('common:actions.downvote')}
               aria-pressed={userVote === -1}
@@ -212,13 +212,13 @@ function CommentItem({
               <div
                 role="button"
                 tabIndex={0}
-                className="flex items-center gap-2 py-2 cursor-pointer hover:bg-gray-50 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                className="flex items-center gap-2 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                 onClick={() => setIsCollapsed(false)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsCollapsed(false) } }}
                 aria-label={t('common:actions.expand')}
               >
-                <Plus className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-500">
+                <Plus className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   {author.name} • {t('common:comments', { count: childReplies.length + 1 })}
                 </span>
               </div>
@@ -228,15 +228,15 @@ function CommentItem({
                 <div className="flex items-center gap-2 text-xs">
                   <button
                     onClick={() => setIsCollapsed(true)}
-                    className="p-0.5 hover:bg-gray-100 rounded"
+                    className="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
                     title={t('common:actions.collapse')}
                     aria-label={t('common:actions.collapse')}
                   >
-                    <Minus className="w-3 h-3 text-gray-400" />
+                    <Minus className="w-3 h-3 text-gray-400 dark:text-gray-500" />
                   </button>
                   <ActorBadge user={author} size="sm" />
-                  <span className="text-gray-400">•</span>
-                  <span className="text-gray-500">{formatRelativeTime(comment.createdAt)}</span>
+                  <span className="text-gray-400 dark:text-gray-500">•</span>
+                  <span className="text-gray-500 dark:text-gray-400">{formatRelativeTime(comment.createdAt)}</span>
                   {comment.editedAt && (
                     <EditedIndicator editedAt={comment.editedAt} />
                   )}
@@ -244,14 +244,14 @@ function CommentItem({
 
                 {/* Content */}
                 <div className={`mt-1 rounded-lg ${
-                  isInstitution ? 'bg-violet-50 p-3 border border-violet-100' : ''
+                  isInstitution ? 'bg-violet-50 dark:bg-violet-900/20 p-3 border border-violet-100 dark:border-violet-800' : ''
                 }`}>
                   {isEditing ? (
                     <div>
                       <textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         rows={4}
                         autoFocus
                       />
@@ -265,7 +265,7 @@ function CommentItem({
                         </button>
                         <button
                           onClick={() => setIsEditing(false)}
-                          className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800"
+                          className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                         >
                           {t('common:actions.cancel')}
                         </button>
@@ -274,10 +274,10 @@ function CommentItem({
                   ) : comment.contentHtml ? (
                     <ContentWithPreviews
                       html={comment.contentHtml}
-                      className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                      className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none"
                     />
                   ) : (
-                    <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                       {comment.content}
                     </div>
                   )}
@@ -288,7 +288,7 @@ function CommentItem({
                   <div className="flex items-center gap-3 mt-1">
                     <button
                       onClick={() => onReply(comment.id)}
-                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 py-1 rounded transition-colors"
+                      className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 py-1 rounded transition-colors"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
                       {t('common:actions.reply')}
@@ -296,7 +296,7 @@ function CommentItem({
                     {canEditComment && (
                       <button
                         onClick={handleStartEdit}
-                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 py-1 rounded transition-colors"
+                        className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 py-1 rounded transition-colors"
                       >
                         <Pencil className="w-3 h-3" />
                         {t('common:actions.edit')}
@@ -305,7 +305,7 @@ function CommentItem({
                     {canDeleteComment && (
                       <button
                         onClick={() => setShowDeleteConfirm(true)}
-                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-600 py-1 rounded transition-colors"
+                        className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 py-1 rounded transition-colors"
                       >
                         <Trash2 className="w-3 h-3" />
                         {t('common:actions.delete')}
@@ -335,7 +335,7 @@ function CommentItem({
                         }
                       }}
                       placeholder={t('writeReply')}
-                      className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       rows={3}
                       autoFocus
                     />
@@ -349,7 +349,7 @@ function CommentItem({
                       </button>
                       <button
                         onClick={onCancelReply}
-                        className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800"
+                        className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                       >
                         {t('common:actions.cancel')}
                       </button>

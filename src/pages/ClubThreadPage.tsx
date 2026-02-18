@@ -120,7 +120,7 @@ export function ClubThreadPage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">{t('clubs:threadNotFound')}</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('clubs:threadNotFound')}</p>
           <Link to={`/clubs/${clubId}`} className="text-blue-600 hover:underline mt-2 inline-block">
             {t('clubs:backToClub')}
           </Link>
@@ -147,10 +147,10 @@ export function ClubThreadPage() {
         />
       )}
       {/* Back navigation */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('clubs:backToClub')}
@@ -176,19 +176,19 @@ export function ClubThreadPage() {
           )}
           {!thread.isLocked && (
             <>
-              <Lock className="w-3 h-3 text-gray-400" />
-              <span className="text-xs text-gray-500">{t('clubs:membersOnly')}</span>
+              <Lock className="w-3 h-3 text-gray-400 dark:text-gray-500" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">{t('clubs:membersOnly')}</span>
             </>
           )}
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           {thread.title}
         </h1>
 
         {/* Meta + Vote */}
-        <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-4">
           <ThreadVoteButtons
             threadId={threadId || ''}
             score={thread.score || 0}
@@ -208,7 +208,7 @@ export function ClubThreadPage() {
                 <button
                   onClick={handleToggleLock}
                   disabled={updateThreadMutation.isPending}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
                   {thread.isLocked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
                   {thread.isLocked ? t('clubs:moderation.unlockThread') : t('clubs:moderation.lockThread')}
@@ -216,7 +216,7 @@ export function ClubThreadPage() {
                 <button
                   onClick={handleTogglePin}
                   disabled={updateThreadMutation.isPending}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
                   {thread.isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
                   {thread.isPinned ? t('clubs:moderation.unpinThread') : t('clubs:moderation.pinThread')}
@@ -234,7 +234,7 @@ export function ClubThreadPage() {
         )}
 
         {/* Author */}
-        <div className="pt-4 border-t border-gray-200">
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
           <ActorBadge user={author} />
         </div>
       </div>
@@ -242,13 +242,13 @@ export function ClubThreadPage() {
       {/* Confirm delete thread dialog */}
       {confirmDeleteThread && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm p-6">
-            <h3 className="font-semibold text-gray-900 mb-2">{t('clubs:moderation.confirmDelete')}</h3>
-            <p className="text-sm text-gray-600 mb-4">{thread.title}</p>
+          <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-sm p-6">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('clubs:moderation.confirmDelete')}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{thread.title}</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmDeleteThread(false)}
-                className="flex-1 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 {t('common:actions.cancel')}
               </button>
@@ -267,12 +267,12 @@ export function ClubThreadPage() {
       {/* Confirm delete comment dialog */}
       {confirmDeleteComment && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm p-6">
-            <h3 className="font-semibold text-gray-900 mb-2">{t('clubs:moderation.confirmDelete')}</h3>
+          <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-sm p-6">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('clubs:moderation.confirmDelete')}</h3>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmDeleteComment(null)}
-                className="flex-1 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 {t('common:actions.cancel')}
               </button>
@@ -291,7 +291,7 @@ export function ClubThreadPage() {
       {/* Main content area */}
       <div className="px-4 py-6 space-y-6">
         {/* Thread content */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
           {thread.contentHtml ? (
             <ContentWithPreviews
               html={thread.contentHtml}
@@ -307,7 +307,7 @@ export function ClubThreadPage() {
         {/* Discussion section */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {t('clubs:discussion', { count: comments.length })}
             </h2>
 
@@ -315,7 +315,7 @@ export function ClubThreadPage() {
             <div className="relative">
               <button
                 onClick={() => setShowSortMenu(!showSortMenu)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 {t('clubs:sort', { label: sortOptions.find(o => o.value === sort)?.label })}
                 <ChevronDown className="w-4 h-4" />
@@ -327,7 +327,7 @@ export function ClubThreadPage() {
                     className="fixed inset-0 z-10"
                     onClick={() => setShowSortMenu(false)}
                   />
-                  <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                  <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20">
                     {sortOptions.map(option => (
                       <button
                         key={option.value}
@@ -335,8 +335,8 @@ export function ClubThreadPage() {
                           setSort(option.value)
                           setShowSortMenu(false)
                         }}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                          sort === option.value ? 'text-blue-600 font-medium' : 'text-gray-700'
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                          sort === option.value ? 'text-blue-600 font-medium' : 'text-gray-700 dark:text-gray-300'
                         }`}
                       >
                         {option.label}
@@ -350,14 +350,14 @@ export function ClubThreadPage() {
 
           {/* Comment input - hidden when thread is locked (unless mod/admin) */}
           {thread.isLocked && !isModOrAdmin ? (
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4 text-center">
-              <div className="flex items-center justify-center gap-2 text-gray-500">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-800 mb-4 text-center">
+              <div className="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
                 <Lock className="w-4 h-4" />
                 <span className="text-sm">{t('clubs:moderation.threadLocked')}</span>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-xl p-4 border border-gray-200 mb-4">
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 mb-4">
               <textarea
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
@@ -368,7 +368,7 @@ export function ClubThreadPage() {
                   }
                 }}
                 placeholder={t('clubs:thread.writeComment')}
-                className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full p-3 border border-gray-200 dark:border-gray-800 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                 rows={3}
               />
               <div className="flex justify-end mt-3">
@@ -407,7 +407,7 @@ export function ClubThreadPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <p>{t('clubs:noReplies')}</p>
             </div>
           )}

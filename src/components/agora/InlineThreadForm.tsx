@@ -223,7 +223,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
   }
 
   return (
-    <div ref={formRef} className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all">
+    <div ref={formRef} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all">
       {/* Collapsed state */}
       {!isExpanded ? (
         <button
@@ -233,7 +233,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
           <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
             <Plus className="w-4 h-4 text-blue-600" />
           </div>
-          <span className="flex-1 text-gray-500 group-hover:text-gray-700 transition-colors">{t('threadForm.collapsed')}</span>
+          <span className="flex-1 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">{t('threadForm.collapsed')}</span>
         </button>
       ) : (
         /* Expanded state */
@@ -256,7 +256,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                       scope === value
                         ? 'bg-blue-800 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -267,9 +267,9 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
             )}
             <button
               onClick={handleCancel}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
             >
-              <ChevronUp className="w-5 h-5 text-gray-400" />
+              <ChevronUp className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             </button>
           </div>
 
@@ -286,13 +286,13 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
 
           {/* National/EU indicator - subtle, informational */}
           {!isPrefilled && scope === 'national' && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <span>🇫🇮</span>
               <span>{t('threadForm.nationalInfo')}</span>
             </div>
           )}
           {!isPrefilled && scope === 'european' && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <span>🇪🇺</span>
               <span>{t('threadForm.europeanInfo')}</span>
             </div>
@@ -305,7 +305,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('threadForm.title')}
-            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base font-medium placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-colors"
+            className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-lg text-base font-medium placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-900 dark:text-gray-100 transition-colors"
             maxLength={500}
           />
 
@@ -315,7 +315,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('threadForm.contentPlaceholder')}
             rows={4}
-            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white resize-none transition-colors"
+            className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-900 resize-none transition-colors"
           />
 
           {/* Image upload */}
@@ -334,7 +334,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
                 <img
                   src={uploadedImage.thumbnailUrl}
                   alt={t('threadForm.preview')}
-                  className="h-24 rounded-lg border border-gray-200 object-cover"
+                  className="h-24 rounded-lg border border-gray-200 dark:border-gray-800 object-cover"
                 />
                 <button
                   type="button"
@@ -349,7 +349,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
                 type="button"
                 onClick={handleImageClick}
                 disabled={isUploadingImage}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
               >
                 {isUploadingImage ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -371,7 +371,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${
                     selectedTags.includes(tag)
                       ? 'bg-teal-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
                   <Hash className="w-3 h-3" />
@@ -379,8 +379,8 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
                 </button>
               ))}
               {/* Custom tag input inline */}
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-50 rounded-full">
-                <Hash className="w-3 h-3 text-gray-400" />
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-50 dark:bg-gray-800/50 rounded-full">
+                <Hash className="w-3 h-3 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   value={customTag}
@@ -424,7 +424,7 @@ export function InlineThreadForm({ municipalityId, municipalityName, onSuccess }
           <div className="flex items-center justify-end gap-3 pt-3">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors"
+              className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors"
             >
               {t('threadForm.cancel')}
             </button>

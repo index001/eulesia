@@ -20,34 +20,34 @@ export function AdminInstitutionsPage() {
 
   return (
     <AdminLayout>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('institutions.title')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">{t('institutions.title')}</h1>
 
       {!claims || claims.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+        <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
           <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">{t('institutions.noPending')}</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('institutions.noPending')}</p>
         </div>
       ) : (
         <div className="space-y-3">
           {claims.map(claim => (
-            <div key={claim.id} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={claim.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Building2 className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       {claim.institution.institutionName || claim.institution.name}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {claim.institution.institutionType}
                     </p>
-                    <div className="mt-2 text-sm text-gray-600">
+                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                       <span className="font-medium">{t('institutions.requestedBy')}:</span>{' '}
                       {claim.user.name} ({claim.user.email})
                     </div>
-                    <div className="mt-1 text-xs text-gray-400 flex items-center gap-1">
+                    <div className="mt-1 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {new Date(claim.createdAt).toLocaleDateString()}
                     </div>

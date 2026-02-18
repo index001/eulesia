@@ -225,9 +225,9 @@ export function EulesiaMap({
       />
 
       {isLoading && (
-        <div className="absolute top-4 right-4 z-[1000] bg-white rounded-lg shadow-lg px-3 py-2 flex items-center gap-2">
+        <div className="absolute top-4 right-4 z-[1000] bg-white dark:bg-gray-900 rounded-lg shadow-lg px-3 py-2 flex items-center gap-2">
           <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-600">Loading...</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">Loading...</span>
         </div>
       )}
     </div>

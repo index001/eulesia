@@ -38,7 +38,7 @@ export function AgoraFilters({
   const hasActiveFilters = selectedScope !== 'all' || selectedTags.length > 0 || !!selectedMunicipality
 
   return (
-    <div className="bg-white border-b border-gray-200 sticky top-14 z-40">
+    <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-14 z-40">
       <div className="px-4 py-3">
         {/* Scope filters */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -55,7 +55,7 @@ export function AgoraFilters({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 selectedScope === value
                   ? 'bg-blue-800 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
               aria-pressed={selectedScope === value}
             >
@@ -68,13 +68,13 @@ export function AgoraFilters({
         {/* Municipality chips - show when Local scope is selected */}
         {selectedScope === 'local' && municipalities && municipalities.length > 0 && (
           <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide">
-            <span className="text-xs text-gray-500 flex-shrink-0">{t('filters.municipalityLabel')}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">{t('filters.municipalityLabel')}</span>
             <button
               onClick={() => onMunicipalityChange?.(undefined)}
               className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 !selectedMunicipality
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               {t('filters.allMunicipalities')}
@@ -86,7 +86,7 @@ export function AgoraFilters({
                 className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                   selectedMunicipality === m.id
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {m.name}
@@ -97,7 +97,7 @@ export function AgoraFilters({
 
         {/* Topic tags */}
         <div className="flex items-center gap-2 overflow-x-auto pt-2 scrollbar-hide">
-          <span className="text-xs text-gray-500 flex-shrink-0">{t('filters.topicsLabel')}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">{t('filters.topicsLabel')}</span>
           {availableTags.slice(0, 8).map(tag => (
             <button
               key={tag}
@@ -105,7 +105,7 @@ export function AgoraFilters({
               className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 selectedTags.includes(tag)
                   ? 'bg-teal-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
               aria-pressed={selectedTags.includes(tag)}
             >
@@ -118,7 +118,7 @@ export function AgoraFilters({
         {hasActiveFilters && (
           <button
             onClick={onClearFilters}
-            className="mt-2 flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+            className="mt-2 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
             <X className="w-3 h-3" />
             {t('filters.clearFilters')}

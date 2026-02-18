@@ -36,8 +36,8 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
 
   return (
     <div
-      className={`bg-white rounded-xl hover:shadow-md transition-shadow border ${
-        isAiGenerated ? 'border-purple-200' : isInstitutional ? 'border-violet-200' : 'border-gray-200'
+      className={`bg-white dark:bg-gray-900 rounded-xl hover:shadow-md transition-shadow border ${
+        isAiGenerated ? 'border-purple-200 dark:border-purple-800' : isInstitutional ? 'border-violet-200 dark:border-violet-800' : 'border-gray-200 dark:border-gray-800'
       }`}
     >
       <div className="flex">
@@ -125,7 +125,7 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
               municipalityId={thread.municipalityId}
               municipalityName={thread.municipalityName}
             />
-            <div className="flex items-center gap-3 text-xs text-gray-500">
+            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
               <span className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
                 {formatRelativeTime(thread.updatedAt)}
@@ -134,12 +134,12 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
           </div>
 
           {/* Title */}
-          <h3 className="font-semibold text-gray-900 mb-2 leading-snug">
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 leading-snug">
             {thread.title}
           </h3>
 
           {/* Preview content */}
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
             {thread.content.split('\n')[0].replace(/[*#]/g, '')}
           </p>
 
@@ -154,10 +154,10 @@ export function ThreadCard({ thread, author, onVote, isVoting = false }: ThreadC
           </div>
 
           {/* Footer: author + replies + share */}
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
             <ActorBadge user={author} size="sm" />
 
-            <div className="flex items-center gap-3 text-sm text-gray-500">
+            <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
               <span className="flex items-center gap-1">
                 <MessageSquare className="w-4 h-4" />
                 {t('replies', { count: thread.replyCount })}

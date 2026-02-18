@@ -69,10 +69,10 @@ export function PersonalDataPage() {
   return (
     <Layout>
       <SEOHead title={t('personalData.title')} path="/profile/data" noIndex />
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <Link
           to="/profile"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('personalData.back')}
@@ -81,8 +81,8 @@ export function PersonalDataPage() {
 
       <div className="px-4 py-6 space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">{t('personalData.title')}</h1>
-          <p className="text-sm text-gray-500 mt-1">{t('personalData.description')}</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('personalData.title')}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('personalData.description')}</p>
         </div>
 
         {isLoading ? (
@@ -91,21 +91,21 @@ export function PersonalDataPage() {
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+                <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <Database className="w-4 h-4 text-blue-600" />
                   {t('personalData.storedData')}
                 </h2>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 dark:border-gray-800">
                 {categories.map((cat, i) => (
                   <div key={i} className="px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-gray-400">{cat.icon}</span>
-                      <span className="text-sm text-gray-700">{cat.label}</span>
+                      <span className="text-gray-400 dark:text-gray-500">{cat.icon}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{cat.label}</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{cat.count}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{cat.count}</span>
                   </div>
                 ))}
               </div>

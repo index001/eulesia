@@ -21,9 +21,9 @@ export function AdminSidebar() {
   const { t } = useTranslation('admin')
 
   return (
-    <aside className="w-56 bg-white border-r border-gray-200 min-h-screen flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-bold text-gray-900">Eulesia Admin</h2>
+    <aside className="w-56 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen flex flex-col">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Eulesia Admin</h2>
       </div>
 
       <nav className="flex-1 p-2 space-y-0.5">
@@ -35,8 +35,8 @@ export function AdminSidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
               }`
             }
           >
@@ -46,10 +46,10 @@ export function AdminSidebar() {
         ))}
       </nav>
 
-      <div className="p-2 border-t border-gray-200">
+      <div className="p-2 border-t border-gray-200 dark:border-gray-800">
         <NavLink
           to="/agora"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 flex-shrink-0" />
           {t('nav.backToApp')}

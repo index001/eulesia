@@ -46,7 +46,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
   return (
     <>
       {/* Desktop: centered horizontal bar */}
-      <div className="hidden sm:flex absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-white rounded-lg shadow-lg p-2 items-center gap-2">
+      <div className="hidden sm:flex absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-white dark:bg-gray-900 rounded-lg shadow-lg p-2 items-center gap-2">
         {/* Type toggles */}
         <div className="flex gap-1">
           {typeFilters.map(({ type, icon: Icon, labelKey, color }) => {
@@ -58,7 +58,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   isActive
                     ? `${color} text-white`
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
                 title={t(labelKey)}
               >
@@ -70,7 +70,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
         </div>
 
         {/* Separator */}
-        <div className="w-px h-6 bg-gray-200" />
+        <div className="w-px h-6 bg-gray-200 dark:bg-gray-700" />
 
         {/* Time presets */}
         <div className="flex gap-1">
@@ -82,8 +82,8 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
                 onClick={() => handleTimePreset(value)}
                 className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-gray-800 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {t(labelKey)}
@@ -93,7 +93,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
         </div>
 
         {/* Separator */}
-        <div className="w-px h-6 bg-gray-200" />
+        <div className="w-px h-6 bg-gray-200 dark:bg-gray-700" />
 
         {/* Advanced filters button */}
         <button
@@ -101,7 +101,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
           className={`p-1.5 rounded-md transition-colors ${
             (filters.scopes?.length || filters.languages?.length || filters.tags?.length || filters.dateFrom)
               ? 'bg-blue-100 text-blue-700'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
           }`}
           title={t('filters.advanced')}
         >
@@ -112,7 +112,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
       {/* Mobile: compact bottom-left bar, avoiding zoom controls (top-left) */}
       <div className="sm:hidden absolute bottom-4 left-2 right-2 z-[1000] flex flex-col gap-2">
         {/* Type toggles row */}
-        <div className="bg-white rounded-lg shadow-lg p-1.5 flex items-center justify-between">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-1.5 flex items-center justify-between">
           <div className="flex gap-1 flex-1">
             {typeFilters.map(({ type, icon: Icon, labelKey, color }) => {
               const isActive = filters.types.includes(type)
@@ -123,7 +123,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
                   className={`flex-1 flex items-center justify-center gap-1 px-1 py-1.5 rounded-md text-xs font-medium transition-colors ${
                     isActive
                       ? `${color} text-white`
-                      : 'bg-gray-100 text-gray-600'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                   }`}
                   title={t(labelKey)}
                 >
@@ -133,7 +133,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
             })}
           </div>
 
-          <div className="w-px h-5 bg-gray-200 mx-1" />
+          <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
 
           {/* Time presets - compact */}
           <div className="flex gap-0.5">
@@ -145,8 +145,8 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
                   onClick={() => handleTimePreset(value)}
                   className={`px-1.5 py-1 rounded text-[10px] font-medium transition-colors ${
                     isActive
-                      ? 'bg-gray-800 text-white'
-                      : 'bg-gray-100 text-gray-500'
+                      ? 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
                   }`}
                 >
                   {t(labelKey)}
@@ -155,7 +155,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
             })}
           </div>
 
-          <div className="w-px h-5 bg-gray-200 mx-1" />
+          <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
 
           {/* Advanced */}
           <button
@@ -163,7 +163,7 @@ export function MapFilters({ filters, onFiltersChange }: MapFiltersProps) {
             className={`p-1.5 rounded-md transition-colors ${
               (filters.scopes?.length || filters.languages?.length || filters.tags?.length || filters.dateFrom)
                 ? 'bg-blue-100 text-blue-700'
-                : 'bg-gray-100 text-gray-600'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
             }`}
             title={t('filters.advanced')}
           >

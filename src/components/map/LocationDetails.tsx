@@ -24,21 +24,21 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
   const Icon = config.icon
 
   return (
-    <div className="absolute bottom-20 left-4 right-4 z-[1000] max-w-md mx-auto bg-white rounded-xl shadow-xl overflow-hidden max-h-[60vh] flex flex-col">
+    <div className="absolute bottom-20 left-4 right-4 z-[1000] max-w-md mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden max-h-[60vh] flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex items-start gap-3">
+      <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-start gap-3">
         <div className={`p-2 rounded-lg ${config.bgColor} shrink-0`}>
           <Icon className={`w-6 h-6 ${config.color}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="font-bold text-lg text-gray-900 truncate">{point.name}</h2>
-          <p className="text-sm text-gray-500">{config.label}</p>
+          <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">{point.name}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{config.label}</p>
         </div>
         <button
           onClick={onClose}
-          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
         >
-          <X className="w-5 h-5 text-gray-500" />
+          <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
         </button>
       </div>
 
@@ -86,7 +86,7 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
             {/* Related threads */}
             {details.threads && details.threads.length > 0 && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                   <MessageCircle className="w-4 h-4" />
                   Recent Discussions
                 </h3>
@@ -95,10 +95,10 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
                     <Link
                       key={thread.id}
                       to={`/agora/thread/${thread.id}`}
-                      className="block p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="block p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
-                      <p className="font-medium text-gray-900 text-sm truncate">{thread.title}</p>
-                      <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                      <p className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{thread.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
                         <Clock className="w-3 h-3" />
                         {new Date(thread.createdAt).toLocaleDateString()}
                       </p>
@@ -111,7 +111,7 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
             {/* Related clubs */}
             {details.clubs && details.clubs.length > 0 && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   Clubs here
                 </h3>
@@ -120,11 +120,11 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
                     <Link
                       key={club.id}
                       to={`/clubs/${club.id}`}
-                      className="block p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="block p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
-                      <p className="font-medium text-gray-900 text-sm">{club.name}</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{club.name}</p>
                       {club.memberCount && (
-                        <p className="text-xs text-gray-500">{club.memberCount} members</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{club.memberCount} members</p>
                       )}
                     </Link>
                   ))}
@@ -134,8 +134,8 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
 
             {/* Municipality info */}
             {details.municipality && (
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   <span className="font-medium">Municipality:</span>{' '}
                   {details.municipality.name}
                 </p>
@@ -144,8 +144,8 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
 
             {/* Place info */}
             {details.place && point.type !== 'place' && (
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   <span className="font-medium">Location:</span>{' '}
                   {details.place.name}
                 </p>
@@ -153,7 +153,7 @@ export function LocationDetails({ point, onClose }: LocationDetailsProps) {
             )}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">{t('noResults')}</div>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t('noResults')}</div>
         )}
       </div>
     </div>

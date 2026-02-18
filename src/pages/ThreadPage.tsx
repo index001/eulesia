@@ -157,7 +157,7 @@ export function ThreadPage() {
     return (
       <Layout>
         <div className="p-8 text-center">
-          <p className="text-gray-500">{t('thread.notFound')}</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('thread.notFound')}</p>
           <Link to="/agora" className="text-blue-600 hover:underline mt-2 inline-block">
             {t('thread.returnToAgora')}
           </Link>
@@ -196,10 +196,10 @@ export function ThreadPage() {
         jsonLd={threadJsonLd}
       />
       {/* Back navigation */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('thread.backToAgora')}
@@ -207,7 +207,7 @@ export function ThreadPage() {
       </div>
 
       {/* Thread header */}
-      <div className={`px-4 py-6 ${isInstitutional ? 'bg-violet-50' : 'bg-white'}`}>
+      <div className={`px-4 py-6 ${isInstitutional ? 'bg-violet-50 dark:bg-violet-900/20' : 'bg-white dark:bg-gray-900'}`}>
         {/* Institutional indicator */}
         {isInstitutional && (
           <div className="flex items-center gap-1.5 text-sm text-violet-700 mb-3">
@@ -222,7 +222,7 @@ export function ThreadPage() {
             scope={thread.scope}
             municipalityName={thread.municipality?.name}
           />
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {t('thread.posted', { time: formatRelativeTime(thread.createdAt) })}
           </span>
           {thread.editedAt && (
@@ -232,7 +232,7 @@ export function ThreadPage() {
 
         {/* Title */}
         <div className="flex items-start gap-3 mb-4">
-          <h1 className="text-2xl font-bold text-gray-900 flex-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex-1">
             {thread.title}
           </h1>
           {currentUser && (canEditThread || canDeleteThread) && (
@@ -240,7 +240,7 @@ export function ThreadPage() {
               {canEditThread && (
                 <button
                   onClick={handleStartEditThread}
-                  className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   title={t('thread.editThread')}
                 >
                   <Pencil className="w-4 h-4" />
@@ -258,7 +258,7 @@ export function ThreadPage() {
               {isBotThread && (
                 <button
                   onClick={() => setShowEditHistory(true)}
-                  className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   title={t('thread.editHistory')}
                 >
                   <History className="w-4 h-4" />
@@ -274,7 +274,7 @@ export function ThreadPage() {
         </div>
 
         {/* Author + Share + Report */}
-        <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <ActorBadge user={author} />
           <div className="flex items-center gap-1">
             <ShareButtons
@@ -300,9 +300,9 @@ export function ThreadPage() {
         )}
 
         {/* Thread content */}
-        <div ref={threadContentRef} className="bg-white rounded-xl border border-gray-200 flex">
+        <div ref={threadContentRef} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 flex">
           {/* Vote buttons */}
-          <div className="flex-shrink-0 p-4 border-r border-gray-100">
+          <div className="flex-shrink-0 p-4 border-r border-gray-100 dark:border-gray-800">
             <ThreadVoteButtons
               threadId={thread.id}
               score={thread.score ?? 0}
@@ -318,27 +318,27 @@ export function ThreadPage() {
             {isEditingThread ? (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('threadForm.title')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('threadForm.title')}</label>
                   <input
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('threadForm.content')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('threadForm.content')}</label>
                   <textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
                     rows={10}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-y focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg resize-y focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setIsEditingThread(false)}
-                    className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                    className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                   >
                     {t('common:actions.cancel')}
                   </button>
@@ -361,14 +361,14 @@ export function ThreadPage() {
                 {thread.content.split('\n').map((paragraph, i) => {
                   if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
                     return (
-                      <h3 key={i} className="font-semibold text-gray-900 mt-4 first:mt-0">
+                      <h3 key={i} className="font-semibold text-gray-900 dark:text-gray-100 mt-4 first:mt-0">
                         {paragraph.replace(/\*\*/g, '')}
                       </h3>
                     )
                   }
                   if (paragraph.startsWith('- ')) {
                     return (
-                      <li key={i} className="ml-4 text-gray-700">
+                      <li key={i} className="ml-4 text-gray-700 dark:text-gray-300">
                         {paragraph.replace('- ', '')}
                       </li>
                     )
@@ -377,7 +377,7 @@ export function ThreadPage() {
                     return <br key={i} />
                   }
                   return (
-                    <p key={i} className="text-gray-700 leading-relaxed">
+                    <p key={i} className="text-gray-700 dark:text-gray-300 leading-relaxed">
                       {paragraph}
                     </p>
                   )
@@ -390,7 +390,7 @@ export function ThreadPage() {
         {/* Discussion section */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {t('thread.discussion')} ({t('replies', { count: comments.length })})
             </h2>
 
@@ -398,7 +398,7 @@ export function ThreadPage() {
             <div className="relative">
               <button
                 onClick={() => setShowSortMenu(!showSortMenu)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 {t('thread.sort')} {sortOptions.find(o => o.value === sort)?.label}
                 <ChevronDown className="w-4 h-4" />
@@ -410,7 +410,7 @@ export function ThreadPage() {
                     className="fixed inset-0 z-10"
                     onClick={() => setShowSortMenu(false)}
                   />
-                  <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                  <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20">
                     {sortOptions.map(option => (
                       <button
                         key={option.value}
@@ -418,8 +418,8 @@ export function ThreadPage() {
                           setSort(option.value)
                           setShowSortMenu(false)
                         }}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                          sort === option.value ? 'text-blue-600 font-medium' : 'text-gray-700'
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800/50 ${
+                          sort === option.value ? 'text-blue-600 font-medium' : 'text-gray-700 dark:text-gray-300'
                         }`}
                       >
                         {option.label}
@@ -433,7 +433,7 @@ export function ThreadPage() {
 
           {/* Comment input */}
           {currentUser ? (
-            <div className="bg-white rounded-xl p-4 border border-gray-200 mb-4">
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 mb-4">
               <textarea
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
@@ -444,7 +444,7 @@ export function ThreadPage() {
                   }
                 }}
                 placeholder={t('thread.shareThoughts')}
-                className="w-full p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 border border-gray-200 dark:border-gray-800 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={3}
               />
               <div className="flex justify-end mt-3">
@@ -477,7 +477,7 @@ export function ThreadPage() {
               currentUserRole={currentUser?.role}
             />
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <p>{t('thread.noReplies')}</p>
             </div>
           )}

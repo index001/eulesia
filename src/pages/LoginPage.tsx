@@ -119,16 +119,16 @@ export function LoginPage() {
           </p>
 
           {/* Login/Register card */}
-          <div className="bg-white rounded-2xl p-6 shadow-xl">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-xl">
             {step === 'initial' && (
               <>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <Fingerprint className="w-6 h-6 text-blue-800" />
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                    <Fingerprint className="w-6 h-6 text-blue-800 dark:text-blue-300" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-gray-900">{t('welcome')}</h2>
-                    <p className="text-sm text-gray-500">{t('inviteOnlyBeta')}</p>
+                    <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('welcome')}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('inviteOnlyBeta')}</p>
                   </div>
                 </div>
 
@@ -149,10 +149,10 @@ export function LoginPage() {
                 </button>
 
                 {/* Future: EUDI Wallet button */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
                   <button
                     disabled
-                    className="w-full bg-gray-100 text-gray-400 py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 cursor-not-allowed"
+                    className="w-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 cursor-not-allowed"
                   >
                     <Shield className="w-5 h-5" />
                     {t('eudiWallet')}
@@ -164,18 +164,18 @@ export function LoginPage() {
             {step === 'login' && (
               <form onSubmit={handleLogin}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <LogIn className="w-6 h-6 text-blue-800" />
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                    <LogIn className="w-6 h-6 text-blue-800 dark:text-blue-300" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-gray-900">{t('signIn')}</h2>
-                    <p className="text-sm text-gray-500">{t('enterCredentials')}</p>
+                    <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('signIn')}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('enterCredentials')}</p>
                   </div>
                 </div>
 
                 <div className="space-y-4 mb-4">
                   <div>
-                    <label htmlFor="login-username" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="login-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t('username')}
                     </label>
                     <input
@@ -184,7 +184,7 @@ export function LoginPage() {
                       value={loginUsername}
                       onChange={(e) => setLoginUsername(e.target.value)}
                       placeholder={t('usernamePlaceholder')}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                       required
                       autoFocus
                       autoComplete="username"
@@ -192,7 +192,7 @@ export function LoginPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t('password')}
                     </label>
                     <input
@@ -201,7 +201,7 @@ export function LoginPage() {
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                       required
                       autoComplete="current-password"
                     />
@@ -209,7 +209,7 @@ export function LoginPage() {
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-xl text-sm text-red-700">
                     {error}
                   </div>
                 )}
@@ -235,7 +235,7 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => { setStep('initial'); setError(null) }}
-                  className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700 flex items-center justify-center gap-1"
+                  className="w-full mt-3 text-gray-500 dark:text-gray-400 text-sm hover:text-gray-700 dark:hover:text-gray-300 flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   {t('common:actions.back')}
@@ -250,13 +250,13 @@ export function LoginPage() {
                     <Ticket className="w-6 h-6 text-green-700" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-gray-900">{t('enterInviteCode')}</h2>
-                    <p className="text-sm text-gray-500">{t('needInvite')}</p>
+                    <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('enterInviteCode')}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('needInvite')}</p>
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="invite-code" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="invite-code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t('inviteCode')}
                   </label>
                   <input
@@ -265,14 +265,14 @@ export function LoginPage() {
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                     placeholder="EULESIA-XXXXXX"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-center text-lg tracking-wider"
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-center text-lg tracking-wider dark:bg-gray-800 dark:text-gray-100"
                     required
                     autoFocus
                   />
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-xl text-sm text-red-700">
                     {error}
                   </div>
                 )}
@@ -298,7 +298,7 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => { setStep('initial'); setError(null); setInviteCode('') }}
-                  className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700 flex items-center justify-center gap-1"
+                  className="w-full mt-3 text-gray-500 dark:text-gray-400 text-sm hover:text-gray-700 dark:hover:text-gray-300 flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   {t('common:actions.back')}
@@ -313,9 +313,9 @@ export function LoginPage() {
                     <UserPlus className="w-6 h-6 text-green-700" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-gray-900">{t('createAccount')}</h2>
+                    <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('createAccount')}</h2>
                     {invitedBy && (
-                      <p className="text-sm text-gray-500">{t('invitedBy', { name: invitedBy })}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t('invitedBy', { name: invitedBy })}</p>
                     )}
                   </div>
                 </div>
@@ -342,7 +342,7 @@ export function LoginPage() {
                 <div className="space-y-4 mb-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label htmlFor="reg-firstname" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="reg-firstname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {t('firstName')}
                       </label>
                       <input
@@ -351,14 +351,14 @@ export function LoginPage() {
                         value={regFirstName}
                         onChange={(e) => setRegFirstName(e.target.value)}
                         placeholder={t('firstNamePlaceholder')}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                         required
                         autoFocus
                         autoComplete="given-name"
                       />
                     </div>
                     <div>
-                      <label htmlFor="reg-lastname" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="reg-lastname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {t('lastName')}
                       </label>
                       <input
@@ -367,7 +367,7 @@ export function LoginPage() {
                         value={regLastName}
                         onChange={(e) => setRegLastName(e.target.value)}
                         placeholder={t('lastNamePlaceholder')}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                         required
                         autoComplete="family-name"
                       />
@@ -376,7 +376,7 @@ export function LoginPage() {
                   <p className="text-xs text-amber-700 -mt-2">{t('realNameNotice')}</p>
 
                   <div>
-                    <label htmlFor="reg-username" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="reg-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t('username')}
                     </label>
                     <input
@@ -385,16 +385,16 @@ export function LoginPage() {
                       value={regUsername}
                       onChange={(e) => setRegUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                       placeholder={t('usernamePlaceholder')}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                       required
                       autoComplete="username"
                       pattern="[a-z0-9_]+"
                     />
-                    <p className="text-xs text-gray-500 mt-1">{t('usernameHint')}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('usernameHint')}</p>
                   </div>
 
                   <div>
-                    <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t('password')}
                     </label>
                     <input
@@ -403,17 +403,17 @@ export function LoginPage() {
                       value={regPassword}
                       onChange={(e) => setRegPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                       required
                       minLength={6}
                       autoComplete="new-password"
                     />
-                    <p className="text-xs text-gray-500 mt-1">{t('passwordHint')}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('passwordHint')}</p>
                   </div>
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-xl text-sm text-red-700">
                     {error}
                   </div>
                 )}
@@ -439,7 +439,7 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => { setStep('invite-check'); setError(null); setInviteValid(false) }}
-                  className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700 flex items-center justify-center gap-1"
+                  className="w-full mt-3 text-gray-500 dark:text-gray-400 text-sm hover:text-gray-700 dark:hover:text-gray-300 flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   {t('common:actions.back')}
@@ -462,9 +462,9 @@ export function LoginPage() {
       </main>
 
       {/* Feature highlights */}
-      <div className="bg-white px-6 py-8">
+      <div className="bg-white dark:bg-gray-900 px-6 py-8">
         <div className="max-w-md mx-auto">
-          <h3 className="text-gray-900 font-semibold mb-4 text-center">
+          <h3 className="text-gray-900 dark:text-gray-100 font-semibold mb-4 text-center">
             {t('features.title')}
           </h3>
 
@@ -474,8 +474,8 @@ export function LoginPage() {
                 <CheckCircle className="w-4 h-4 text-green-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">{t('features.noAttentionEconomy.title')}</h4>
-                <p className="text-gray-500 text-sm">
+                <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('features.noAttentionEconomy.title')}</h4>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
                   {t('features.noAttentionEconomy.description')}
                 </p>
               </div>
@@ -486,8 +486,8 @@ export function LoginPage() {
                 <Building2 className="w-4 h-4 text-violet-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">{t('features.institutions.title')}</h4>
-                <p className="text-gray-500 text-sm">
+                <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('features.institutions.title')}</h4>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
                   {t('features.institutions.description')}
                 </p>
               </div>
@@ -498,8 +498,8 @@ export function LoginPage() {
                 <Users className="w-4 h-4 text-teal-700" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 text-sm">{t('features.socialNotSurveillance.title')}</h4>
-                <p className="text-gray-500 text-sm">
+                <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('features.socialNotSurveillance.title')}</h4>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
                   {t('features.socialNotSurveillance.description')}
                 </p>
               </div>
@@ -507,8 +507,8 @@ export function LoginPage() {
           </div>
 
           {/* EU alignment + about link */}
-          <div className="mt-6 pt-4 border-t border-gray-200 space-y-3">
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <span className="text-lg">🇪🇺</span>
               <span>{t('euInfrastructure')}</span>
             </div>

@@ -4,13 +4,13 @@
 
 function SkeletonBox({ className = '' }: { className?: string }) {
   return (
-    <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
+    <div className={`animate-pulse bg-gray-200 dark:bg-gray-700 rounded ${className}`} />
   )
 }
 
 export function ThreadCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-3">
+    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 space-y-3">
       <div className="flex items-center gap-2">
         <SkeletonBox className="w-8 h-8 rounded-full" />
         <SkeletonBox className="h-4 w-24" />
@@ -54,7 +54,7 @@ export function CommentSkeleton() {
 
 export function CommentListSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="divide-y divide-gray-100">
+    <div className="divide-y divide-gray-100 dark:divide-gray-800">
       {Array.from({ length: count }).map((_, i) => (
         <CommentSkeleton key={i} />
       ))}
