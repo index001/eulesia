@@ -214,5 +214,17 @@
   },
   "a11y": {
     "skipToContent": "Siirry sisältöön"
+  },
+  "pwa": {
+    "updateAvailable": "Uusi versio saatavilla",
+    "update": "Päivitä",
+    "installTitle": "Asenna Eulesia",
+    "installDesc": "Lisää Eulesia kotinäytöllesi nopeampaa käyttöä varten",
+    "install": "Asenna",
+    "notNow": "Ei nyt",
+    "offline": "Olet offline-tilassa. Jotkin toiminnot eivät ole käytettävissä.",
+    "offlineTitle": "Ei verkkoyhteyttä",
+    "offlineDesc": "Tarkista verkkoyhteytesi ja yritä uudelleen.",
+    "retry": "Yritä uudelleen"
   }
 }

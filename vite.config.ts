@@ -1,10 +1,64 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'prompt',
+      includeAssets: ['favicon.svg', 'icons/*.webp'],
+      manifest: {
+        name: 'Eulesia',
+        short_name: 'Eulesia',
+        description: 'Eurooppalainen kansalaisdemokratia-alusta',
+        start_url: '/agora',
+        display: 'standalone',
+        background_color: '#1e3a8a',
+        theme_color: '#1e3a8a',
+        orientation: 'portrait-primary',
+        icons: [
+          { src: '/icons/icon-48.webp', sizes: '48x48', type: 'image/webp' },
+          { src: '/icons/icon-72.webp', sizes: '72x72', type: 'image/webp' },
+          { src: '/icons/icon-96.webp', sizes: '96x96', type: 'image/webp' },
+          { src: '/icons/icon-128.webp', sizes: '128x128', type: 'image/webp' },
+          { src: '/icons/icon-192.webp', sizes: '192x192', type: 'image/webp', purpose: 'any' },
+          { src: '/icons/icon-256.webp', sizes: '256x256', type: 'image/webp' },
+          { src: '/icons/icon-512.webp', sizes: '512x512', type: 'image/webp', purpose: 'any maskable' },
+        ],
+      },
+      workbox: {
+        importScripts: ['/sw-push.js'],
+        globPatterns: ['**/*.{js,css,html,svg,webp,woff,woff2}'],
+        runtimeCaching: [
+          {
+            // Cache locale files
+            urlPattern: /\/locales\/.*\.json$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'eulesia-locales',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 },
+            },
+          },
+          {
+            // Cache API responses (short TTL, network-first)
+            urlPattern: /\/api\/v1\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'eulesia-api',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 5 },
+              networkTimeoutSeconds: 10,
+            },
+          },
+        ],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/],
+      },
+    }),
+  ],
   server: {
     host: '0.0.0.0',
   },

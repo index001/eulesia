@@ -9,6 +9,8 @@ import { DeepLinkHandler } from './hooks/useDeepLinks'
 import { BackButtonHandler } from './hooks/useBackButton'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { PageErrorBoundary } from './components/common/PageErrorBoundary'
+import { PWAUpdatePrompt, PWAInstallBanner } from './components/common/PWAPrompt'
+import { PWAProvider } from './hooks/usePWA'
 import { NotFoundPage } from './pages/NotFoundPage'
 
 // Lazy-loaded pages — route-based code splitting
@@ -330,19 +332,23 @@ function MagicLinkVerify() {
 function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <ScrollToTop />
-        <DeepLinkHandler />
-        <BackButtonHandler />
-        <AuthProvider>
-          <SocketProvider>
-            <GuideProvider>
-              <AppRoutes />
-              <CookieConsent />
-            </GuideProvider>
-          </SocketProvider>
-        </AuthProvider>
-      </BrowserRouter>
+      <PWAProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <DeepLinkHandler />
+          <BackButtonHandler />
+          <AuthProvider>
+            <SocketProvider>
+              <GuideProvider>
+                <AppRoutes />
+                <CookieConsent />
+                <PWAUpdatePrompt />
+                <PWAInstallBanner />
+              </GuideProvider>
+            </SocketProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </PWAProvider>
     </ErrorBoundary>
   )
 }

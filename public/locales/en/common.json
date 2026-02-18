@@ -214,5 +214,17 @@
   },
   "a11y": {
     "skipToContent": "Skip to content"
+  },
+  "pwa": {
+    "updateAvailable": "A new version is available",
+    "update": "Update",
+    "installTitle": "Install Eulesia",
+    "installDesc": "Add Eulesia to your home screen for faster access",
+    "install": "Install",
+    "notNow": "Not now",
+    "offline": "You are offline. Some features may not be available.",
+    "offlineTitle": "No connection",
+    "offlineDesc": "Check your network connection and try again.",
+    "retry": "Try again"
   }
 }
