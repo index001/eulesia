@@ -23,13 +23,14 @@ export function ProfilePage() {
   const updateProfileMutation = useUpdateProfile()
   const exportDataMutation = useExportData()
   const deleteAccountMutation = useDeleteAccount()
-  const { data: myInstitutions } = useMyInstitutions()
-  const [showAvailableInstitutions, setShowAvailableInstitutions] = useState(false)
-  const { data: availableInstitutions } = useAvailableInstitutions()
-  const claimInstitutionMutation = useClaimInstitution()
-  const createOrgMutation = useCreateOrganization()
-  const [showCreateOrg, setShowCreateOrg] = useState(false)
-  const [orgForm, setOrgForm] = useState({ name: '', institutionName: '', businessId: '', businessIdCountry: 'FI', websiteUrl: '', description: '' })
+  // Institution Management - disabled temporarily
+  // const { data: myInstitutions } = useMyInstitutions()
+  // const [showAvailableInstitutions, setShowAvailableInstitutions] = useState(false)
+  // const { data: availableInstitutions } = useAvailableInstitutions()
+  // const claimInstitutionMutation = useClaimInstitution()
+  // const createOrgMutation = useCreateOrganization()
+  // const [showCreateOrg, setShowCreateOrg] = useState(false)
+  // const [orgForm, setOrgForm] = useState({ name: '', institutionName: '', businessId: '', businessIdCountry: 'FI', websiteUrl: '', description: '' })
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const { startGuide, hasCompletedGuide, resetAllGuides } = useGuide()
@@ -425,7 +426,7 @@ export function ProfilePage() {
           </div>
         </div>
 
-        {/* Institution Management */}
+        {/* Institution Management - commented out temporarily
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
           <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
             <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -434,7 +435,6 @@ export function ProfilePage() {
             </h2>
           </div>
           <div className="p-4 space-y-4">
-            {/* My managed institutions */}
             {myInstitutions && myInstitutions.length > 0 ? (
               <div className="space-y-2">
                 {myInstitutions.map(mgr => (
@@ -477,7 +477,6 @@ export function ProfilePage() {
               <p className="text-sm text-gray-500 dark:text-gray-400">{t('institutions.noInstitutions')}</p>
             )}
 
-            {/* Claim an institution */}
             <div className="pt-3 border-t border-gray-200 dark:border-gray-800">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{t('institutions.claimDesc')}</p>
               <button
@@ -488,7 +487,6 @@ export function ProfilePage() {
               </button>
             </div>
 
-            {/* Available institutions list */}
             {showAvailableInstitutions && (
               <div className="space-y-2">
                 {claimInstitutionMutation.isSuccess && (
@@ -529,7 +527,6 @@ export function ProfilePage() {
               </div>
             )}
 
-            {/* Create Organization */}
             <div className="pt-3 border-t border-gray-200 dark:border-gray-800">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{t('institutions.createOrgDesc')}</p>
               <button
@@ -640,6 +637,7 @@ export function ProfilePage() {
             )}
           </div>
         </div>
+        End of Institution Management commented out */
 
         {/* Invite Codes */}
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
