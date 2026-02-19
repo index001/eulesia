@@ -481,14 +481,13 @@ export function LoginPage() {
                   </div>
                 ) : (
                   <>
-                    {/* Beta notice */}
-                    <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                    {/* FTN required notice */}
+                    <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
                       <div className="flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                        <div className="text-sm text-amber-800 space-y-1">
-                          <p className="font-medium">{t('betaNotice.title')}</p>
-                          <p>{t('betaNotice.realName')}</p>
-                          <p>{t('betaNotice.strongAuth')}</p>
+                        <Fingerprint className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-amber-800 dark:text-amber-200">
+                          <p className="font-medium">{t('ftn.requiredTitle')}</p>
+                          <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">{t('ftn.requiredDescription')}</p>
                         </div>
                       </div>
                     </div>
@@ -501,92 +500,8 @@ export function LoginPage() {
                       <Fingerprint className="w-5 h-5" />
                       {t('ftn.authenticateWithBank')}
                     </a>
-
-                    <div className="relative mb-4">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                      </div>
-                      <div className="relative flex justify-center text-xs">
-                        <span className="bg-white dark:bg-gray-900 px-3 text-gray-400">{t('ftn.orFillManually')}</span>
-                      </div>
-                    </div>
                   </>
                 )}
-
-                <div className="space-y-4 mb-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label htmlFor="reg-firstname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {t('firstName')}
-                      </label>
-                      <input
-                        type="text"
-                        id="reg-firstname"
-                        value={regFirstName}
-                        onChange={(e) => !ftnVerified && setRegFirstName(e.target.value)}
-                        placeholder={t('firstNamePlaceholder')}
-                        className={`w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100 ${ftnVerified ? 'bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed' : ''}`}
-                        required
-                        autoFocus={!ftnVerified}
-                        autoComplete="given-name"
-                        readOnly={ftnVerified}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="reg-lastname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {t('lastName')}
-                      </label>
-                      <input
-                        type="text"
-                        id="reg-lastname"
-                        value={regLastName}
-                        onChange={(e) => !ftnVerified && setRegLastName(e.target.value)}
-                        placeholder={t('lastNamePlaceholder')}
-                        className={`w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100 ${ftnVerified ? 'bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed' : ''}`}
-                        required
-                        autoComplete="family-name"
-                        readOnly={ftnVerified}
-                      />
-                    </div>
-                  </div>
-                  {!ftnVerified && <p className="text-xs text-amber-700 -mt-2">{t('realNameNotice')}</p>}
-
-                  <div>
-                    <label htmlFor="reg-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('username')}
-                    </label>
-                    <input
-                      type="text"
-                      id="reg-username"
-                      value={regUsername}
-                      onChange={(e) => setRegUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                      placeholder={t('usernamePlaceholder')}
-                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
-                      required
-                      autoComplete="username"
-                      pattern="[a-z0-9_]+"
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('usernameHint')}</p>
-                  </div>
-
-                  <div>
-                    <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('password')}
-                    </label>
-                    <input
-                      type="password"
-                      id="reg-password"
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
-                      required
-                      minLength={6}
-                      autoComplete="new-password"
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('passwordHint')}</p>
-                  </div>
-                </div>
 
                 {error && (
                   <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-xl text-sm text-red-700">
@@ -594,27 +509,104 @@ export function LoginPage() {
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={isLoading || !regUsername || !regPassword || !regFirstName.trim() || !regLastName.trim()}
-                  className="w-full bg-green-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      {t('creatingAccount')}
-                    </>
-                  ) : (
-                    <>
-                      {t('createAccount')}
-                      <ArrowRight className="w-5 h-5" />
-                    </>
-                  )}
-                </button>
+                {/* Registration form - only shown after FTN verification */}
+                {ftnVerified && (
+                  <>
+                    <div className="space-y-4 mb-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label htmlFor="reg-firstname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {t('firstName')}
+                          </label>
+                          <input
+                            type="text"
+                            id="reg-firstname"
+                            value={regFirstName}
+                            onChange={(e) => setRegFirstName(e.target.value)}
+                            placeholder={t('firstNamePlaceholder')}
+                            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                            required
+                            autoComplete="given-name"
+                          />
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('ftn.firstNameHint')}</p>
+                        </div>
+                        <div>
+                          <label htmlFor="reg-lastname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {t('lastName')}
+                          </label>
+                          <input
+                            type="text"
+                            id="reg-lastname"
+                            value={regLastName}
+                            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed dark:text-gray-100"
+                            required
+                            autoComplete="family-name"
+                            readOnly
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor="reg-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          {t('username')}
+                        </label>
+                        <input
+                          type="text"
+                          id="reg-username"
+                          value={regUsername}
+                          onChange={(e) => setRegUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                          placeholder={t('usernamePlaceholder')}
+                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                          required
+                          autoFocus
+                          autoComplete="username"
+                          pattern="[a-z0-9_]+"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('usernameHint')}</p>
+                      </div>
+
+                      <div>
+                        <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          {t('password')}
+                        </label>
+                        <input
+                          type="password"
+                          id="reg-password"
+                          value={regPassword}
+                          onChange={(e) => setRegPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                          required
+                          minLength={6}
+                          autoComplete="new-password"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('passwordHint')}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading || !regUsername || !regPassword || !regFirstName.trim() || !regLastName.trim()}
+                      className="w-full bg-green-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          {t('creatingAccount')}
+                        </>
+                      ) : (
+                        <>
+                          {t('createAccount')}
+                          <ArrowRight className="w-5 h-5" />
+                        </>
+                      )}
+                    </button>
+                  </>
+                )}
 
                 <button
                   type="button"
-                  onClick={() => { setStep('invite-check'); setError(null); setInviteValid(false) }}
+                  onClick={() => { setStep('invite-check'); setError(null); setInviteValid(false); setFtnToken(null) }}
                   className="w-full mt-3 text-gray-500 dark:text-gray-400 text-sm hover:text-gray-700 dark:hover:text-gray-300 flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
