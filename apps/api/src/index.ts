@@ -75,10 +75,10 @@ const limiter = rateLimit({
   skip: () => isDev // Skip rate limiting entirely in development
 })
 
-// Auth rate limiter: 10 attempts per 15 min window per IP
+// Auth rate limiter: 20 attempts per 15 min window per IP
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isDev ? 1000 : 10,
+  max: isDev ? 1000 : 20,
   message: { success: false, error: 'Too many authentication attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
