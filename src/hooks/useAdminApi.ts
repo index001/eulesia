@@ -17,6 +17,8 @@ export const adminKeys = {
   mySanctions: ['mySanctions'] as const,
   announcements: ['admin', 'announcements'] as const,
   institutionClaims: ['admin', 'institutionClaims'] as const,
+  waitlist: (params?: any) => ['admin', 'waitlist', params] as const,
+  waitlistStats: ['admin', 'waitlistStats'] as const,
 }
 
 // Dashboard
@@ -327,6 +329,57 @@ export function useAdminUpdateClaim() {
       api.updateInstitutionClaim(claimId, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.institutionClaims })
+      queryClient.invalidateQueries({ queryKey: adminKeys.dashboard })
+    }
+  })
+}
+
+// Waitlist (admin)
+export function useAdminWaitlist(params?: { page?: number; limit?: number; status?: string }) {
+  return useQuery({
+    queryKey: adminKeys.waitlist(params),
+    queryFn: () => api.getWaitlist(params)
+  })
+}
+
+export function useWaitlistStats() {
+  return useQuery({
+    queryKey: adminKeys.waitlistStats,
+    queryFn: () => api.getWaitlistStats(),
+    refetchInterval: 60_000
+  })
+}
+
+export function useApproveWaitlistEntry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.approveWaitlistEntry(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'waitlist'] })
+      queryClient.invalidateQueries({ queryKey: adminKeys.waitlistStats })
+      queryClient.invalidateQueries({ queryKey: adminKeys.dashboard })
+    }
+  })
+}
+
+export function useRejectWaitlistEntry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note?: string }) => api.rejectWaitlistEntry(id, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'waitlist'] })
+      queryClient.invalidateQueries({ queryKey: adminKeys.waitlistStats })
+    }
+  })
+}
+
+export function useBulkApproveWaitlist() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (ids: string[]) => api.bulkApproveWaitlist(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'waitlist'] })
+      queryClient.invalidateQueries({ queryKey: adminKeys.waitlistStats })
       queryClient.invalidateQueries({ queryKey: adminKeys.dashboard })
     }
   })

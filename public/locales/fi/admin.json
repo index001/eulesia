@@ -9,7 +9,8 @@
     "institutions": "Instituutiot",
     "transparency": "DSA-raportti",
     "settings": "Asetukset",
-    "backToApp": "Takaisin appiin"
+    "backToApp": "Takaisin appiin",
+    "waitlist": "Jonotuslista"
   },
   "dashboard": {
     "title": "Hallintapaneeli",
@@ -217,6 +218,37 @@
     "requestedBy": "Hakija",
     "approve": "Hyväksy",
     "reject": "Hylkää"
+  },
+  "waitlist": {
+    "title": "Jonotuslistan hallinta",
+    "stats": {
+      "pending": "Odottavat",
+      "approved": "Hyväksytyt",
+      "rejected": "Hylätyt",
+      "total": "Yhteensä"
+    },
+    "columns": {
+      "email": "Sähköposti",
+      "name": "Nimi",
+      "status": "Tila",
+      "submitted": "Lähetetty",
+      "actions": "Toiminnot"
+    },
+    "approve": "Hyväksy",
+    "reject": "Hylkää",
+    "bulkApprove": "Hyväksy valitut",
+    "rejectNote": "Hylkäyksen syy (vapaaehtoinen)",
+    "approved": "Hyväksytty",
+    "rejected": "Hylätty",
+    "pending": "Odottaa",
+    "codeSent": "Koodi: {{code}}",
+    "emailSent": "Sähköposti lähetetty",
+    "emailFailed": "Sähköpostin lähetys epäonnistui",
+    "noEntries": "Ei jonotuslistaentryjä",
+    "showing": "Näytetään {{from}}-{{to}} / {{total}}",
+    "confirmApprove": "Hyväksy ja lähetä kutsukoodi?",
+    "confirmReject": "Hylkää tämä entry?",
+    "selected": "{{count}} valittu"
   },
   "common": {
     "cancel": "Peruuta"

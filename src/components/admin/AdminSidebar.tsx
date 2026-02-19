@@ -2,12 +2,13 @@ import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, Users, Flag, ScrollText, FileText,
-  BarChart3, Settings, ArrowLeft, Scale, Building2
+  BarChart3, Settings, ArrowLeft, Scale, Building2, ClipboardList
 } from 'lucide-react'
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, labelKey: 'nav.dashboard', end: true },
   { to: '/admin/users', icon: Users, labelKey: 'nav.users' },
+  { to: '/admin/waitlist', icon: ClipboardList, labelKey: 'nav.waitlist' },
   { to: '/admin/reports', icon: Flag, labelKey: 'nav.reports' },
   { to: '/admin/modlog', icon: ScrollText, labelKey: 'nav.modlog' },
   { to: '/admin/content', icon: FileText, labelKey: 'nav.content' },

@@ -17,6 +17,7 @@ export const locationTypeEnum = pgEnum('location_type', ['country', 'region', 'm
 export const subscriptionNotifyEnum = pgEnum('subscription_notify', ['all', 'none', 'highlights'])
 export const institutionManagerRoleEnum = pgEnum('institution_manager_role', ['owner', 'editor'])
 export const institutionClaimStatusEnum = pgEnum('institution_claim_status', ['pending', 'approved', 'rejected'])
+export const waitlistStatusEnum = pgEnum('waitlist_status', ['pending', 'approved', 'rejected'])
 
 // Moderation enums (DSA)
 export const reportReasonEnum = pgEnum('report_reason', ['illegal', 'harassment', 'spam', 'misinformation', 'other'])
@@ -227,6 +228,28 @@ export const inviteCodes = pgTable('invite_codes', {
   codeIdx: index('invite_codes_code_idx').on(table.code),
   createdByIdx: index('invite_codes_created_by_idx').on(table.createdBy),
   statusIdx: index('invite_codes_status_idx').on(table.status)
+}))
+
+// Waitlist
+export const waitlist = pgTable('waitlist', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).notNull(),
+  name: varchar('name', { length: 255 }),
+  status: waitlistStatusEnum('status').default('pending'),
+  locale: varchar('locale', { length: 10 }).default('en'),
+  ipAddress: inet('ip_address'),
+  inviteCodeId: uuid('invite_code_id').references(() => inviteCodes.id),
+  approvedBy: uuid('approved_by').references(() => users.id),
+  rejectedBy: uuid('rejected_by').references(() => users.id),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  rejectedAt: timestamp('rejected_at', { withTimezone: true }),
+  emailSentAt: timestamp('email_sent_at', { withTimezone: true }),
+  note: text('note'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  emailIdx: uniqueIndex('waitlist_email_idx').on(table.email),
+  statusIdx: index('waitlist_status_idx').on(table.status),
+  createdIdx: index('waitlist_created_idx').on(table.createdAt)
 }))
 
 // Threads (Agora)
@@ -1186,3 +1209,22 @@ export type Bookmark = typeof bookmarks.$inferSelect
 export type NewBookmark = typeof bookmarks.$inferInsert
 export type TrendingCacheEntry = typeof trendingCache.$inferSelect
 export type NewTrendingCacheEntry = typeof trendingCache.$inferInsert
+
+// FTN Pending Registrations — temporary storage for strong authentication claims during registration flow
+export const ftnPendingRegistrations = pgTable('ftn_pending_registrations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  token: varchar('token', { length: 255 }).notNull(),
+  givenName: varchar('given_name', { length: 255 }).notNull(),
+  familyName: varchar('family_name', { length: 255 }).notNull(),
+  sub: varchar('sub', { length: 255 }).notNull(),
+  country: varchar('country', { length: 10 }),
+  inviteCode: varchar('invite_code', { length: 50 }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  tokenIdx: index('ftn_pending_token_idx').on(table.token),
+  expiresIdx: index('ftn_pending_expires_idx').on(table.expiresAt)
+}))
+
+export type FtnPendingRegistration = typeof ftnPendingRegistrations.$inferSelect
+export type NewFtnPendingRegistration = typeof ftnPendingRegistrations.$inferInsert

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Shield, Fingerprint, CheckCircle, Lock, Users, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Ticket, AlertTriangle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Shield, Fingerprint, CheckCircle, Lock, Users, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Ticket, AlertTriangle, Clock, Mail } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { SEOHead } from '../components/SEOHead'
 import { useAuth } from '../hooks/useAuth'
@@ -8,7 +8,7 @@ import { api } from '../lib/api'
 type LoginStep = 'initial' | 'login' | 'register' | 'invite-check'
 
 export function LoginPage() {
-  const { t } = useTranslation(['auth', 'common'])
+  const { t, i18n } = useTranslation(['auth', 'common'])
   const { login, register } = useAuth()
   const [step, setStep] = useState<LoginStep>('initial')
   const [isLoading, setIsLoading] = useState(false)
@@ -27,6 +27,50 @@ export function LoginPage() {
   const [regFirstName, setRegFirstName] = useState('')
   const [regLastName, setRegLastName] = useState('')
 
+  // FTN (strong authentication)
+  const [ftnToken, setFtnToken] = useState<string | null>(null)
+  const ftnVerified = !!ftnToken
+
+  // Handle FTN callback parameters from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('ftn')
+    const firstName = params.get('firstName')
+    const lastName = params.get('lastName')
+    const invite = params.get('invite')
+    const ftnError = params.get('ftn_error')
+
+    if (ftnError) {
+      if (ftnError === 'duplicate_identity') {
+        setError(t('ftn.alreadyRegistered'))
+      } else {
+        setError(t('ftn.authFailed'))
+      }
+      window.history.replaceState({}, '', window.location.pathname)
+      return
+    }
+
+    if (token && firstName && lastName) {
+      setFtnToken(token)
+      setRegFirstName(decodeURIComponent(firstName))
+      setRegLastName(decodeURIComponent(lastName))
+      if (invite) {
+        setInviteCode(decodeURIComponent(invite))
+        setInviteValid(true)
+      }
+      setStep('register')
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [t])
+
+  // Waitlist form
+  const [waitlistEmail, setWaitlistEmail] = useState('')
+  const [waitlistName, setWaitlistName] = useState('')
+  const [showWaitlist, setShowWaitlist] = useState(false)
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false)
+  const [waitlistPosition, setWaitlistPosition] = useState<number | null>(null)
+  const [waitlistLoading, setWaitlistLoading] = useState(false)
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -39,6 +83,21 @@ export function LoginPage() {
       setError(err instanceof Error ? err.message : t('loginFailed'))
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setWaitlistLoading(true)
+    setError(null)
+    try {
+      const result = await api.joinWaitlist(waitlistEmail, waitlistName || undefined, i18n.language)
+      setWaitlistSubmitted(true)
+      setWaitlistPosition(result.position ?? null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('waitlist.submitFailed'))
+    } finally {
+      setWaitlistLoading(false)
     }
   }
 
@@ -73,7 +132,8 @@ export function LoginPage() {
         inviteCode,
         username: regUsername,
         password: regPassword,
-        name: `${regFirstName.trim()} ${regLastName.trim()}`
+        name: `${regFirstName.trim()} ${regLastName.trim()}`,
+        ...(ftnToken ? { ftnToken } : {})
       })
       // Navigation handled by App.tsx
     } catch (err) {
@@ -142,11 +202,94 @@ export function LoginPage() {
 
                 <button
                   onClick={() => setStep('invite-check')}
-                  className="w-full bg-white text-blue-800 border-2 border-blue-800 py-3 px-4 rounded-xl font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-white dark:bg-gray-800 text-blue-800 dark:text-blue-300 border-2 border-blue-800 dark:border-blue-700 py-3 px-4 rounded-xl font-medium hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
                 >
                   <Ticket className="w-5 h-5" />
                   {t('iHaveInvite')}
                 </button>
+
+                {/* Waitlist */}
+                <div className="mt-3">
+                  {!showWaitlist && !waitlistSubmitted && (
+                    <button
+                      onClick={() => setShowWaitlist(true)}
+                      className="w-full text-blue-600 dark:text-blue-400 text-sm hover:underline flex items-center justify-center gap-1"
+                    >
+                      <Clock className="w-4 h-4" />
+                      {t('waitlist.noInvite')}
+                    </button>
+                  )}
+
+                  {showWaitlist && !waitlistSubmitted && (
+                    <form onSubmit={handleWaitlistSubmit} className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                      <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        {t('waitlist.title')}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        {t('waitlist.description')}
+                      </p>
+                      <div className="space-y-2">
+                        <input
+                          type="email"
+                          value={waitlistEmail}
+                          onChange={(e) => setWaitlistEmail(e.target.value)}
+                          placeholder={t('waitlist.emailPlaceholder')}
+                          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
+                          required
+                          autoFocus
+                        />
+                        <input
+                          type="text"
+                          value={waitlistName}
+                          onChange={(e) => setWaitlistName(e.target.value)}
+                          placeholder={t('waitlist.namePlaceholder')}
+                          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
+                        />
+                      </div>
+                      {error && <div className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</div>}
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          type="submit"
+                          disabled={waitlistLoading || !waitlistEmail}
+                          className="flex-1 bg-blue-800 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                        >
+                          {waitlistLoading ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <Mail className="w-4 h-4" />
+                              {t('waitlist.submit')}
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setShowWaitlist(false); setError(null) }}
+                          className="text-gray-500 dark:text-gray-400 text-sm px-3 hover:text-gray-700 dark:hover:text-gray-200"
+                        >
+                          {t('common:actions.cancel')}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {waitlistSubmitted && (
+                    <div className="mt-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                        <CheckCircle className="w-5 h-5" />
+                        <span className="font-medium text-sm">{t('waitlist.success')}</span>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        {t('waitlist.successDescription')}
+                      </p>
+                      {waitlistPosition && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {t('waitlist.position', { position: waitlistPosition })}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* Future: EUDI Wallet button */}
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
@@ -327,17 +470,48 @@ export function LoginPage() {
                   </div>
                 </div>
 
-                {/* Beta notice */}
-                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-amber-800 space-y-1">
-                      <p className="font-medium">{t('betaNotice.title')}</p>
-                      <p>{t('betaNotice.realName')}</p>
-                      <p>{t('betaNotice.strongAuth')}</p>
+                {/* FTN verification status or button */}
+                {ftnVerified ? (
+                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                    <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-sm">
+                      <Fingerprint className="w-4 h-4" />
+                      <span className="font-medium">{t('ftn.verified')}</span>
                     </div>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">{t('ftn.nameFromBank')}</p>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {/* Beta notice */}
+                    <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-amber-800 space-y-1">
+                          <p className="font-medium">{t('betaNotice.title')}</p>
+                          <p>{t('betaNotice.realName')}</p>
+                          <p>{t('betaNotice.strongAuth')}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* FTN strong authentication button */}
+                    <a
+                      href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/v1/auth/ftn/start?invite=${encodeURIComponent(inviteCode)}`}
+                      className="w-full mb-4 bg-blue-700 text-white py-3 px-4 rounded-xl font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 no-underline block"
+                    >
+                      <Fingerprint className="w-5 h-5" />
+                      {t('ftn.authenticateWithBank')}
+                    </a>
+
+                    <div className="relative mb-4">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+                      </div>
+                      <div className="relative flex justify-center text-xs">
+                        <span className="bg-white dark:bg-gray-900 px-3 text-gray-400">{t('ftn.orFillManually')}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="space-y-4 mb-4">
                   <div className="grid grid-cols-2 gap-3">
@@ -349,12 +523,13 @@ export function LoginPage() {
                         type="text"
                         id="reg-firstname"
                         value={regFirstName}
-                        onChange={(e) => setRegFirstName(e.target.value)}
+                        onChange={(e) => !ftnVerified && setRegFirstName(e.target.value)}
                         placeholder={t('firstNamePlaceholder')}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                        className={`w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100 ${ftnVerified ? 'bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed' : ''}`}
                         required
-                        autoFocus
+                        autoFocus={!ftnVerified}
                         autoComplete="given-name"
+                        readOnly={ftnVerified}
                       />
                     </div>
                     <div>
@@ -365,15 +540,16 @@ export function LoginPage() {
                         type="text"
                         id="reg-lastname"
                         value={regLastName}
-                        onChange={(e) => setRegLastName(e.target.value)}
+                        onChange={(e) => !ftnVerified && setRegLastName(e.target.value)}
                         placeholder={t('lastNamePlaceholder')}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                        className={`w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100 ${ftnVerified ? 'bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed' : ''}`}
                         required
                         autoComplete="family-name"
+                        readOnly={ftnVerified}
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-amber-700 -mt-2">{t('realNameNotice')}</p>
+                  {!ftnVerified && <p className="text-xs text-amber-700 -mt-2">{t('realNameNotice')}</p>}
 
                   <div>
                     <label htmlFor="reg-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

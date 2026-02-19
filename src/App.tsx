@@ -49,6 +49,7 @@ const AdminTransparencyPage = lazy(() => import('./pages/admin/AdminTransparency
 const AdminAppealsPage = lazy(() => import('./pages/admin/AdminAppealsPage').then(m => ({ default: m.AdminAppealsPage })))
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage').then(m => ({ default: m.AdminSettingsPage })))
 const AdminInstitutionsPage = lazy(() => import('./pages/admin/AdminInstitutionsPage').then(m => ({ default: m.AdminInstitutionsPage })))
+const AdminWaitlistPage = lazy(() => import('./pages/admin/AdminWaitlistPage').then(m => ({ default: m.AdminWaitlistPage })))
 
 function LoadingScreen() {
   return (
@@ -268,6 +269,7 @@ function AppRoutes() {
         <Route path="/admin/transparency" element={<AdminRoute><PageErrorBoundary><AdminTransparencyPage /></PageErrorBoundary></AdminRoute>} />
         <Route path="/admin/appeals" element={<AdminRoute><PageErrorBoundary><AdminAppealsPage /></PageErrorBoundary></AdminRoute>} />
         <Route path="/admin/institutions" element={<AdminRoute><PageErrorBoundary><AdminInstitutionsPage /></PageErrorBoundary></AdminRoute>} />
+        <Route path="/admin/waitlist" element={<AdminRoute><PageErrorBoundary><AdminWaitlistPage /></PageErrorBoundary></AdminRoute>} />
         <Route path="/admin/settings" element={<AdminRoute><PageErrorBoundary><AdminSettingsPage /></PageErrorBoundary></AdminRoute>} />
 
         {/* 404 */}

@@ -85,8 +85,18 @@ const authLimiter = rateLimit({
   skip: () => isDev
 })
 
+const waitlistLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: isDev ? 1000 : 5,
+  message: { success: false, error: 'Too many waitlist submissions, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => isDev
+})
+
 app.use(limiter)
 app.use('/api/v1/auth', authLimiter)
+app.use('/api/v1/waitlist/join', waitlistLimiter)
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }))
@@ -367,6 +377,28 @@ async function runMigrations() {
     )`)
     await db.execute(sql`CREATE INDEX IF NOT EXISTS "device_tokens_user_idx" ON "device_tokens" ("user_id")`)
     await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "device_tokens_token_idx" ON "device_tokens" ("token")`)
+
+    // 0016: Waitlist table
+    await db.execute(sql`DO $$ BEGIN CREATE TYPE waitlist_status AS ENUM ('pending', 'approved', 'rejected'); EXCEPTION WHEN duplicate_object THEN null; END $$`)
+    await db.execute(sql`CREATE TABLE IF NOT EXISTS "waitlist" (
+      "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      "email" VARCHAR(255) NOT NULL,
+      "name" VARCHAR(255),
+      "status" waitlist_status DEFAULT 'pending',
+      "locale" VARCHAR(10) DEFAULT 'en',
+      "ip_address" INET,
+      "invite_code_id" UUID REFERENCES "invite_codes"("id"),
+      "approved_by" UUID REFERENCES "users"("id"),
+      "rejected_by" UUID REFERENCES "users"("id"),
+      "approved_at" TIMESTAMPTZ,
+      "rejected_at" TIMESTAMPTZ,
+      "email_sent_at" TIMESTAMPTZ,
+      "note" TEXT,
+      "created_at" TIMESTAMPTZ DEFAULT NOW()
+    )`)
+    await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "waitlist_email_idx" ON "waitlist" ("email")`)
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS "waitlist_status_idx" ON "waitlist" ("status")`)
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS "waitlist_created_idx" ON "waitlist" ("created_at")`)
 
     console.log('Migrations OK')
   } catch (error) {

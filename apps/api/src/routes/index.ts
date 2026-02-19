@@ -21,6 +21,7 @@ import institutionsRoutes from './institutions.js'
 import linkPreviewRoutes from './linkPreview.js'
 import discoverRoutes from './discover.js'
 import bookmarksRoutes from './bookmarks.js'
+import waitlistRoutes from './waitlist.js'
 
 const router = Router()
 
@@ -43,6 +44,7 @@ router.use('/reports', reportsRoutes)
 router.use('/institutions', institutionsRoutes)
 router.use('/discover', discoverRoutes)
 router.use('/bookmarks', bookmarksRoutes)
+router.use('/waitlist', waitlistRoutes)
 router.use('/', linkPreviewRoutes)
 
 // Public: active system announcements

@@ -61,7 +61,7 @@ class ApiClient {
     })
   }
 
-  async register(data: { inviteCode: string; username: string; password: string; name: string }): Promise<User> {
+  async register(data: { inviteCode: string; username: string; password: string; name: string; ftnToken?: string }): Promise<User> {
     return this.request('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data)
@@ -962,6 +962,46 @@ class ApiClient {
     return this.request(`/institutions/claims/${claimId}`, {
       method: 'PATCH',
       body: JSON.stringify({ status })
+    })
+  }
+
+  // Waitlist (public)
+  async joinWaitlist(email: string, name?: string, locale?: string): Promise<{ message: string; position?: number }> {
+    return this.request('/waitlist/join', {
+      method: 'POST',
+      body: JSON.stringify({ email, name, locale })
+    })
+  }
+
+  // Waitlist (admin)
+  async getWaitlist(params?: { page?: number; limit?: number; status?: string }): Promise<{ items: WaitlistEntry[]; total: number; page: number; limit: number; hasMore: boolean }> {
+    const searchParams = new URLSearchParams()
+    if (params?.page) searchParams.set('page', params.page.toString())
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.status) searchParams.set('status', params.status)
+    const query = searchParams.toString()
+    return this.request(`/waitlist/admin${query ? `?${query}` : ''}`)
+  }
+
+  async getWaitlistStats(): Promise<WaitlistStats> {
+    return this.request('/waitlist/admin/stats')
+  }
+
+  async approveWaitlistEntry(id: string): Promise<{ id: string; status: string; code: string; emailSent: boolean }> {
+    return this.request(`/waitlist/admin/${id}/approve`, { method: 'POST' })
+  }
+
+  async rejectWaitlistEntry(id: string, note?: string): Promise<{ id: string; status: string }> {
+    return this.request(`/waitlist/admin/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ note })
+    })
+  }
+
+  async bulkApproveWaitlist(ids: string[]): Promise<{ processed: number; results: { id: string; code: string; emailSent: boolean }[] }> {
+    return this.request('/waitlist/admin/bulk-approve', {
+      method: 'POST',
+      body: JSON.stringify({ ids })
     })
   }
 }
@@ -1905,6 +1945,26 @@ export interface CreatedOrganization {
   institutionType: string
   institutionName: string
   businessId: string | null
+}
+
+export interface WaitlistEntry {
+  id: string
+  email: string
+  name: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  locale: string
+  createdAt: string
+  approvedAt: string | null
+  rejectedAt: string | null
+  emailSentAt: string | null
+  note: string | null
+}
+
+export interface WaitlistStats {
+  pending: number
+  approved: number
+  rejected: number
+  total: number
 }
 
 // Export singleton instance

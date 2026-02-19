@@ -9,7 +9,8 @@
     "institutions": "Institutions",
     "transparency": "DSA Report",
     "settings": "Settings",
-    "backToApp": "Back to app"
+    "backToApp": "Back to app",
+    "waitlist": "Waitlist"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -217,6 +218,37 @@
     "requestedBy": "Requested by",
     "approve": "Approve",
     "reject": "Reject"
+  },
+  "waitlist": {
+    "title": "Waitlist Management",
+    "stats": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "total": "Total"
+    },
+    "columns": {
+      "email": "Email",
+      "name": "Name",
+      "status": "Status",
+      "submitted": "Submitted",
+      "actions": "Actions"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "bulkApprove": "Approve Selected",
+    "rejectNote": "Reason for rejection (optional)",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "pending": "Pending",
+    "codeSent": "Code: {{code}}",
+    "emailSent": "Email sent",
+    "emailFailed": "Email failed to send",
+    "noEntries": "No waitlist entries",
+    "showing": "Showing {{from}}-{{to}} of {{total}}",
+    "confirmApprove": "Approve and send invite code?",
+    "confirmReject": "Reject this entry?",
+    "selected": "{{count}} selected"
   },
   "common": {
     "cancel": "Cancel"
