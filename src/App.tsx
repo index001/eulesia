@@ -11,6 +11,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { PageErrorBoundary } from './components/common/PageErrorBoundary'
 import { PWAUpdatePrompt, PWAInstallBanner } from './components/common/PWAPrompt'
 import { PWAProvider } from './hooks/usePWA'
+import { useNativePush } from './hooks/useNativePush'
 import { NotFoundPage } from './pages/NotFoundPage'
 
 // Lazy-loaded pages — route-based code splitting
@@ -100,6 +101,11 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>
+}
+
+function NativePushHandler() {
+  useNativePush()
+  return null
 }
 
 function AppRoutes() {
@@ -339,6 +345,7 @@ function App() {
           <BackButtonHandler />
           <AuthProvider>
             <SocketProvider>
+              <NativePushHandler />
               <GuideProvider>
                 <AppRoutes />
                 <CookieConsent />

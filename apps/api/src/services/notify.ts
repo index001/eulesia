@@ -1,5 +1,6 @@
 import { db, notifications } from '../db/index.js'
 import { sendPushToUser } from './pushNotifications.js'
+import { sendFCMToUser } from './fcmNotifications.js'
 import type { Server } from 'socket.io'
 
 let ioInstance: Server | null = null
@@ -43,5 +44,10 @@ export async function notify({ userId, type, title, body, link }: NotifyParams):
   // 3. Web Push (async, fire-and-forget)
   sendPushToUser(userId, { title, body, link, type }).catch(err => {
     console.error('Push notification failed for user', userId, err)
+  })
+
+  // 4. FCM native push (async, fire-and-forget)
+  sendFCMToUser(userId, { title, body, link, type }).catch(err => {
+    console.error('FCM notification failed for user', userId, err)
   })
 }

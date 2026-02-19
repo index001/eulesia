@@ -1082,6 +1082,23 @@ export const pushSubscriptions = pgTable('push_subscriptions', {
 export type NewPushSubscription = typeof pushSubscriptions.$inferInsert
 export type PushSubscription = typeof pushSubscriptions.$inferSelect
 
+// Native push device tokens (FCM)
+export const deviceTokens = pgTable('device_tokens', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text('token').notNull(),
+  platform: varchar('platform', { length: 10 }).notNull(), // 'android' | 'ios'
+  deviceId: varchar('device_id', { length: 255 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  userIdx: index('device_tokens_user_idx').on(table.userId),
+  tokenIdx: uniqueIndex('device_tokens_token_idx').on(table.token)
+}))
+
+export type NewDeviceToken = typeof deviceTokens.$inferInsert
+export type DeviceToken = typeof deviceTokens.$inferSelect
+
 // Site settings (key-value)
 export const siteSettings = pgTable('site_settings', {
   key: varchar('key', { length: 255 }).primaryKey(),

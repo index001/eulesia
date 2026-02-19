@@ -1,6 +1,6 @@
 import { Router, type Response } from 'express'
 import { eq, and, desc, sql } from 'drizzle-orm'
-import { db, notifications, pushSubscriptions } from '../db/index.js'
+import { db, notifications, pushSubscriptions, deviceTokens } from '../db/index.js'
 import { authMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
@@ -166,6 +166,52 @@ router.delete('/push/subscribe', authMiddleware, asyncHandler(async (req: Authen
   )
 
   res.json({ success: true, data: { unsubscribed: true } })
+}))
+
+// POST /notifications/push/device-token — Register a native device token (FCM)
+router.post('/push/device-token', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { token, platform, deviceId } = req.body
+
+  if (!token || !platform) {
+    throw new AppError(400, 'token and platform are required')
+  }
+
+  if (!['android', 'ios'].includes(platform)) {
+    throw new AppError(400, 'platform must be android or ios')
+  }
+
+  // Upsert: if token exists (possibly for another user), reassign it
+  await db.delete(deviceTokens).where(eq(deviceTokens.token, token))
+
+  await db.insert(deviceTokens).values({
+    userId,
+    token,
+    platform,
+    deviceId: deviceId || null,
+    updatedAt: new Date()
+  })
+
+  res.json({ success: true, data: { registered: true } })
+}))
+
+// DELETE /notifications/push/device-token — Unregister a device token
+router.delete('/push/device-token', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { token } = req.body
+
+  if (!token) {
+    throw new AppError(400, 'token is required')
+  }
+
+  await db.delete(deviceTokens).where(
+    and(
+      eq(deviceTokens.userId, userId),
+      eq(deviceTokens.token, token)
+    )
+  )
+
+  res.json({ success: true, data: { unregistered: true } })
 }))
 
 export default router

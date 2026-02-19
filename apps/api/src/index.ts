@@ -14,6 +14,7 @@ import sitemapRoutes from './routes/sitemap.js'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
 import { initScheduler } from './services/scheduler.js'
 import { initWebPush } from './services/pushNotifications.js'
+import { initFCM } from './services/fcmNotifications.js'
 import { setNotifyIO } from './services/notify.js'
 import { fullSync, startPeriodicSync, healthCheck as meiliHealthCheck } from './services/search/index.js'
 import { hashToken } from './utils/crypto.js'
@@ -296,6 +297,7 @@ export { io }
 
 // Initialize services
 initWebPush()
+initFCM()
 setNotifyIO(io)
 
 // Run pending migrations before starting
@@ -352,6 +354,20 @@ async function runMigrations() {
     )`)
     await db.execute(sql`CREATE INDEX IF NOT EXISTS "push_subscriptions_user_idx" ON "push_subscriptions" ("user_id")`)
     await db.execute(sql`CREATE INDEX IF NOT EXISTS "push_subscriptions_endpoint_idx" ON "push_subscriptions" ("endpoint")`)
+
+    // Native push device tokens (FCM)
+    await db.execute(sql`CREATE TABLE IF NOT EXISTS "device_tokens" (
+      "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      "user_id" UUID NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+      "token" TEXT NOT NULL,
+      "platform" VARCHAR(10) NOT NULL,
+      "device_id" VARCHAR(255),
+      "created_at" TIMESTAMPTZ DEFAULT NOW(),
+      "updated_at" TIMESTAMPTZ DEFAULT NOW()
+    )`)
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS "device_tokens_user_idx" ON "device_tokens" ("user_id")`)
+    await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "device_tokens_token_idx" ON "device_tokens" ("token")`)
+
     console.log('Migrations OK')
   } catch (error) {
     console.error('Migration error:', error)

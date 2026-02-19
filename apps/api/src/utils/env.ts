@@ -28,6 +28,9 @@ const envSchema = z.object({
   VAPID_PRIVATE_KEY: z.string().optional(),
   VAPID_SUBJECT: z.string().optional().default('mailto:admin@eulesia.eu'),
 
+  // Firebase Cloud Messaging (native push)
+  FIREBASE_SERVICE_ACCOUNT_KEY: z.string().optional(),
+
   // eIDAS (future)
   EIDAS_ENABLED: z.string().transform(v => v === 'true').default('false')
 })

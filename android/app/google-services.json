@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "978482405053",
+    "project_id": "eulesia-f2165",
+    "storage_bucket": "eulesia-f2165.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:978482405053:android:5bcb96dd3d7b7c30b561d4",
+        "android_client_info": {
+          "package_name": "eu.eulesia.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABB05R5vbaXHapD_59W39BacaN9JhGblI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

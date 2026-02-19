@@ -618,6 +618,21 @@ class ApiClient {
     })
   }
 
+  // Native push device token (FCM)
+  async registerDeviceToken(token: string, platform: 'android' | 'ios', deviceId?: string): Promise<void> {
+    await this.request('/notifications/push/device-token', {
+      method: 'POST',
+      body: JSON.stringify({ token, platform, deviceId })
+    })
+  }
+
+  async unregisterDeviceToken(token: string): Promise<void> {
+    await this.request('/notifications/push/device-token', {
+      method: 'DELETE',
+      body: JSON.stringify({ token })
+    })
+  }
+
   // Uploads
   async uploadAvatar(file: File): Promise<UploadAvatarResponse> {
     const formData = new FormData()

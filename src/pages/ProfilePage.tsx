@@ -46,41 +46,73 @@ export function ProfilePage() {
   const [pushSupported, setPushSupported] = useState(false)
   const [pushLoading, setPushLoading] = useState(false)
 
+  const isNative = typeof window !== 'undefined' && 'Capacitor' in window && (window as any).Capacitor?.isNativePlatform?.()
+
   const checkPushStatus = useCallback(async () => {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
-    setPushSupported(true)
-    try {
-      const reg = await navigator.serviceWorker.ready
-      const sub = await reg.pushManager.getSubscription()
-      setPushEnabled(!!sub)
-    } catch { /* ignore */ }
-  }, [])
+    if (isNative) {
+      // Native: check Capacitor push permission
+      setPushSupported(true)
+      try {
+        const { PushNotifications } = await import('@capacitor/push-notifications')
+        const permission = await PushNotifications.checkPermissions()
+        setPushEnabled(permission.receive === 'granted')
+      } catch { /* ignore */ }
+    } else {
+      // Web: check service worker + PushManager
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
+      setPushSupported(true)
+      try {
+        const reg = await navigator.serviceWorker.ready
+        const sub = await reg.pushManager.getSubscription()
+        setPushEnabled(!!sub)
+      } catch { /* ignore */ }
+    }
+  }, [isNative])
 
   useEffect(() => { checkPushStatus() }, [checkPushStatus])
 
   const handlePushToggle = async () => {
     setPushLoading(true)
     try {
-      if (pushEnabled) {
-        // Unsubscribe
-        const reg = await navigator.serviceWorker.ready
-        const sub = await reg.pushManager.getSubscription()
-        if (sub) {
-          await api.unsubscribePush(sub.endpoint)
-          await sub.unsubscribe()
+      if (isNative) {
+        if (pushEnabled) {
+          // On native, can't programmatically revoke permission — unregister token from server
+          const token = localStorage.getItem('fcm_token')
+          if (token) {
+            await api.unregisterDeviceToken(token)
+            localStorage.removeItem('fcm_token')
+          }
+          setPushEnabled(false)
+        } else {
+          const { PushNotifications } = await import('@capacitor/push-notifications')
+          const permission = await PushNotifications.requestPermissions()
+          if (permission.receive === 'granted') {
+            await PushNotifications.register()
+            setPushEnabled(true)
+          }
         }
-        setPushEnabled(false)
       } else {
-        // Subscribe
-        const { vapidPublicKey, enabled } = await api.getPushVapidKey()
-        if (!enabled || !vapidPublicKey) return
-        const reg = await navigator.serviceWorker.ready
-        const sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: vapidPublicKey
-        })
-        await api.subscribePush(sub)
-        setPushEnabled(true)
+        if (pushEnabled) {
+          // Unsubscribe
+          const reg = await navigator.serviceWorker.ready
+          const sub = await reg.pushManager.getSubscription()
+          if (sub) {
+            await api.unsubscribePush(sub.endpoint)
+            await sub.unsubscribe()
+          }
+          setPushEnabled(false)
+        } else {
+          // Subscribe
+          const { vapidPublicKey, enabled } = await api.getPushVapidKey()
+          if (!enabled || !vapidPublicKey) return
+          const reg = await navigator.serviceWorker.ready
+          const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: vapidPublicKey
+          })
+          await api.subscribePush(sub)
+          setPushEnabled(true)
+        }
       }
     } catch (err) {
       console.error('Push toggle failed:', err)
