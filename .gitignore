@@ -37,6 +37,10 @@ docker/.env
 *.key
 *.crt
 
+# Firebase config files (contain API keys)
+android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
+
 # Capacitor native build artifacts
 ios/App/Pods/
 ios/App/App.xcworkspace/
