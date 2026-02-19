@@ -62,7 +62,7 @@ if (process.env.IDURA_DOMAIN && process.env.IDURA_CLIENT_ID && process.env.IDURA
       domain: process.env.IDURA_DOMAIN!,
       clientID: process.env.IDURA_CLIENT_ID!,
       clientSecret: process.env.IDURA_CLIENT_SECRET!,
-      redirectUri: '/api/v1/auth/ftn/callback',
+      redirectUri: process.env.IDURA_CALLBACK_URL || '/api/v1/auth/ftn/callback',
       postLogoutRedirectUri: '/',
       beforeAuthorize(_req: any, options: any) {
         return {
