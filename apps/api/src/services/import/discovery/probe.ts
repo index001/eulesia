@@ -10,7 +10,7 @@
  * scraper_config entry is created with the appropriate template.
  */
 
-import { scraperDb, scraperConfigs } from '../../db/scraper-db.js'
+import { scraperDb, scraperConfigs } from '../../../db/scraper-db.js'
 import { eq, and } from 'drizzle-orm'
 import { getTemplate } from '../adaptive/templates.js'
 import type { CountryConfig, UrlPattern } from './registry-sources.js'

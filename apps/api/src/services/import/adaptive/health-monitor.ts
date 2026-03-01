@@ -5,7 +5,7 @@
  * Triggers self-healing when consecutive failures exceed threshold.
  */
 
-import { scraperDb, scraperConfigs, healthEvents } from '../../db/scraper-db.js'
+import { scraperDb, scraperConfigs, healthEvents } from '../../../db/scraper-db.js'
 import { eq, and, lt, sql } from 'drizzle-orm'
 
 const FAILURE_THRESHOLD = 5  // Consecutive failures before triggering self-heal

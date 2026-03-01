@@ -10,7 +10,7 @@
 
 import type { MinuteFetcher, MinuteSource, Meeting } from '../fetchers/types.js'
 import type { FetcherConfig } from './config-schema.js'
-import { scraperDb, scraperConfigs } from '../../db/scraper-db.js'
+import { scraperDb, scraperConfigs } from '../../../db/scraper-db.js'
 import { eq } from 'drizzle-orm'
 
 // ============================================
@@ -330,7 +330,7 @@ async function extractPdf(
 async function extractHtml(
   meeting: Meeting,
   config: FetcherConfig,
-  source: MinuteSource,
+  _source: MinuteSource,
   vars: Record<string, string>
 ): Promise<string | null> {
   const htmlConfig = config.contentExtraction.html
@@ -518,7 +518,7 @@ export async function loadAdaptiveSourcesFromDb(): Promise<MinuteSource[]> {
     .from(scraperConfigs)
     .where(eq(scraperConfigs.status, 'active'))
 
-  return configs.map(c => ({
+  return configs.map((c: typeof scraperConfigs.$inferSelect) => ({
     municipality: c.municipalityName,
     type: 'adaptive',
     url: c.baseUrl,

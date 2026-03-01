@@ -6,7 +6,7 @@
  * and rate limits.
  */
 
-import { scraperDb, discoveryRuns } from '../../db/scraper-db.js'
+import { scraperDb, discoveryRuns } from '../../../db/scraper-db.js'
 import { eq } from 'drizzle-orm'
 import { COUNTRY_CONFIGS, getCountryMode, getSupportedCountries } from './registry-sources.js'
 import { discoverCountry, discoverCountryFull } from './probe.js'

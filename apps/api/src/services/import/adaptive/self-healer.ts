@@ -12,7 +12,7 @@
  * 6. After 3 failed heal attempts → permanently disable
  */
 
-import { scraperDb, scraperConfigs, configHistory, healthEvents } from '../../db/scraper-db.js'
+import { scraperDb, scraperConfigs, configHistory, healthEvents } from '../../../db/scraper-db.js'
 import { eq } from 'drizzle-orm'
 import { analyzePage } from './page-analyzer.js'
 import { getTemplate } from './templates.js'

@@ -12,9 +12,8 @@ import { callAi, parseAiJson } from '../adaptive/ai-provider.js'
 import { analyzePage } from '../adaptive/page-analyzer.js'
 import { getTemplate } from '../adaptive/templates.js'
 import { generateFetcherConfig, testConfig } from '../adaptive/config-generator.js'
-import { scraperDb, scraperConfigs } from '../../db/scraper-db.js'
+import { scraperDb, scraperConfigs } from '../../../db/scraper-db.js'
 import { eq } from 'drizzle-orm'
-import { validateFetcherConfig } from '../adaptive/config-schema.js'
 
 // Known systems that AI can classify into
 const KNOWN_SYSTEMS = [

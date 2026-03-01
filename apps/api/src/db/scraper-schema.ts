@@ -6,7 +6,7 @@
  * security and lifecycle independence.
  */
 
-import { pgTable, uuid, varchar, text, timestamp, integer, jsonb, index, boolean } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, timestamp, integer, jsonb, index } from 'drizzle-orm/pg-core'
 
 // ============================================
 // Scraper Configurations
