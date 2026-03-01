@@ -30,9 +30,9 @@ export const cloudncTemplate: FetcherConfig = {
     url: '{baseUrl}',
     method: 'GET',
     meetingSelector: {
-      // Matches: href='/fi-FI/Toimielimet/Organ/Kokous_DATE' ... >Organ - Kokous DATE Pöytäkirja
-      pattern: "href='([^']*\\/Kokous_([^']+))'[^>]*>([^<]+P\u00f6yt\u00e4kirja)",
-      groups: { url: 1, id: 2, title: 3 },
+      // Matches: href='/fi-FI/Toimielimet/Organ/Kokous_DATE' ... >Organ - Kokous DD.MM.YYYY Pöytäkirja
+      pattern: "href='([^']*\\/Kokous_([^']+))'[^>]*>([^<]*?(\\d{1,2}\\.\\d{1,2}\\.\\d{4})[^<]*P\u00f6yt\u00e4kirja)",
+      groups: { url: 1, id: 2, title: 3, date: 4 },
     },
     dateFormat: 'DD.MM.YYYY',
     protocolIndicators: ['Pöytäkirja'],
@@ -53,7 +53,7 @@ export const cloudncTemplate: FetcherConfig = {
 
 export const dynastyTemplate: FetcherConfig = {
   meetingList: {
-    url: '{baseUrl}?page=meeting_frames',
+    url: '{baseUrl}',
     method: 'GET',
     meetingSelector: {
       // Matches meeting links with protocol indicators
@@ -74,7 +74,7 @@ export const dynastyTemplate: FetcherConfig = {
     html: {
       // Fallback: extract individual meeting items
       itemPattern: 'page=meetingitem&(?:amp;)?id=(\\d+-\\d+)[^"]*"[^>]*>([^<]*)',
-      itemUrlTemplate: '{baseUrl}?page=meetingitem&id={itemId}',
+      itemUrlTemplate: '{baseUrlNoQuery}?page=meetingitem&id={itemId}',
       contentSelectors: ['div.content'],
       contentPatterns: ['<div[^>]*class="[^"]*content[^"]*"[^>]*>([\\s\\S]*?)<\\/div>'],
     },

@@ -47,8 +47,8 @@ export const FI_SYSTEM_MAP: Record<string, FiSystemInfo> = {
 
   // Uusimaa
   helsinki: { system: 'helsinki-paatokset', urlOverride: 'https://paatokset.hel.fi/fi/paattajat/kaupunginvaltuusto/asiakirjat', notes: 'Custom Drupal/Ahjo system. Multi-body: valtuusto, hallitus, lautakunnat.' },
-  espoo: { system: 'cloudnc' },
-  vantaa: { system: 'cloudnc' },
+  espoo: { system: 'dynasty', urlOverride: 'https://espoo.oncloudos.com/cgi/DREQUEST.PHP?page=meeting_frames', notes: 'OnCloudOS, not CloudNC' },
+  vantaa: { system: 'dynasty', urlOverride: 'https://vantaa.oncloudos.com/cgi/DREQUEST.PHP?page=meeting_frames', notes: 'OnCloudOS, not CloudNC' },
   kauniainen: { system: 'cloudnc' },
   kerava: { system: 'cloudnc' },
   kirkkonummi: { system: 'cloudnc' },
@@ -476,13 +476,15 @@ export function getFiSystem(slug: string): FiSystemInfo | null {
  * Build the standard URL for a Finnish municipality based on system type.
  */
 export function buildFiUrl(slug: string, system: FiSystemType): string {
+  // Returns the FULL meeting list URL. Templates use {baseUrl} as-is.
   switch (system) {
     case 'cloudnc':
       return `https://${slug}.cloudnc.fi/fi-FI`
     case 'dynasty':
       return `https://poytakirjat.${slug}.fi/cgi/DREQUEST.PHP?page=meeting_frames`
     case 'tweb':
-      return `https://${slug}.tweb.fi/ktwebbin/dbisa.dll/ktwebscr/pk_tek_tweb.htm`
+      // Return the DLL directory (not full URL) — tweb template appends /dbisa.dll/... paths
+      return `https://${slug}.tweb.fi/ktwebbin`
     case 'helsinki-paatokset':
       return `https://paatokset.hel.fi/fi/paattajat/kaupunginvaltuusto/asiakirjat`
     case 'none':

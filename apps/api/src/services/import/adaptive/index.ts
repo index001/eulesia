@@ -90,7 +90,7 @@ function applyTextCleaning(text: string, config: FetcherConfig): string {
 
 /**
  * Resolve URL template placeholders.
- * Supported: {baseUrl}, {origin}, {pathPrefix}, {meetingId}
+ * Supported: {baseUrl}, {baseUrlNoQuery}, {origin}, {pathPrefix}, {meetingId}, {itemId}
  */
 function resolveUrlTemplate(template: string, vars: Record<string, string>): string {
   let resolved = template
@@ -174,11 +174,14 @@ export const adaptiveFetcher: MinuteFetcher = {
 
     const { config, fetcherOptions } = loaded
     const baseUrl = source.url
-    const origin = new URL(baseUrl).origin
+    const parsedUrl = new URL(baseUrl)
+    const origin = parsedUrl.origin
     const pathPrefix = fetcherOptions?.pathPrefix || ''
+    // baseUrlNoQuery: strip query string (for Dynasty item URLs: DREQUEST.PHP?page=meetingitem&id=...)
+    const baseUrlNoQuery = baseUrl.split('?')[0]
 
     // Build the meeting list URL
-    const listUrl = resolveUrlTemplate(config.meetingList.url, { baseUrl, origin, pathPrefix })
+    const listUrl = resolveUrlTemplate(config.meetingList.url, { baseUrl, origin, pathPrefix, baseUrlNoQuery })
     console.log(`   [adaptive] Fetching meetings: ${listUrl}`)
 
     const response = await rateLimitedFetch(listUrl, {
@@ -242,8 +245,9 @@ export const adaptiveFetcher: MinuteFetcher = {
     const origin = new URL(source.url).origin
     const pathPrefix = fetcherOptions?.pathPrefix || ''
     const { strategy } = config.contentExtraction
+    const baseUrlNoQuery = source.url.split('?')[0]
 
-    const templateVars = { origin, pathPrefix, meetingId: meeting.id, baseUrl: source.url }
+    const templateVars = { origin, pathPrefix, meetingId: meeting.id, baseUrl: source.url, baseUrlNoQuery }
 
     // ---- Strategy: PDF ----
     if (strategy === 'pdf' || strategy === 'pdf-with-html-fallback') {
