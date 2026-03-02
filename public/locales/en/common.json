@@ -217,7 +217,10 @@
     },
     "backToAgora": "Back to Agora",
     "backToHome": "Go to homepage",
-    "reload": "Reload page"
+    "reload": "Reload page",
+    "dev": {
+      "details": "Error details"
+    }
   },
   "cookies": {
     "message": "Eulesia only uses an essential session cookie for authentication. We do not use analytics or advertising cookies.",

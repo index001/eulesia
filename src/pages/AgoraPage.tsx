@@ -5,7 +5,7 @@ import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ThreadCard, FeedFilters, FeedOnboarding, InlineThreadForm } from '../components/agora'
 import { ContentEndMarker, ThreadListSkeleton } from '../components/common'
-import { MapPin, Building2, Globe, Users } from 'lucide-react'
+import { MapPin, Building2, Globe, Users, Landmark } from 'lucide-react'
 import { useThreads, useVoteThread, useSubscriptions, useCompleteOnboarding } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import { useGuide } from '../hooks/useGuide'
@@ -363,12 +363,14 @@ export function AgoraPage() {
 
         {/* Empty state (not onboarding, not scope hint) */}
         {!isLoading && !error && !(showOnboarding && feedScope === 'following') && threads.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            <p>{t('noThreads')}</p>
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <Landmark className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+            <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">{t('noThreads')}</p>
+            <p className="text-sm mb-3">{t('noThreadsHint')}</p>
             {feedScope === 'following' && (
               <button
                 onClick={() => setShowOnboarding(true)}
-                className="mt-2 text-blue-600 hover:underline text-sm"
+                className="text-blue-600 hover:underline text-sm"
               >
                 {t('editSubscriptions')}
               </button>

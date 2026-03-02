@@ -55,7 +55,7 @@ function MessageBubble({ message, isOwnMessage, onEdit, onDelete }: DMMessageBub
       </div>
       <div className={`max-w-[75%] ${isOwnMessage ? 'text-right' : ''}`}>
         <div className="flex items-baseline gap-2 mb-1">
-          <span className={`text-sm font-medium text-gray-900 ${isOwnMessage ? 'order-2' : ''}`}>
+          <span className={`text-sm font-medium text-gray-900 dark:text-gray-100 ${isOwnMessage ? 'order-2' : ''}`}>
             {message.author?.name}
           </span>
           <span className="text-xs text-gray-500">
@@ -70,7 +70,7 @@ function MessageBubble({ message, isOwnMessage, onEdit, onDelete }: DMMessageBub
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full p-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               rows={3}
               autoFocus
             />
@@ -97,7 +97,7 @@ function MessageBubble({ message, isOwnMessage, onEdit, onDelete }: DMMessageBub
               className={`px-4 py-2 rounded-2xl ${
                 isOwnMessage
                   ? 'bg-teal-600 text-white rounded-br-md'
-                  : 'bg-gray-100 text-gray-900 rounded-bl-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-md'
               }`}
             >
               {message.contentHtml ? (
@@ -111,7 +111,7 @@ function MessageBubble({ message, isOwnMessage, onEdit, onDelete }: DMMessageBub
               <div className="absolute top-0 left-0 -translate-x-full pr-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5">
                 <button
                   onClick={handleStartEdit}
-                  className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600"
+                  className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   title={t('common:actions.edit')}
                 >
                   <Pencil className="w-3.5 h-3.5" />

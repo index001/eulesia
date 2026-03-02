@@ -11,6 +11,21 @@
   --color-home-purple: #581c87;
   --topbar-height: 3.5rem;
   --topbar-total: calc(env(safe-area-inset-top, 0px) + var(--topbar-height));
+
+  /* Surface hierarchy (light) */
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f9fafb;
+  --color-surface-page: #f9fafb;
+  --color-border: #e5e7eb;
+  --color-border-secondary: #f3f4f6;
+}
+
+.dark {
+  --color-surface: #111827;
+  --color-surface-secondary: #1f2937;
+  --color-surface-page: #030712;
+  --color-border: #1f2937;
+  --color-border-secondary: #374151;
 }
 
 /* Base typography - calm, legible, civic */
@@ -25,7 +40,7 @@ body {
 
 /* Prevent infinite scroll feel - content ends */
 .content-end-marker {
-  @apply py-8 text-center text-gray-500 border-t border-gray-200;
+  @apply py-8 text-center text-gray-500 border-t border-gray-200 dark:border-gray-800;
 }
 
 /* Leaflet map custom styles */
@@ -91,11 +106,28 @@ body {
   content-visibility: auto;
 }
 
+/* Keyboard navigation: visible focus indicator */
+*:focus-visible {
+  outline: 2px solid var(--color-civic-blue);
+  outline-offset: 2px;
+}
+
+/* Remove focus ring for mouse clicks */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* iOS Safari: prevent auto-zoom on input focus (triggers when font-size < 16px) */
 @media screen and (max-width: 768px) {
   input, textarea, select {
     font-size: 16px !important;
   }
+}
+
+/* Toast animation */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(1rem); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Guide tour: highlighted element */

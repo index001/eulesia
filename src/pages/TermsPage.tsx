@@ -35,13 +35,13 @@ function TermsContent() {
         {t('common:actions.back')}
       </Link>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
             {t('terms.title')}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {t('terms.lastUpdated', { date: '12.2.2026' })}
           </p>
         </div>
@@ -49,16 +49,16 @@ function TermsContent() {
         <div className="p-6 space-y-6">
           {sectionKeys.map((key) => (
             <section key={key}>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 {t(`terms.sections.${key}.title`)}
               </h2>
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
                 {t(`terms.sections.${key}.content`)}
               </p>
               {key === 'conduct' && (
                 <ul className="mt-2 space-y-1">
                   {(t(`terms.sections.conduct.rules`, { returnObjects: true }) as string[]).map((rule, i) => (
-                    <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
+                    <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-2">
                       <span className="text-red-500 mt-0.5">•</span>
                       {rule}
                     </li>
@@ -84,7 +84,7 @@ export function TermsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
         <PublicHeader />
         <TermsContent />
       </div>

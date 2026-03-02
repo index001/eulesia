@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Shield, Bell, BellRing, Eye, Database, LogOut, ChevronRight, Info, ExternalLink, Ticket, Plus, Copy, Check, Trash2, Users, Camera, Loader2, Globe, HelpCircle, AlertTriangle, Building2, CheckCircle, Clock, X, Sun, Moon, Monitor } from 'lucide-react'
+import { Shield, Bell, BellRing, Eye, Database, LogOut, ChevronRight, Info, ExternalLink, Ticket, Plus, Copy, Check, Trash2, Users, Camera, Loader2, Globe, HelpCircle, AlertTriangle, Sun, Moon, Monitor } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
@@ -10,7 +10,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
 import { useMySanctions } from '../hooks/useAdminApi'
 import { useGuide } from '../hooks/useGuide'
-import { useUpdateProfile, useExportData, useDeleteAccount, useMyInstitutions, useAvailableInstitutions, useClaimInstitution, useCreateOrganization } from '../hooks/useApi'
+import { useUpdateProfile, useExportData, useDeleteAccount } from '../hooks/useApi'
 import { guides } from '../data/guides'
 import { api, type InviteCode, type InvitedUser } from '../lib/api'
 
@@ -311,7 +311,7 @@ export function ProfilePage() {
             {t('profile:sanctions.active')}
           </div>
           {mySanctions.filter(s => !s.revokedAt).map(s => (
-            <div key={s.id} className="bg-white rounded-lg p-3 border border-red-200 mb-2">
+            <div key={s.id} className="bg-white dark:bg-gray-900 rounded-lg p-3 border border-red-200 dark:border-red-800 mb-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-red-800 capitalize">{s.sanctionType}</span>
                 {s.expiresAt && (
@@ -550,42 +550,42 @@ export function ProfilePage() {
                   </div>
                 )}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.orgName')}</label>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{t('institutions.orgName')}</label>
                   <input
                     type="text"
                     value={orgForm.name}
                     onChange={e => setOrgForm(f => ({ ...f, name: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     placeholder="Acme Oy"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.orgOfficialName')}</label>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{t('institutions.orgOfficialName')}</label>
                   <input
                     type="text"
                     value={orgForm.institutionName}
                     onChange={e => setOrgForm(f => ({ ...f, institutionName: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     placeholder="Acme Oyj"
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.businessId')}</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{t('institutions.businessId')}</label>
                     <input
                       type="text"
                       value={orgForm.businessId}
                       onChange={e => setOrgForm(f => ({ ...f, businessId: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                       placeholder={t('institutions.businessIdPlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.businessIdCountry')}</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{t('institutions.businessIdCountry')}</label>
                     <select
                       value={orgForm.businessIdCountry}
                       onChange={e => setOrgForm(f => ({ ...f, businessIdCountry: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     >
                       <option value="FI">FI</option>
                       <option value="SE">SE</option>
@@ -599,22 +599,22 @@ export function ProfilePage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.websiteUrl')}</label>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{t('institutions.websiteUrl')}</label>
                   <input
                     type="url"
                     value={orgForm.websiteUrl}
                     onChange={e => setOrgForm(f => ({ ...f, websiteUrl: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     placeholder="https://example.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('institutions.orgDescription')}</label>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{t('institutions.orgDescription')}</label>
                   <textarea
                     value={orgForm.description}
                     onChange={e => setOrgForm(f => ({ ...f, description: e.target.value }))}
                     rows={2}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     placeholder={t('institutions.orgDescPlaceholder')}
                   />
                 </div>
@@ -637,7 +637,7 @@ export function ProfilePage() {
             )}
           </div>
         </div>
-        End of Institution Management commented out */
+        End of Institution Management commented out */}
 
         {/* Invite Codes */}
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
@@ -918,7 +918,7 @@ export function ProfilePage() {
                   </button>
                   <button
                     onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText('') }}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300"
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
                   >
                     {t('common:actions.cancel')}
                   </button>

@@ -38,7 +38,7 @@ export function ActorBadge({ user, showName = true, size = 'md' }: ActorBadgePro
       {showName && (
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
-            <span className={`font-medium text-gray-900 hover:underline ${size === 'sm' ? 'text-sm' : ''}`}>
+            <span className={`font-medium text-gray-900 dark:text-gray-100 hover:underline ${size === 'sm' ? 'text-sm' : ''}`}>
               {user.name}
             </span>
 
@@ -61,7 +61,7 @@ export function ActorBadge({ user, showName = true, size = 'md' }: ActorBadgePro
 
           {/* Institution type */}
           {isInstitution && user.institutionType && (
-            <span className="text-xs text-gray-500 capitalize">
+            <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
               {user.institutionType}
             </span>
           )}

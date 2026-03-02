@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X, MapPin, Building2, Globe, Loader2, Hash, Plus, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useCreateThread } from '../../hooks/useApi'
 import { useAuth } from '../../hooks/useAuth'
+import { useModalAccessibility } from '../../hooks/useModalAccessibility'
 import { LocationSearch } from '../common/LocationSearch'
 import type { Scope } from '../../types'
 import type { LocationResult } from '../../lib/api'
@@ -56,6 +57,7 @@ export function NewThreadModal({
   const { t } = useTranslation('agora')
   const { currentUser } = useAuth()
   const createThreadMutation = useCreateThread()
+  const modalRef = useRef<HTMLDivElement>(null)
 
   const scopeOptions: { value: Scope; icon: React.ElementType; label: string; description: string }[] = [
     {
@@ -195,12 +197,14 @@ export function NewThreadModal({
     onClose()
   }
 
+  useModalAccessibility(modalRef, handleClose, isOpen)
+
   if (!isOpen) return null
 
   const isPrefilled = !!(prefilledMunicipalityId || prefilledLocation)
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="new-thread-title">
+    <div ref={modalRef} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="new-thread-title">
       <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">

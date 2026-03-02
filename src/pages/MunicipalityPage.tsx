@@ -88,21 +88,21 @@ export function MunicipalityPage() {
         }}
       />
       {/* Page header */}
-      <div className="bg-white px-4 py-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-900 px-4 py-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {municipality?.name || t('agora:municipality.defaultName')}
               </h1>
               {municipality?.region && (
-                <p className="text-sm text-gray-500">{municipality.region}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{municipality.region}</p>
               )}
             </div>
           </div>
@@ -110,7 +110,7 @@ export function MunicipalityPage() {
             <FollowButton entityType="municipality" entityId={municipalityId} />
           )}
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           {t('agora:municipality.discussions', { count: threads.length })}
         </p>
       </div>

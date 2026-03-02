@@ -31,15 +31,15 @@ export function GuideTooltip({
 
   // Arrow classes based on placement
   const arrowClasses: Record<string, string> = {
-    bottom: 'absolute -top-2 left-6 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-200',
-    top: 'absolute -bottom-2 left-6 w-4 h-4 bg-white rotate-45 border-r border-b border-gray-200',
-    left: 'absolute top-4 -right-2 w-4 h-4 bg-white rotate-45 border-t border-r border-gray-200',
-    right: 'absolute top-4 -left-2 w-4 h-4 bg-white rotate-45 border-b border-l border-gray-200'
+    bottom: 'absolute -top-2 left-6 w-4 h-4 bg-white dark:bg-gray-900 rotate-45 border-l border-t border-gray-200 dark:border-gray-700',
+    top: 'absolute -bottom-2 left-6 w-4 h-4 bg-white dark:bg-gray-900 rotate-45 border-r border-b border-gray-200 dark:border-gray-700',
+    left: 'absolute top-4 -right-2 w-4 h-4 bg-white dark:bg-gray-900 rotate-45 border-t border-r border-gray-200 dark:border-gray-700',
+    right: 'absolute top-4 -left-2 w-4 h-4 bg-white dark:bg-gray-900 rotate-45 border-b border-l border-gray-200 dark:border-gray-700'
   }
 
   return (
     <div
-      className="fixed bg-white rounded-xl shadow-lg border border-gray-200 p-4 w-72 sm:w-80"
+      className="fixed bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 w-72 sm:w-80"
       style={{
         top: position.top,
         left: position.left,
@@ -54,11 +54,11 @@ export function GuideTooltip({
 
       {/* Content */}
       <div className="relative">
-        <h3 className="font-semibold text-gray-900 text-sm mb-1">{title}</h3>
-        <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-1">{title}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{description}</p>
 
         {/* Step indicator and controls */}
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
           <span className="text-xs text-gray-400">
             {t('stepOf', { current: currentStep, total: totalSteps })}
           </span>
@@ -66,7 +66,7 @@ export function GuideTooltip({
           <div className="flex items-center gap-2">
             <button
               onClick={onSkip}
-              className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded transition-colors"
+              className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-1 rounded transition-colors"
             >
               {t('skip')}
             </button>

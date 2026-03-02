@@ -30,14 +30,14 @@ function InlineCardPreview({ url }: { url: string }) {
 
   if (isLoading) {
     return (
-      <div className="border border-gray-200 rounded-lg overflow-hidden animate-pulse">
+      <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden animate-pulse">
         <div className="flex">
           <div className="flex-1 p-2.5 space-y-1.5">
-            <div className="h-2.5 bg-gray-200 rounded w-1/3" />
-            <div className="h-3.5 bg-gray-200 rounded w-3/4" />
-            <div className="h-2.5 bg-gray-200 rounded w-full" />
+            <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+            <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+            <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-full" />
           </div>
-          <div className="w-20 h-16 bg-gray-200 flex-shrink-0" />
+          <div className="w-20 h-16 bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
         </div>
       </div>
     )
@@ -57,7 +57,7 @@ function InlineCardPreview({ url }: { url: string }) {
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(e as any) } }}
-      className="border border-gray-200 rounded-lg overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer"
+      className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
     >
       <div className="flex">
         <div className="flex-1 p-2.5 min-w-0">
@@ -71,27 +71,27 @@ function InlineCardPreview({ url }: { url: string }) {
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
             )}
-            <span className="text-[11px] text-gray-500 truncate">
+            <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
               {data.siteName || new URL(url).hostname}
             </span>
             <ExternalLink className="w-2.5 h-2.5 text-gray-400 flex-shrink-0" />
           </div>
           {/* Title */}
           {data.title && (
-            <p className="text-xs font-medium text-gray-900 line-clamp-1 leading-snug">
+            <p className="text-xs font-medium text-gray-900 dark:text-gray-100 line-clamp-1 leading-snug">
               {data.title}
             </p>
           )}
           {/* Description */}
           {data.description && (
-            <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5 leading-relaxed">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5 leading-relaxed">
               {data.description}
             </p>
           )}
         </div>
         {/* Image */}
         {data.imageUrl && (
-          <div className="w-20 flex-shrink-0 bg-gray-100">
+          <div className="w-20 flex-shrink-0 bg-gray-100 dark:bg-gray-800">
             <img
               src={data.imageUrl}
               alt=""

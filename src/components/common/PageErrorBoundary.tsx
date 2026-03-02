@@ -38,13 +38,13 @@ export class PageErrorBoundary extends Component<Props, State> {
         <Layout>
           <div className="flex items-center justify-center px-4 py-16">
             <div className="text-center max-w-sm">
-              <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-7 h-7 text-red-300" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
                 {t('errorPages.error.title')}
               </h2>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                 {t('errorPages.error.description')}
               </p>
               <button
@@ -56,10 +56,10 @@ export class PageErrorBoundary extends Component<Props, State> {
               </button>
               {import.meta.env.DEV && this.state.error && (
                 <details className="mt-6 text-left">
-                  <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600">
-                    Virheen tiedot
+                  <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300">
+                    {t('errorPages.dev.details')}
                   </summary>
-                  <pre className="mt-2 p-2 bg-gray-100 rounded-lg text-xs text-red-600 overflow-auto max-h-40">
+                  <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs text-red-600 dark:text-red-400 overflow-auto max-h-40">
                     {this.state.error.message}
                     {'\n'}
                     {this.state.error.stack}

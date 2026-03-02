@@ -9,21 +9,22 @@ import { MapFilters } from './MapFilters'
 import { MapPopup } from './MapPopup'
 import type { MapFilterState } from './types'
 
-// Custom marker icons
+// Custom marker icons — 32px for better touch targets on mobile
+const MARKER_SIZE = 32
 const createIcon = (color: string) => L.divIcon({
   className: 'custom-marker',
   html: `<div style="
     background-color: ${color};
-    width: 24px;
-    height: 24px;
+    width: ${MARKER_SIZE}px;
+    height: ${MARKER_SIZE}px;
     border-radius: 50% 50% 50% 0;
     transform: rotate(-45deg);
     border: 2px solid white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   "></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 24],
-  popupAnchor: [0, -24]
+  iconSize: [MARKER_SIZE, MARKER_SIZE],
+  iconAnchor: [MARKER_SIZE / 2, MARKER_SIZE],
+  popupAnchor: [0, -MARKER_SIZE]
 })
 
 const icons = {

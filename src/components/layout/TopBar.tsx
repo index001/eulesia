@@ -29,7 +29,7 @@ function NotificationItem({
     <div
       role="button"
       tabIndex={0}
-      className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 ${
+      className={`group flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 ${
         !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''
       }`}
       onClick={() => onNavigate(notification)}
@@ -107,15 +107,25 @@ export function TopBar() {
 
   const unreadCount = unreadData?.count ?? 0
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setShowNotifications(false)
       }
     }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setShowNotifications(false)
+        setShowMobileSearch(false)
+      }
+    }
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [])
 
   const handleNotificationClick = (notification: AppNotification) => {
@@ -182,7 +192,7 @@ export function TopBar() {
 
                 {/* Notifications dropdown */}
                 {showNotifications && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+                  <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
                     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('notifications.title')}</h3>
                       <div className="flex items-center gap-1">
@@ -231,6 +241,7 @@ export function TopBar() {
               <Link
                 to="/profile"
                 className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                aria-label={t('nav.profile')}
               >
                 <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
                   {currentUser.avatarUrl ? (

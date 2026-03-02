@@ -7,7 +7,8 @@
   "subtitle_3": "Democracy is built through dialogue",
   "subtitle_4": "An open space for public discourse",
   "loadError": "Failed to load discussions",
-  "noThreads": "No discussions match your filters",
+  "noThreads": "No discussions yet",
+  "noThreadsHint": "Try different filters or start a new discussion.",
   "editSubscriptions": "Edit subscriptions",
   "emptyScope": {
     "local": "Follow municipalities and places to see local discussions and decisions.",

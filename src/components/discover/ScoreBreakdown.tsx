@@ -57,7 +57,7 @@ export function ScoreBreakdown({ score, breakdown, className = '' }: ScoreBreakd
                   e.stopPropagation()
                   setIsOpen(false)
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -71,7 +71,7 @@ export function ScoreBreakdown({ score, breakdown, className = '' }: ScoreBreakd
                   <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
                     {t('discover.engagement')}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     {breakdown.engagement.toFixed(1)}
                   </div>
                 </div>
@@ -84,7 +84,7 @@ export function ScoreBreakdown({ score, breakdown, className = '' }: ScoreBreakd
                   <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
                     {t('discover.sourceQuality')}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     &times;{breakdown.sourceQuality.toFixed(1)}
                     {breakdown.sourceQuality > 1.0 && (
                       <span className="ml-1 text-blue-500">
@@ -105,7 +105,7 @@ export function ScoreBreakdown({ score, breakdown, className = '' }: ScoreBreakd
                   <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
                     {t('discover.freshness')}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     {(breakdown.freshness * 100).toFixed(0)}%
                   </div>
                 </div>

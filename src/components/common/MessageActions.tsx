@@ -18,7 +18,7 @@ export function MessageActions({ canEdit, canDelete, onEdit, onDelete }: Message
       {canEdit && (
         <button
           onClick={onEdit}
-          className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           title={t('actions.edit')}
         >
           <Pencil className="w-3.5 h-3.5" />
@@ -27,7 +27,7 @@ export function MessageActions({ canEdit, canDelete, onEdit, onDelete }: Message
       {canDelete && (
         <button
           onClick={onDelete}
-          className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+          className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors"
           title={t('actions.delete')}
         >
           <Trash2 className="w-3.5 h-3.5" />

@@ -217,7 +217,10 @@
     },
     "backToAgora": "Takaisin Agoraan",
     "backToHome": "Etusivulle",
-    "reload": "Lataa uudelleen"
+    "reload": "Lataa uudelleen",
+    "dev": {
+      "details": "Virheen tiedot"
+    }
   },
   "cookies": {
     "message": "Eulesia käyttää vain välttämätöntä istuntoevästettä kirjautumiseen. Emme käytä analytiikka- tai mainosevästeitä.",

@@ -18,6 +18,7 @@ interface UserThread {
   replyCount: number
   score: number
   createdAt: string
+  municipalityId?: string
   municipalityName?: string
   tags: string[]
 }
@@ -62,9 +63,19 @@ function ThreadListItem({ thread }: { thread: UserThread }) {
       </p>
       <div className="flex items-center gap-3 mt-3 text-xs text-gray-500 dark:text-gray-400">
         {thread.municipalityName && (
-          <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
-            {thread.municipalityName}
-          </span>
+          thread.municipalityId ? (
+            <Link
+              to={`/kunnat/${thread.municipalityId}`}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded hover:opacity-80 transition-opacity"
+            >
+              {thread.municipalityName}
+            </Link>
+          ) : (
+            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+              {thread.municipalityName}
+            </span>
+          )
         )}
         <span className="flex items-center gap-1">
           <MessageSquare className="w-3.5 h-3.5" />

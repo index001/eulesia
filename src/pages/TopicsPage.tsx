@@ -73,14 +73,14 @@ export function TopicsPage() {
         path="/aiheet"
       />
       {/* Header */}
-      <div className="bg-gradient-to-b from-teal-50 to-white px-4 py-6">
+      <div className="bg-gradient-to-b from-teal-50 to-white dark:from-teal-950/30 dark:to-gray-950 px-4 py-6">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center">
             <Hash className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('agora:topics.title')}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('agora:topics.title')}</h1>
         </div>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           {t('agora:topics.subtitle')}
         </p>
       </div>
@@ -89,14 +89,14 @@ export function TopicsPage() {
       <div className="px-4 py-4 space-y-6">
         {orderedCategories.map(category => (
           <div key={category}>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
               {CATEGORY_I18N_KEYS[category] ? t(CATEGORY_I18N_KEYS[category]) : category}
             </h2>
             <div className="space-y-2">
               {grouped[category].map(tag => (
                 <div
                   key={tag.tag}
-                  className="bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between"
+                  className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 flex items-center justify-between"
                 >
                   <Link
                     to={`/agora/tag/${encodeURIComponent(tag.tag)}`}
@@ -104,7 +104,7 @@ export function TopicsPage() {
                   >
                     <div className="flex items-center gap-2">
                       <Hash className="w-4 h-4 text-teal-600 flex-shrink-0" />
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
                         {tag.displayName || tag.tag.replace(/-/g, ' ')}
                       </span>
                       {tag.count > 0 && (
@@ -129,13 +129,13 @@ export function TopicsPage() {
         {/* Uncategorized tags (from thread usage, not in tagCategories) */}
         {grouped['muut'] && grouped['muut'].length > 0 && !orderedCategories.includes('muut') && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('agora:topics.otherTopics')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('agora:topics.otherTopics')}</h2>
             <div className="flex flex-wrap gap-2">
               {grouped['muut'].map(tag => (
                 <Link
                   key={tag.tag}
                   to={`/agora/tag/${encodeURIComponent(tag.tag)}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
                   {tag.displayName || tag.tag.replace(/-/g, ' ')}
                   {tag.count > 0 && (

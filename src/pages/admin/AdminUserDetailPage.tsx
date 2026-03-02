@@ -223,7 +223,7 @@ export function AdminUserDetailPage() {
                   <button
                     onClick={() => revokeSanctionMutation.mutate(s.id)}
                     disabled={revokeSanctionMutation.isPending}
-                    className="text-xs px-3 py-1 bg-white border border-red-300 text-red-700 rounded-lg hover:bg-red-50"
+                    className="text-xs px-3 py-1 bg-white dark:bg-gray-900 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
                     {t('userDetail.revoke')}
                   </button>

@@ -436,7 +436,7 @@ export function CommentThread({ comments, onVote, onReply, onEdit, onDelete, cur
 
   if (comments.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
         <p>{t('noComments')}</p>
       </div>
     )

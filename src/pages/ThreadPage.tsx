@@ -238,6 +238,7 @@ export function ThreadPage() {
         <div className="flex items-center gap-3 mb-1">
           <ScopeBadge
             scope={thread.scope}
+            municipalityId={thread.municipality?.id}
             municipalityName={thread.municipality?.name}
           />
           <span className="text-xs text-gray-500 dark:text-gray-400">

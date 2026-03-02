@@ -139,9 +139,9 @@ function AboutContent() {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('comparison.quadrant3Platforms')}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5">{t('comparison.quadrant3Desc')}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                <p className="font-medium text-blue-900 text-sm">{t('comparison.quadrant4Title')}</p>
-                <p className="text-xs text-blue-700 mt-1.5">{t('comparison.quadrant4Desc')}</p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                <p className="font-medium text-blue-900 dark:text-blue-200 text-sm">{t('comparison.quadrant4Title')}</p>
+                <p className="text-xs text-blue-700 dark:text-blue-300 mt-1.5">{t('comparison.quadrant4Desc')}</p>
               </div>
             </div>
           </div>
@@ -158,7 +158,7 @@ function AboutContent() {
             </p>
 
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Landmark className="w-4 h-4 text-blue-700" />
               </div>
               <div>
@@ -170,7 +170,7 @@ function AboutContent() {
             </div>
 
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Users className="w-4 h-4 text-violet-700" />
               </div>
               <div>
@@ -182,7 +182,7 @@ function AboutContent() {
             </div>
 
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Shield className="w-4 h-4 text-teal-700" />
               </div>
               <div>
@@ -194,7 +194,7 @@ function AboutContent() {
             </div>
 
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Building2 className="w-4 h-4 text-amber-700" />
               </div>
               <div>
@@ -265,7 +265,7 @@ function AboutContent() {
         >
           <div className="space-y-4">
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Users className="w-4 h-4 text-blue-700" />
               </div>
               <div>
@@ -274,7 +274,7 @@ function AboutContent() {
               </div>
             </div>
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Building2 className="w-4 h-4 text-violet-700" />
               </div>
               <div>
@@ -283,7 +283,7 @@ function AboutContent() {
               </div>
             </div>
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 <GraduationCap className="w-4 h-4 text-teal-700" />
               </div>
               <div>
@@ -292,7 +292,7 @@ function AboutContent() {
               </div>
             </div>
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Code className="w-4 h-4 text-amber-700" />
               </div>
               <div>
@@ -342,11 +342,11 @@ function AboutContent() {
         </SectionCard>
 
         {/* EU alignment */}
-        <div className="bg-blue-50 rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 flex items-center gap-3">
           <span className="text-3xl">🇪🇺</span>
           <div>
-            <p className="font-medium text-blue-900">{t('euAlignment.title')}</p>
-            <p className="text-sm text-blue-700 mt-1">
+            <p className="font-medium text-blue-900 dark:text-blue-200">{t('euAlignment.title')}</p>
+            <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
               {t('euAlignment.description')}
             </p>
           </div>
@@ -361,7 +361,7 @@ function AboutContent() {
             {/* Now */}
             <div className="relative pl-6 border-l-2 border-blue-500">
               <div className="absolute -left-[7px] top-0.5 w-3 h-3 bg-blue-500 rounded-full" />
-              <h3 className="font-medium text-blue-900 text-sm">{t('roadmap.now')}</h3>
+              <h3 className="font-medium text-blue-900 dark:text-blue-200 text-sm">{t('roadmap.now')}</h3>
               <ul className="mt-1.5 space-y-1">
                 {(t('roadmap.nowItems', { returnObjects: true }) as string[]).map((item, i) => (
                   <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
