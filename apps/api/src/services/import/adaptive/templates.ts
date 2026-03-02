@@ -56,13 +56,14 @@ export const dynastyTemplate: FetcherConfig = {
     url: '{baseUrl}',
     method: 'GET',
     meetingSelector: {
-      // Matches meeting links with protocol indicators
-      // Dynasty uses <tr> rows with page=meeting&id=NNNN and protocol icons/text
-      pattern: 'page=meeting&(?:amp;)?id=(\\d+).*?(?:icon_protocol|class=["\'][^"\']*\\bprotocol\\b|>\\s*P\u00f6yt\u00e4kirja\\s*<)',
-      groups: { id: 1, url: 1 }, // URL is constructed from ID
+      // Matches Dynasty/OnCloudOS meeting links: href='...page=meeting&id=NNNN'
+      // Captures the full href (for URL resolution) and the meeting ID.
+      // Protocol filtering via protocolIndicators (checks ±500 char window).
+      pattern: "href=['\"]([^'\"]*?page=meeting&(?:amp;)?id=(\\d+)[^'\"]*?)['\"]",
+      groups: { url: 1, id: 2 },
     },
     dateFormat: 'DD.MM.YYYY',
-    protocolIndicators: ['icon_protocol', 'Pöytäkirja', 'protocol'],
+    protocolIndicators: ['icon_protocol', 'Pöytäkirja', 'P&ouml;yt&auml;kirja', 'protocol', 'filetitle protocol'],
     maxMeetings: 10,
   },
   contentExtraction: {

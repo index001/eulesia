@@ -210,24 +210,54 @@ export const adaptiveFetcher: MinuteFetcher = {
 
       if (!id || !url) continue
 
-      // Filter by protocol indicators if configured
+      // Filter by protocol indicators if configured.
+      // Use a ±500 char window around the match for context, since indicators
+      // may appear before the link (OnCloudOS: class="protocol") or after it.
       if (config.meetingList.protocolIndicators.length > 0) {
-        const context = match[0] // Full match
+        const windowStart = Math.max(0, match.index - 500)
+        const windowEnd = Math.min(html.length, match.index + match[0].length + 500)
+        const context = html.slice(windowStart, windowEnd)
         const hasIndicator = config.meetingList.protocolIndicators.some(
           indicator => context.toLowerCase().includes(indicator.toLowerCase())
         )
         if (!hasIndicator) continue
       }
 
-      const date = dateRaw ? parseDate(dateRaw, config.meetingList.dateFormat) : undefined
-      const resolvedUrl = url.startsWith('http') ? url : new URL(url, listUrl).toString()
+      let date = dateRaw ? parseDate(dateRaw, config.meetingList.dateFormat) : undefined
+
+      // If no date from regex, try to extract from surrounding context (±200 chars).
+      // Dynasty/OnCloudOS has dates in adjacent <td> cells or aria-labels.
+      if (!date) {
+        const ctxStart = Math.max(0, match.index - 200)
+        const ctxEnd = Math.min(html.length, match.index + match[0].length + 200)
+        const nearby = html.slice(ctxStart, ctxEnd)
+        const dateInContext = nearby.match(/(\d{1,2}\.\d{1,2}\.\d{4})/)
+        if (dateInContext) {
+          date = parseDate(dateInContext[1], config.meetingList.dateFormat)
+        }
+      }
+
+      // Decode &amp; → & in URLs (common in Dynasty HTML attributes)
+      const decodedUrl = url.replace(/&amp;/g, '&')
+      const resolvedUrl = decodedUrl.startsWith('http') ? decodedUrl : new URL(decodedUrl, listUrl).toString()
+
+      // Try to extract organ name from context (Dynasty: preceding <td> with organ link)
+      let resolvedOrgan = organ
+      if (!resolvedOrgan) {
+        const ctxStart = Math.max(0, match.index - 500)
+        const organContext = html.slice(ctxStart, match.index)
+        const organMatch = organContext.match(/page=meetings[^>]*>([^<]+)<\/a>/i)
+        if (organMatch) {
+          resolvedOrgan = organMatch[1].replace(/&ouml;/g, 'ö').replace(/&auml;/g, 'ä').replace(/&amp;/g, '&').trim()
+        }
+      }
 
       meetings.push({
         id,
         pageUrl: resolvedUrl,
-        title: title || `Kokous ${id}`,
+        title: title || (resolvedOrgan ? `${resolvedOrgan} ${date || id}` : `Kokous ${id}`),
         date,
-        organ,
+        organ: resolvedOrgan,
       })
     }
 
