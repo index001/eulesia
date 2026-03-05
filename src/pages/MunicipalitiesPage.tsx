@@ -3,12 +3,13 @@ import { MapPin, MessageSquare, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
+import { ErrorState } from '../components/common'
 import { useMunicipalities, useThreads } from '../hooks/useApi'
 import type { Municipality } from '../lib/api'
 
 export function MunicipalitiesPage() {
   const { t } = useTranslation(['common', 'agora'])
-  const { data: municipalities, isLoading, error } = useMunicipalities()
+  const { data: municipalities, isLoading, error, refetch } = useMunicipalities()
   const { data: threadsData } = useThreads({ scope: 'local' })
 
   // Count threads per municipality
@@ -57,10 +58,11 @@ export function MunicipalitiesPage() {
         )}
 
         {error && (
-          <div className="text-center py-12 text-red-600">
-            <p>{t('common:municipalities.loadError')}</p>
-            <p className="text-sm mt-1">{error instanceof Error ? error.message : t('common:errors.unknown')}</p>
-          </div>
+          <ErrorState
+            title={t('common:municipalities.loadError')}
+            description={error instanceof Error ? error.message : undefined}
+            onRetry={() => refetch()}
+          />
         )}
 
         {!isLoading && !error && municipalitiesWithThreads && municipalitiesWithThreads.length > 0 && (

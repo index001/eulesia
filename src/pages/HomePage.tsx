@@ -4,7 +4,7 @@ import { Home, Plus, Lock, Globe, MessageSquare, Users, Settings, ChevronRight, 
 import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
-import { ContentEndMarker } from '../components/common'
+import { ContentEndMarker, ErrorState } from '../components/common'
 import { useHome, useCreateRoom, useInvitations, useAcceptInvitation, useDeclineInvitation } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import { useGuide } from '../hooks/useGuide'
@@ -14,7 +14,7 @@ export function HomePage() {
   const { t } = useTranslation('home')
   const navigate = useNavigate()
   const { currentUser } = useAuth()
-  const { data: homeData, isLoading, error } = useHome(currentUser?.id || '')
+  const { data: homeData, isLoading, error, refetch } = useHome(currentUser?.id || '')
   const { data: invitations } = useInvitations()
   const createRoomMutation = useCreateRoom()
   const acceptInvitationMutation = useAcceptInvitation()
@@ -140,9 +140,11 @@ export function HomePage() {
         )}
 
         {error && (
-          <div className="text-center py-12 text-red-600">
-            <p>{t('loadError')}</p>
-          </div>
+          <ErrorState
+            title={t('loadError')}
+            description={error instanceof Error ? error.message : undefined}
+            onRetry={() => refetch()}
+          />
         )}
 
         {!isLoading && !error && (

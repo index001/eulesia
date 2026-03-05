@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ThreadCard, InlineThreadForm } from '../components/agora'
-import { ContentEndMarker, FollowButton } from '../components/common'
+import { ContentEndMarker, FollowButton, ErrorState } from '../components/common'
 import { useThreads, useMunicipalities } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import type { Thread as ApiThread, UserSummary, Municipality } from '../lib/api'
@@ -53,7 +53,7 @@ export function MunicipalityPage() {
   const { currentUser } = useAuth()
 
   const { data: municipalitiesData } = useMunicipalities()
-  const { data: threadsData, isLoading, error } = useThreads({ municipalityId })
+  const { data: threadsData, isLoading, error, refetch } = useThreads({ municipalityId })
 
   const municipality = useMemo(() => {
     return municipalitiesData?.find((m: Municipality) => m.id === municipalityId)
@@ -132,10 +132,11 @@ export function MunicipalityPage() {
         )}
 
         {error && (
-          <div className="text-center py-12 text-red-600">
-            <p>{t('agora:municipality.loadError')}</p>
-            <p className="text-sm mt-1">{error instanceof Error ? error.message : t('common:errors.unknown')}</p>
-          </div>
+          <ErrorState
+            title={t('agora:municipality.loadError')}
+            description={error instanceof Error ? error.message : undefined}
+            onRetry={() => refetch()}
+          />
         )}
 
         {!isLoading && !error && threads.length > 0 && (

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ThreadCard, FeedFilters, FeedOnboarding, InlineThreadForm } from '../components/agora'
-import { ContentEndMarker, ThreadListSkeleton } from '../components/common'
+import { ContentEndMarker, ThreadListSkeleton, ErrorState } from '../components/common'
 import { MapPin, Building2, Globe, Users, Landmark } from 'lucide-react'
 import { useThreads, useVoteThread, useSubscriptions, useCompleteOnboarding } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
@@ -89,7 +89,7 @@ export function AgoraPage() {
     page
   }), [feedScope, sortBy, topPeriod, selectedMunicipality, selectedTags, page])
 
-  const { data: threadsData, isLoading, error } = useThreads(filters)
+  const { data: threadsData, isLoading, error, refetch } = useThreads(filters)
   const voteThreadMutation = useVoteThread(filters)
 
   // Reset pagination when filters change
@@ -305,10 +305,11 @@ export function AgoraPage() {
         )}
 
         {error && (
-          <div className="text-center py-12 text-red-600">
-            <p>{t('loadError')}</p>
-            <p className="text-sm mt-1">{error instanceof Error ? error.message : t('common:errors.unknown')}</p>
-          </div>
+          <ErrorState
+            title={t('loadError')}
+            description={error instanceof Error ? error.message : undefined}
+            onRetry={() => refetch()}
+          />
         )}
 
         {/* Onboarding: full on following, compact banner on Tutustu */}

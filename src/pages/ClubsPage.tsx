@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ClubCard } from '../components/clubs'
-import { ContentEndMarker, LocationSearch } from '../components/common'
+import { ContentEndMarker, LocationSearch, ErrorState } from '../components/common'
 import { useClubs, useClubCategories, useCreateClub, useMyClubInvitations, useAcceptClubInvitation, useDeclineClubInvitation } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import { useGuide } from '../hooks/useGuide'
@@ -52,7 +52,7 @@ export function ClubsPage() {
 
   const { data: categoriesData } = useClubCategories()
   const createClubMutation = useCreateClub()
-  const { data: clubsData, isLoading, error } = useClubs({
+  const { data: clubsData, isLoading, error, refetch } = useClubs({
     category: selectedCategory || undefined,
     search: searchQuery || undefined
   })
@@ -522,10 +522,11 @@ export function ClubsPage() {
         )}
 
         {error && (
-          <div className="text-center py-12 text-red-600">
-            <p>{t('failedToLoad')}</p>
-            <p className="text-sm mt-1">{error instanceof Error ? error.message : t('common:errors.unknown')}</p>
-          </div>
+          <ErrorState
+            title={t('failedToLoad')}
+            description={error instanceof Error ? error.message : undefined}
+            onRetry={() => refetch()}
+          />
         )}
 
         {!isLoading && !error && clubs.length > 0 && (
