@@ -1,12 +1,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Plus, X, Globe, Lock, Image as ImageIcon, Loader2, Trash2 } from 'lucide-react'
+import { Search, Plus, X, Globe, Lock, Image as ImageIcon, Loader2, Trash2, Mail, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ClubCard } from '../components/clubs'
 import { ContentEndMarker, LocationSearch } from '../components/common'
-import { useClubs, useClubCategories, useCreateClub } from '../hooks/useApi'
+import { useClubs, useClubCategories, useCreateClub, useMyClubInvitations, useAcceptClubInvitation, useDeclineClubInvitation } from '../hooks/useApi'
 import { useAuth } from '../hooks/useAuth'
 import { useGuide } from '../hooks/useGuide'
 import { api } from '../lib/api'
@@ -35,6 +35,7 @@ export function ClubsPage() {
   const [newClubLocation, setNewClubLocation] = useState<LocationResult | null>(null)
   const [newClubRules, setNewClubRules] = useState<string[]>([])
   const [newRuleInput, setNewRuleInput] = useState('')
+  const [customCategory, setCustomCategory] = useState('')
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   const { hasCompletedGuide, startGuide, isGuideActive } = useGuide()
@@ -56,6 +57,9 @@ export function ClubsPage() {
     search: searchQuery || undefined
   })
   const { data: myClubsData } = useClubs({ membership: 'mine' })
+  const { data: clubInvitations } = useMyClubInvitations()
+  const acceptInvitationMutation = useAcceptClubInvitation()
+  const declineInvitationMutation = useDeclineClubInvitation()
 
   const categories = useMemo(() => {
     return categoriesData?.map(c => c.category) || []
@@ -116,6 +120,7 @@ export function ClubsPage() {
     setNewClubLocation(null)
     setNewClubRules([])
     setNewRuleInput('')
+    setCustomCategory('')
   }
 
   const handleCreateClub = async (e: React.FormEvent) => {
@@ -130,7 +135,7 @@ export function ClubsPage() {
         name: newClubName.trim(),
         slug,
         description: newClubDescription.trim() || undefined,
-        category: newClubCategory.trim() || undefined,
+        category: (newClubCategory === '__other__' ? customCategory.trim() : newClubCategory.trim()) || undefined,
         coverImageUrl: newClubCoverImage || undefined,
         isPublic: newClubIsPublic,
         latitude: newClubLocation ? newClubLocation.latitude : undefined,
@@ -207,16 +212,29 @@ export function ClubsPage() {
                 />
               </div>
 
-              {/* Category — free text input */}
+              {/* Category — dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('create.category')}</label>
-                <input
-                  type="text"
+                <select
                   value={newClubCategory}
                   onChange={(e) => setNewClubCategory(e.target.value)}
-                  placeholder={t('create.categoryPlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
-                />
+                >
+                  <option value="">{t('create.selectCategory')}</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                  <option value="__other__">{t('create.otherCategory')}</option>
+                </select>
+                {newClubCategory === '__other__' && (
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    placeholder={t('create.categoryPlaceholder')}
+                    className="w-full mt-2 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                  />
+                )}
               </div>
 
               {/* Cover Image */}
@@ -444,6 +462,52 @@ export function ClubsPage() {
                 )}
                 <div className="mt-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{club.name}</div>
               </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Pending Club Invitations */}
+      {clubInvitations && clubInvitations.length > 0 && (
+        <div className="px-4 pt-4 pb-2">
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            {t('clubInvitations')}
+          </h2>
+          <div className="space-y-2">
+            {clubInvitations.map(inv => (
+              <div key={inv.id} className="bg-white dark:bg-gray-900 rounded-xl border border-amber-200 dark:border-amber-800 p-3 flex items-center gap-3">
+                {inv.club.coverImageUrl ? (
+                  <img src={inv.club.coverImageUrl} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                    {inv.club.name.charAt(0)}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{inv.club.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {t('invitedBy', { name: inv.inviter.name })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <button
+                    onClick={() => acceptInvitationMutation.mutate(inv.id)}
+                    disabled={acceptInvitationMutation.isPending || declineInvitationMutation.isPending}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-teal-600 text-white text-xs font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    {t('acceptInvite')}
+                  </button>
+                  <button
+                    onClick={() => declineInvitationMutation.mutate(inv.id)}
+                    disabled={acceptInvitationMutation.isPending || declineInvitationMutation.isPending}
+                    className="px-2.5 py-1.5 text-gray-500 dark:text-gray-400 text-xs font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                  >
+                    {t('declineInvite')}
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>

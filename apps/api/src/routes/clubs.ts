@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express'
 import { z } from 'zod'
-import { eq, desc, and, or, sql, inArray } from 'drizzle-orm'
-import { db, clubs, clubMembers, clubThreads, clubComments, clubThreadVotes, clubCommentVotes, users } from '../db/index.js'
+import { eq, desc, and, or, sql, inArray, ilike } from 'drizzle-orm'
+import { db, clubs, clubMembers, clubThreads, clubComments, clubThreadVotes, clubCommentVotes, clubInvitations, users } from '../db/index.js'
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js'
 import { AppError } from '../middleware/errorHandler.js'
 import { renderMarkdown } from '../utils/markdown.js'
@@ -58,7 +58,7 @@ const clubVoteSchema = z.object({
 
 // GET /clubs - List clubs (public + user's closed clubs)
 router.get('/', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const { page = '1', limit = '20', membership } = req.query
+  const { page = '1', limit = '20', membership, search, category } = req.query
   const pageNum = Math.max(1, parseInt(page as string))
   const limitNum = Math.min(50, Math.max(1, parseInt(limit as string)))
   const offset = (pageNum - 1) * limitNum
@@ -80,19 +80,34 @@ router.get('/', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRe
   }
 
   // If membership=mine, only return user's clubs
-  let whereCondition
+  const conditions = []
   if (membership === 'mine' && memberClubIds.length > 0) {
-    whereCondition = inArray(clubs.id, memberClubIds)
+    conditions.push(inArray(clubs.id, memberClubIds))
   } else if (membership === 'mine') {
     // Not logged in or no memberships — return empty
     res.json({ success: true, data: { items: [], total: 0, page: pageNum, limit: limitNum, hasMore: false } })
     return
   } else {
     // Show public clubs + closed clubs where user is a member
-    whereCondition = memberClubIds.length > 0
-      ? or(eq(clubs.isPublic, true), inArray(clubs.id, memberClubIds))
-      : eq(clubs.isPublic, true)
+    conditions.push(
+      memberClubIds.length > 0
+        ? or(eq(clubs.isPublic, true), inArray(clubs.id, memberClubIds))!
+        : eq(clubs.isPublic, true)
+    )
   }
+
+  // Search filter: match name or description
+  if (search && typeof search === 'string' && search.trim()) {
+    const searchTerm = `%${search.trim()}%`
+    conditions.push(or(ilike(clubs.name, searchTerm), ilike(clubs.description, searchTerm))!)
+  }
+
+  // Category filter
+  if (category && typeof category === 'string' && category.trim()) {
+    conditions.push(eq(clubs.category, category.trim()))
+  }
+
+  const whereCondition = conditions.length > 1 ? and(...conditions) : conditions[0]
 
   const clubList = await db
     .select({
@@ -130,6 +145,116 @@ router.get('/', optionalAuthMiddleware, asyncHandler(async (req: AuthenticatedRe
       hasMore: offset + clubList.length < count
     }
   })
+}))
+
+// ─── Routes that must be registered before /:id parameterized routes ───
+
+// GET /clubs/my-invitations - Get current user's pending club invitations
+router.get('/my-invitations', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+
+  const invitations = await db
+    .select({
+      id: clubInvitations.id,
+      status: clubInvitations.status,
+      createdAt: clubInvitations.createdAt,
+      club: {
+        id: clubs.id,
+        name: clubs.name,
+        slug: clubs.slug,
+        coverImageUrl: clubs.coverImageUrl,
+        memberCount: clubs.memberCount
+      },
+      inviter: {
+        id: users.id,
+        name: users.name,
+        avatarUrl: users.avatarUrl
+      }
+    })
+    .from(clubInvitations)
+    .innerJoin(clubs, eq(clubInvitations.clubId, clubs.id))
+    .innerJoin(users, eq(clubInvitations.inviterId, users.id))
+    .where(and(
+      eq(clubInvitations.inviteeId, userId),
+      eq(clubInvitations.status, 'pending')
+    ))
+    .orderBy(desc(clubInvitations.createdAt))
+
+  res.json({ success: true, data: invitations })
+}))
+
+// POST /clubs/invitations/:invitationId/accept - Accept club invitation
+router.post('/invitations/:invitationId/accept', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { invitationId } = req.params
+
+  const [invitation] = await db
+    .select()
+    .from(clubInvitations)
+    .where(and(
+      eq(clubInvitations.id, invitationId),
+      eq(clubInvitations.inviteeId, userId),
+      eq(clubInvitations.status, 'pending')
+    ))
+    .limit(1)
+
+  if (!invitation) throw new AppError(404, 'Invitation not found')
+
+  // Accept invitation
+  await db
+    .update(clubInvitations)
+    .set({ status: 'accepted' })
+    .where(eq(clubInvitations.id, invitationId))
+
+  // Add as member
+  await db.insert(clubMembers).values({
+    clubId: invitation.clubId,
+    userId,
+    role: 'member'
+  })
+
+  // Update member count
+  await db
+    .update(clubs)
+    .set({ memberCount: sql`${clubs.memberCount} + 1` })
+    .where(eq(clubs.id, invitation.clubId))
+
+  // Notify inviter
+  const [acceptedClub] = await db.select({ name: clubs.name }).from(clubs).where(eq(clubs.id, invitation.clubId)).limit(1)
+  await notify({
+    userId: invitation.inviterId,
+    type: 'club_invitation_accepted',
+    title: 'Kutsu hyväksytty',
+    body: acceptedClub?.name || '',
+    link: `/clubs/${invitation.clubId}`
+  })
+
+  res.json({ success: true, message: 'Invitation accepted' })
+}))
+
+// POST /clubs/invitations/:invitationId/decline - Decline club invitation
+router.post('/invitations/:invitationId/decline', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { invitationId } = req.params
+
+  const [invitation] = await db
+    .select()
+    .from(clubInvitations)
+    .where(and(
+      eq(clubInvitations.id, invitationId),
+      eq(clubInvitations.inviteeId, userId),
+      eq(clubInvitations.status, 'pending')
+    ))
+    .limit(1)
+
+  if (!invitation) throw new AppError(404, 'Invitation not found')
+
+  await db
+    .update(clubInvitations)
+    .set({ status: 'declined' })
+    .where(eq(clubInvitations.id, invitationId))
+
+  res.json({ success: true, message: 'Invitation declined' })
 }))
 
 // GET /clubs/:id - Get club details
@@ -493,6 +618,142 @@ router.post('/:id/leave', authMiddleware, asyncHandler(async (req: Authenticated
     .where(eq(clubs.id, clubId))
 
   res.json({ success: true, message: 'Left club' })
+}))
+
+// ─── Club Invitations ───
+
+const clubInviteSchema = z.object({
+  userId: z.string().uuid()
+})
+
+// POST /clubs/:id/invite - Invite user to club (admin/moderator only)
+router.post('/:id/invite', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const actorId = req.user!.id
+  const { id: clubId } = req.params
+  const { userId: inviteeId } = clubInviteSchema.parse(req.body)
+
+  // Verify club exists
+  const [club] = await db.select().from(clubs).where(eq(clubs.id, clubId)).limit(1)
+  if (!club) throw new AppError(404, 'Club not found')
+
+  // Verify actor is admin or moderator
+  const [membership] = await db
+    .select()
+    .from(clubMembers)
+    .where(and(eq(clubMembers.clubId, clubId), eq(clubMembers.userId, actorId)))
+    .limit(1)
+
+  if (!membership || (membership.role !== 'admin' && membership.role !== 'moderator')) {
+    throw new AppError(403, 'Only admins and moderators can invite users')
+  }
+
+  // Verify invitee exists
+  const [invitee] = await db.select({ id: users.id }).from(users).where(eq(users.id, inviteeId)).limit(1)
+  if (!invitee) throw new AppError(404, 'User not found')
+
+  // Check if invitee is already a member
+  const [existingMember] = await db
+    .select()
+    .from(clubMembers)
+    .where(and(eq(clubMembers.clubId, clubId), eq(clubMembers.userId, inviteeId)))
+    .limit(1)
+  if (existingMember) throw new AppError(400, 'User is already a member')
+
+  // Check for pending invitation
+  const [existingInvite] = await db
+    .select()
+    .from(clubInvitations)
+    .where(and(
+      eq(clubInvitations.clubId, clubId),
+      eq(clubInvitations.inviteeId, inviteeId),
+      eq(clubInvitations.status, 'pending')
+    ))
+    .limit(1)
+  if (existingInvite) throw new AppError(400, 'User already has a pending invitation')
+
+  // Create invitation
+  const [invitation] = await db
+    .insert(clubInvitations)
+    .values({ clubId, inviterId: actorId, inviteeId })
+    .returning()
+
+  // Notify invitee
+  const [inviter] = await db.select({ name: users.name }).from(users).where(eq(users.id, actorId)).limit(1)
+  await notify({
+    userId: inviteeId,
+    type: 'club_invitation',
+    title: inviter?.name || 'Kutsu klubiin',
+    body: club.name,
+    link: `/clubs`
+  })
+
+  res.json({ success: true, data: invitation })
+}))
+
+// GET /clubs/:id/invitations - List pending invitations for a club (admin/mod only)
+router.get('/:id/invitations', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const actorId = req.user!.id
+  const { id: clubId } = req.params
+
+  // Verify admin/mod
+  const [membership] = await db
+    .select()
+    .from(clubMembers)
+    .where(and(eq(clubMembers.clubId, clubId), eq(clubMembers.userId, actorId)))
+    .limit(1)
+
+  if (!membership || (membership.role !== 'admin' && membership.role !== 'moderator')) {
+    throw new AppError(403, 'Only admins and moderators can view invitations')
+  }
+
+  const invitations = await db
+    .select({
+      id: clubInvitations.id,
+      status: clubInvitations.status,
+      createdAt: clubInvitations.createdAt,
+      invitee: {
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        avatarUrl: users.avatarUrl
+      }
+    })
+    .from(clubInvitations)
+    .innerJoin(users, eq(clubInvitations.inviteeId, users.id))
+    .where(and(
+      eq(clubInvitations.clubId, clubId),
+      eq(clubInvitations.status, 'pending')
+    ))
+    .orderBy(desc(clubInvitations.createdAt))
+
+  res.json({ success: true, data: invitations })
+}))
+
+// DELETE /clubs/:id/invitations/:invitationId - Cancel/revoke invitation (admin/mod only)
+router.delete('/:id/invitations/:invitationId', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const actorId = req.user!.id
+  const { id: clubId, invitationId } = req.params
+
+  // Verify admin/mod
+  const [membership] = await db
+    .select()
+    .from(clubMembers)
+    .where(and(eq(clubMembers.clubId, clubId), eq(clubMembers.userId, actorId)))
+    .limit(1)
+
+  if (!membership || (membership.role !== 'admin' && membership.role !== 'moderator')) {
+    throw new AppError(403, 'Only admins and moderators can cancel invitations')
+  }
+
+  await db
+    .delete(clubInvitations)
+    .where(and(
+      eq(clubInvitations.id, invitationId),
+      eq(clubInvitations.clubId, clubId),
+      eq(clubInvitations.status, 'pending')
+    ))
+
+  res.json({ success: true, message: 'Invitation cancelled' })
 }))
 
 // POST /clubs/:id/threads - Create thread in club
@@ -1131,6 +1392,28 @@ router.delete('/:clubId/threads/:threadId/comments/:commentId', authMiddleware, 
     .where(eq(clubThreads.id, threadId))
 
   res.json({ success: true, message: 'Comment deleted' })
+}))
+
+// DELETE /clubs/:id - Delete club (admin only)
+router.delete('/:id', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params
+  const actorId = req.user!.id
+
+  // Check membership — must be club admin
+  const [membership] = await db
+    .select()
+    .from(clubMembers)
+    .where(and(eq(clubMembers.clubId, id), eq(clubMembers.userId, actorId)))
+    .limit(1)
+
+  if (!membership || membership.role !== 'admin') {
+    throw new AppError(403, 'Only club admins can delete a club')
+  }
+
+  // Delete club (cascade removes members, threads, comments, votes)
+  await db.delete(clubs).where(eq(clubs.id, id))
+
+  res.json({ success: true, message: 'Club deleted' })
 }))
 
 // GET /clubs/categories - Get club categories

@@ -4,12 +4,12 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Users, Shield, MessageSquare, Pin, ScrollText, X, Send,
   Settings, Globe, Lock, MapPin, Image as ImageIcon, Loader2, Trash2,
-  MoreVertical, UserMinus
+  MoreVertical, UserMinus, UserPlus, Mail
 } from 'lucide-react'
 import { Layout } from '../components/layout'
 import { SEOHead } from '../components/SEOHead'
 import { ActorBadge, ContentEndMarker, FollowButton, LocationSearch, ReportButton } from '../components/common'
-import { useClub, useJoinClub, useLeaveClub, useCreateClubThread, useUpdateClub, useUpdateMemberRole, useRemoveMember } from '../hooks/useApi'
+import { useClub, useClubCategories, useJoinClub, useLeaveClub, useCreateClubThread, useUpdateClub, useDeleteClub, useUpdateMemberRole, useRemoveMember, useClubInvitations, useInviteToClub, useCancelClubInvitation, useSearchUsers } from '../hooks/useApi'
 import { api } from '../lib/api'
 import { formatRelativeTime } from '../lib/formatTime'
 import type { UserSummary, ClubThread, ClubMember, LocationResult } from '../lib/api'
@@ -37,12 +37,21 @@ export function ClubViewPage() {
   const leaveClubMutation = useLeaveClub()
   const createThreadMutation = useCreateClubThread(clubId || '')
   const updateClubMutation = useUpdateClub(clubId || '')
+  const deleteClubMutation = useDeleteClub()
   const updateRoleMutation = useUpdateMemberRole(clubId || '')
   const removeMemberMutation = useRemoveMember(clubId || '')
+  const { data: categoriesData } = useClubCategories()
+  const availableCategories = categoriesData?.map(c => c.category) || []
+  const { data: pendingInvitations } = useClubInvitations(clubId || '')
+  const inviteToClubMutation = useInviteToClub(clubId || '')
+  const cancelInvitationMutation = useCancelClubInvitation(clubId || '')
 
   const [showNewThreadForm, setShowNewThreadForm] = useState(false)
   const [memberMenuOpen, setMemberMenuOpen] = useState<string | null>(null)
   const [confirmRemoveMember, setConfirmRemoveMember] = useState<ClubMember | null>(null)
+  const [confirmDeleteClub, setConfirmDeleteClub] = useState(false)
+  const [inviteSearch, setInviteSearch] = useState('')
+  const { data: searchedUsers } = useSearchUsers(inviteSearch, 5)
   const [newThreadTitle, setNewThreadTitle] = useState('')
   const [newThreadContent, setNewThreadContent] = useState('')
 
@@ -157,6 +166,33 @@ export function ClubViewPage() {
       await joinClubMutation.mutateAsync(clubId)
     } catch (err) {
       console.error('Failed to join club:', err)
+    }
+  }
+
+  const handleInviteUser = async (userId: string) => {
+    try {
+      await inviteToClubMutation.mutateAsync(userId)
+      setInviteSearch('')
+    } catch (err) {
+      console.error('Failed to invite user:', err)
+    }
+  }
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    try {
+      await cancelInvitationMutation.mutateAsync(invitationId)
+    } catch (err) {
+      console.error('Failed to cancel invitation:', err)
+    }
+  }
+
+  const handleDeleteClub = async () => {
+    if (!clubId) return
+    try {
+      await deleteClubMutation.mutateAsync(clubId)
+      navigate('/clubs')
+    } catch (err) {
+      console.error('Failed to delete club:', err)
     }
   }
 
@@ -355,20 +391,33 @@ export function ClubViewPage() {
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none dark:bg-gray-800 dark:text-gray-100"
                 />
               </div>
 
-              {/* Category */}
+              {/* Category — dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('create.category')}</label>
-                <input
-                  type="text"
-                  value={editCategory}
-                  onChange={(e) => setEditCategory(e.target.value)}
-                  placeholder={t('create.categoryPlaceholder')}
+                <select
+                  value={availableCategories.includes(editCategory) ? editCategory : editCategory ? '__other__' : ''}
+                  onChange={(e) => setEditCategory(e.target.value === '__other__' ? '' : e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
-                />
+                >
+                  <option value="">{t('create.selectCategory')}</option>
+                  {availableCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                  <option value="__other__">{t('create.otherCategory')}</option>
+                </select>
+                {!availableCategories.includes(editCategory) && editCategory && (
+                  <input
+                    type="text"
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                    placeholder={t('create.categoryPlaceholder')}
+                    className="w-full mt-2 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                  />
+                )}
               </div>
 
               {/* Cover Image */}
@@ -499,6 +548,83 @@ export function ClubViewPage() {
                 )}
               </div>
 
+              {/* Invite Members (for private clubs) */}
+              {!editIsPublic && isAdminOrMod && (
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    {t('inviteMembers')}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={inviteSearch}
+                      onChange={(e) => setInviteSearch(e.target.value)}
+                      placeholder={t('inviteSearchPlaceholder')}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100 text-sm"
+                    />
+                    {inviteSearch.length >= 2 && searchedUsers && searchedUsers.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20 max-h-40 overflow-y-auto">
+                        {searchedUsers.map((user: { id: string; name: string; username: string; avatarUrl?: string }) => {
+                          const isMember = members.some(m => m.id === user.id)
+                          const isPending = pendingInvitations?.some(inv => inv.invitee?.id === user.id)
+                          return (
+                            <button
+                              key={user.id}
+                              onClick={() => !isMember && !isPending && handleInviteUser(user.id)}
+                              disabled={isMember || isPending || inviteToClubMutation.isPending}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2 disabled:opacity-40"
+                            >
+                              {user.avatarUrl ? (
+                                <img src={user.avatarUrl} alt="" className="w-6 h-6 rounded-full" />
+                              ) : (
+                                <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-[10px] font-medium text-teal-700">
+                                  {user.name.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <span className="text-gray-900 dark:text-gray-100">{user.name}</span>
+                                <span className="text-gray-400 dark:text-gray-500 ml-1">@{user.username}</span>
+                              </div>
+                              {isMember && <span className="text-xs text-gray-400">{t('alreadyMember')}</span>}
+                              {isPending && <span className="text-xs text-amber-500">{t('invitePending')}</span>}
+                              {!isMember && !isPending && <UserPlus className="w-4 h-4 text-teal-600" />}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Pending invitations list */}
+                  {pendingInvitations && pendingInvitations.length > 0 && (
+                    <div className="mt-3 space-y-1.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t('pendingInvitations')}</p>
+                      {pendingInvitations.map(inv => (
+                        <div key={inv.id} className="flex items-center gap-2 text-sm bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-lg">
+                          {inv.invitee?.avatarUrl ? (
+                            <img src={inv.invitee.avatarUrl} alt="" className="w-5 h-5 rounded-full" />
+                          ) : (
+                            <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center text-[10px] font-medium text-teal-700">
+                              {inv.invitee?.name?.charAt(0)?.toUpperCase() || '?'}
+                            </div>
+                          )}
+                          <span className="flex-1 text-gray-700 dark:text-gray-300">{inv.invitee?.name}</span>
+                          <button
+                            onClick={() => handleCancelInvitation(inv.id)}
+                            disabled={cancelInvitationMutation.isPending}
+                            className="p-0.5 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded text-gray-400 dark:text-gray-500"
+                            aria-label={t('cancelInvitation')}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Save */}
               <div className="flex gap-2 pt-2">
                 <button
@@ -516,6 +642,41 @@ export function ClubViewPage() {
                   {updateClubMutation.isPending ? t('saving') : t('save')}
                 </button>
               </div>
+
+              {/* Danger Zone — Delete Club */}
+              {club.memberRole === 'admin' && (
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-4 mt-4">
+                  <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">{t('dangerZone')}</p>
+                  {!confirmDeleteClub ? (
+                    <button
+                      onClick={() => setConfirmDeleteClub(true)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {t('deleteClub')}
+                    </button>
+                  ) : (
+                    <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                      <p className="text-sm text-red-700 dark:text-red-300 mb-3">{t('confirmDeleteClub')}</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setConfirmDeleteClub(false)}
+                          className="flex-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        >
+                          {t('common:actions.cancel')}
+                        </button>
+                        <button
+                          onClick={handleDeleteClub}
+                          disabled={deleteClubMutation.isPending}
+                          className="flex-1 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        >
+                          {deleteClubMutation.isPending ? '...' : t('confirmDelete')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

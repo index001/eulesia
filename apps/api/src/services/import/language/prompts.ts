@@ -60,9 +60,9 @@ HYVÄKSY (newsworthy: true) asiat joilla on merkitystä kuntalaisille:
 - Mikä tahansa muu asia joka vaikuttaa asukkaiden arkeen
 
 TÄRKEÄÄ "excerpt"-kenttään:
-- Kopioi alkuperäisestä tekstistä kyseisen pykälän KOKO sisältö sanatarkasti
-- Älä tiivistä tai muokkaa — kopioi sellaisenaan
-- Ota mukaan kaikki yksityiskohdat, numerot, rahamäärät, päivämäärät
+- Poimi pykälän olennaisin sisältö: päätös, rahamäärät, päivämäärät, avainluvut
+- Max 500 merkkiä per pykälä — tiivistä jos pidempi
+- Säilytä tarkat numerot ja nimet alkuperäisessä muodossa
 
 Vastaa JSON-muodossa:
 {
@@ -70,7 +70,7 @@ Vastaa JSON-muodossa:
     {
       "itemNumber": "§ 1",
       "title": "Asian otsikko pöytäkirjasta",
-      "excerpt": "Koko pykälän alkuperäinen teksti sanatarkasti kopioituna...",
+      "excerpt": "Tiivistelmä päätöksestä: avainluvut, rahamäärät, vaikutukset (max 500 merkkiä)...",
       "newsworthy": true,
       "reason": "Lyhyt perustelu miksi tämä on/ei ole uutisarvoinen"
     }

@@ -166,6 +166,39 @@ export interface EditorialItem {
 }
 
 /**
+ * Attempt to recover items from truncated JSON response.
+ * Mistral may hit the token limit and output incomplete JSON like:
+ * {"items": [{"itemNumber":"§ 1",...}, {"itemNumber":"§ 2",...}, {"item
+ * We extract all complete objects from the array.
+ */
+function recoverTruncatedJson(content: string): EditorialItem[] | null {
+  // Find the items array start
+  const arrayStart = content.indexOf('[')
+  if (arrayStart === -1) return null
+
+  const items: EditorialItem[] = []
+  // Match complete JSON objects within the array
+  const objRegex = /\{[^{}]*"itemNumber"\s*:\s*"[^"]*"[^{}]*"newsworthy"\s*:\s*(true|false)[^{}]*\}/g
+  let match
+  while ((match = objRegex.exec(content)) !== null) {
+    try {
+      const obj = JSON.parse(match[0])
+      items.push({
+        itemNumber: obj.itemNumber || '§ ?',
+        title: obj.title || 'Nimetön asia',
+        excerpt: obj.excerpt || '',
+        newsworthy: obj.newsworthy ?? false,
+        reason: obj.reason || ''
+      })
+    } catch {
+      // Skip malformed objects
+    }
+  }
+
+  return items.length > 0 ? items : null
+}
+
+/**
  * Stage 1: Editorial Gate
  *
  * Splits meeting minutes into individual agenda items and decides
@@ -194,7 +227,7 @@ export async function editorialGate(
   const content = await callMistral([
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userPrompt }
-  ], { temperature: 0.1, maxTokens: 8000 })
+  ], { temperature: 0.1, maxTokens: 16000 })
 
   try {
     const parsed = JSON.parse(content)
@@ -207,6 +240,12 @@ export async function editorialGate(
       reason: item.reason || ''
     }))
   } catch {
+    // Try to recover truncated JSON (Mistral may hit token limit mid-response)
+    const recovered = recoverTruncatedJson(content)
+    if (recovered && recovered.length > 0) {
+      console.log(`   [editorial] Recovered ${recovered.length} items from truncated JSON`)
+      return recovered
+    }
     console.error('Failed to parse editorial gate response:', content.slice(0, 200))
     return []
   }

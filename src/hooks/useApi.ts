@@ -37,6 +37,8 @@ export const queryKeys = {
   club: (id: string) => ['club', id] as const,
   clubThread: (clubId: string, threadId: string) => ['clubThread', clubId, threadId] as const,
   clubCategories: ['clubCategories'] as const,
+  clubInvitations: (clubId: string) => ['clubInvitations', clubId] as const,
+  myClubInvitations: ['myClubInvitations'] as const,
 
   // Home
   home: (userId: string) => ['home', userId] as const,
@@ -430,6 +432,80 @@ export function useUpdateClub(clubId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.club(clubId) })
       queryClient.invalidateQueries({ queryKey: ['clubs'] })
+    }
+  })
+}
+
+export function useDeleteClub() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (clubId: string) => api.deleteClub(clubId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clubs'] })
+    }
+  })
+}
+
+// Club invitation hooks
+export function useClubInvitations(clubId: string) {
+  return useQuery({
+    queryKey: queryKeys.clubInvitations(clubId),
+    queryFn: () => api.getClubInvitations(clubId),
+    enabled: !!clubId
+  })
+}
+
+export function useMyClubInvitations() {
+  const { isAuthenticated } = useAuth()
+  return useQuery({
+    queryKey: queryKeys.myClubInvitations,
+    queryFn: () => api.getMyClubInvitations(),
+    enabled: isAuthenticated
+  })
+}
+
+export function useInviteToClub(clubId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (userId: string) => api.inviteToClub(clubId, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.clubInvitations(clubId) })
+    }
+  })
+}
+
+export function useAcceptClubInvitation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (invitationId: string) => api.acceptClubInvitation(invitationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.myClubInvitations })
+      queryClient.invalidateQueries({ queryKey: ['clubs'] })
+    }
+  })
+}
+
+export function useDeclineClubInvitation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (invitationId: string) => api.declineClubInvitation(invitationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.myClubInvitations })
+    }
+  })
+}
+
+export function useCancelClubInvitation(clubId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (invitationId: string) => api.cancelClubInvitation(clubId, invitationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.clubInvitations(clubId) })
     }
   })
 }

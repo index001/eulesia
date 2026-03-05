@@ -65,8 +65,14 @@ interface SeedResult {
 // ============================================
 
 async function probeUrl(url: string, confirmPattern?: string): Promise<boolean> {
+  // Tweb: baseUrl is the DLL directory, need to probe the actual meeting page
+  let probeTarget = url
+  if (url.endsWith('/ktwebbin') || url.endsWith('/ktwebbin/')) {
+    probeTarget = url.replace(/\/?$/, '/dbisa.dll/ktwebscr/pk_tek_tweb.htm')
+  }
+
   try {
-    const response = await fetch(url, {
+    const response = await fetch(probeTarget, {
       headers: { 'User-Agent': 'Eulesia/1.0 (civic platform; contact@eulesia.eu)' },
       signal: AbortSignal.timeout(8000),
       redirect: 'follow',
@@ -282,19 +288,14 @@ async function seedCountryMunicipalities(
 
         const url = fiInfo.urlOverride || buildFiUrl(muni.slug, fiInfo.system)
 
-        // Medium confidence entries: verify with a quick probe first
-        if (fiInfo.confidence === 'medium') {
-          if (options.verbose) console.log(`     Pre-mapped (medium): ${fiInfo.system}, verifying...`)
-          const ok = await probeUrl(url, undefined)
-          if (ok) {
-            match = { system: fiInfo.system, url }
-          } else if (options.verbose) {
-            console.log(`     Pre-mapped URL failed, falling back to probe`)
-          }
-        } else {
-          // High confidence: trust the mapping
+        // Always verify the mapped URL with a quick probe
+        if (options.verbose) console.log(`     Pre-mapped: ${fiInfo.system}, verifying ${url}...`)
+        const ok = await probeUrl(url, undefined)
+        if (ok) {
           match = { system: fiInfo.system, url }
-          if (options.verbose) console.log(`     Pre-mapped: ${fiInfo.system}`)
+        } else {
+          console.log(`   ${progress} ${muni.name}: ⚠ mapped URL failed (${fiInfo.system}), probing all patterns...`)
+          // Fall through to URL pattern probing below
         }
       }
     }
@@ -353,6 +354,14 @@ async function seedCountryMunicipalities(
       }
     }
 
+    // Normalize Tweb URLs: store the DLL directory, not full meeting page URL
+    // (tweb template appends /dbisa.dll/... paths to {baseUrl})
+    let baseUrl = match.url
+    if (match.system === 'tweb') {
+      const twebMatch = baseUrl.match(/^(https?:\/\/[^/]+\/[^/]+)\//)
+      if (twebMatch) baseUrl = twebMatch[1]
+    }
+
     // Create the config
     try {
       await createConfig({
@@ -360,7 +369,7 @@ async function seedCountryMunicipalities(
         country: config.code,
         adminLevel: 'municipality',
         systemType: match.system,
-        baseUrl: match.url,
+        baseUrl,
         language: config.language,
         config: template,
         dryRun: options.dryRun,

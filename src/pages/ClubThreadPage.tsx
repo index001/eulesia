@@ -118,7 +118,7 @@ export function ClubThreadPage() {
     return (
       <Layout>
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
         </div>
       </Layout>
     )
@@ -402,8 +402,9 @@ export function ClubThreadPage() {
                   {(isModOrAdmin || comment.authorId === currentUser?.id) && (
                     <button
                       onClick={() => setConfirmDeleteComment(comment.id)}
-                      className="absolute top-2 right-2 p-1 rounded hover:bg-red-50 opacity-0 group-hover/comment:opacity-100 transition-opacity z-10"
+                      className="absolute top-2 right-2 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 opacity-0 group-hover/comment:opacity-100 transition-opacity z-10"
                       title={t('clubs:moderation.deleteComment')}
+                      aria-label={t('clubs:moderation.deleteComment')}
                     >
                       <Trash2 className="w-3.5 h-3.5 text-red-400 hover:text-red-600" />
                     </button>
