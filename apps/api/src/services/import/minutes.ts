@@ -223,7 +223,6 @@ async function processMeeting(
 
       // Build thread content (language-aware)
       const footerText = prompts.footerTemplate.replace('{sourceUrl}', sourceUrl)
-      const keyPointsHtml = article.keyPoints.map(p => `<li>${p}</li>`).join('\n')
       const content = `${article.summary}
 
 <div class="summary-keypoints">
