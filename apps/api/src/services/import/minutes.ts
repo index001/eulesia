@@ -16,7 +16,7 @@
  */
 
 import { db, threads, threadTags, municipalities } from '../../db/index.js'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, gte } from 'drizzle-orm'
 import { editorialGate, writeArticle, verifyArticle } from './mistral.js'
 import { renderMarkdown } from '../../utils/markdown.js'
 import { fetchers, MINUTE_SOURCES, getMinuteSources } from './fetchers/index.js'
@@ -120,6 +120,57 @@ async function isAlreadyImported(sourceId: string): Promise<boolean> {
 }
 
 /**
+ * Check if a similar article already exists for this municipality.
+ * Uses word-level Jaccard similarity on titles to detect near-duplicates.
+ */
+async function findSimilarExisting(
+  title: string,
+  municipalityId: string | undefined,
+  thresholdDays: number = 30
+): Promise<{ id: string; title: string } | null> {
+  if (!municipalityId) return null
+
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - thresholdDays)
+
+  const recentThreads = await db
+    .select({ id: threads.id, title: threads.title })
+    .from(threads)
+    .where(and(
+      eq(threads.source, 'minutes_import'),
+      eq(threads.municipalityId, municipalityId),
+      gte(threads.createdAt, cutoff)
+    ))
+    .limit(200)
+
+  const titleWords = new Set(title.toLowerCase().replace(/[^a-zäöåüé\s]/g, '').split(/\s+/).filter(w => w.length > 2))
+  if (titleWords.size === 0) return null
+
+  for (const existing of recentThreads) {
+    if (!existing.title) continue
+    const existingWords = new Set(existing.title.toLowerCase().replace(/[^a-zäöåüé\s]/g, '').split(/\s+/).filter(w => w.length > 2))
+    if (existingWords.size === 0) continue
+
+    // Jaccard similarity: |intersection| / |union|
+    let intersection = 0
+    for (const w of titleWords) {
+      if (existingWords.has(w)) intersection++
+    }
+    const union = new Set([...titleWords, ...existingWords]).size
+    const similarity = intersection / union
+
+    if (similarity > 0.5) {
+      return { id: existing.id, title: existing.title }
+    }
+  }
+
+  return null
+}
+
+/** Maximum newsworthy items to process per single meeting */
+const MAX_ITEMS_PER_MEETING = 5
+
+/**
  * Process a single meeting through the 3-stage AI pipeline.
  */
 async function processMeeting(
@@ -170,10 +221,14 @@ async function processMeeting(
     language
   )
 
-  const newsworthyItems = editorialItems.filter(item => item.newsworthy)
+  const allNewsworthy = editorialItems.filter(item => item.newsworthy)
   const skippedItems = editorialItems.filter(item => !item.newsworthy)
 
-  console.log(`   📊 ${newsworthyItems.length} newsworthy / ${skippedItems.length} filtered out`)
+  // Cap newsworthy items per meeting to prevent feed flooding
+  const newsworthyItems = allNewsworthy.slice(0, MAX_ITEMS_PER_MEETING)
+  const cappedCount = allNewsworthy.length - newsworthyItems.length
+
+  console.log(`   📊 ${allNewsworthy.length} newsworthy / ${skippedItems.length} filtered out${cappedCount > 0 ? ` (capped ${cappedCount})` : ''}`)
 
   if (skippedItems.length > 0) {
     console.log(`   ⏭️  Filtered: ${skippedItems.map(i => i.title).join(', ')}`)
@@ -201,6 +256,14 @@ async function processMeeting(
         meeting.organ,
         language
       )
+
+      // DEDUP CHECK: Is there a similar article already?
+      const similar = await findSimilarExisting(article.title, municipalityId)
+      if (similar) {
+        console.log(`   ⏭️  Similar article exists: "${similar.title}" — skipping ${item.itemNumber}`)
+        result.skipped++
+        continue
+      }
 
       // STAGE 3: Verify against original excerpt
       console.log(`   ✓  Stage 3: Verifying ${item.itemNumber}...`)

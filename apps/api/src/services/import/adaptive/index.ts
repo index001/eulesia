@@ -398,13 +398,28 @@ async function extractHtml(
           if (!itemUrl) continue
 
           try {
-            const itemResponse = await rateLimitedFetch(
-              itemUrl.startsWith('http') ? itemUrl : new URL(itemUrl, meeting.pageUrl).toString()
-            )
+            const resolvedItemUrl = itemUrl.startsWith('http') ? itemUrl : new URL(itemUrl, meeting.pageUrl).toString()
+            const itemResponse = await rateLimitedFetch(resolvedItemUrl)
             if (!itemResponse.ok) continue
 
-            const itemHtml = await itemResponse.text()
-            const text = extractContentFromHtml(itemHtml, htmlConfig)
+            const contentType = itemResponse.headers.get('content-type') || ''
+
+            let text: string | null = null
+            if (contentType.includes('pdf') || contentType.includes('octet-stream')) {
+              // Item URL returns a PDF — extract text with pdf-parse
+              try {
+                const arrayBuffer = await itemResponse.arrayBuffer()
+                const { PDFParse } = await import('pdf-parse')
+                const parser = new PDFParse({ data: arrayBuffer })
+                const result = await parser.getText()
+                text = result.text
+              } catch {
+                // PDF parse failed, skip
+              }
+            } else {
+              const itemHtml = await itemResponse.text()
+              text = extractContentFromHtml(itemHtml, htmlConfig)
+            }
 
             if (text && text.length > 20) {
               contentParts.push(`§ ${item.title}\n\n${text}`)

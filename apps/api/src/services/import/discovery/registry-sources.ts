@@ -112,9 +112,9 @@ const FI_URL_PATTERNS: UrlPattern[] = [
     buildUrl: (slug) => `https://${slug}.tweb.fi/ktwebbin/dbisa.dll/ktwebscr/pk_tek_tweb.htm`,
     confirmPattern: 'ktwebbin',
   },
-  // Tweb alt path (epj instead of pk)
+  // Tweb "new" (ktwebscr variant — no dbisa.dll, different URL structure)
   {
-    system: 'tweb',
+    system: 'tweb-new',
     buildUrl: (slug) => `https://${slug}.tweb.fi/ktwebscr/epj_tek_tweb.htm`,
     confirmPattern: 'tweb',
   },
@@ -136,11 +136,11 @@ const FI_URL_PATTERNS: UrlPattern[] = [
     buildUrl: (slug) => `https://${slug}10.oncloudos.com/cgi/DREQUEST.PHP?page=meeting_frames`,
     confirmPattern: 'DREQUEST',
   },
-  // TriPlanCloud (Triplan's cloud-hosted Tweb variant)
+  // TriPlanCloud (Triplan's cloud-hosted Tweb variant, uses ktwebscr)
   {
-    system: 'tweb',
-    buildUrl: (slug) => `https://${slug}-julkaisu.triplancloud.fi/`,
-    confirmPattern: 'triplan',
+    system: 'tweb-new',
+    buildUrl: (slug) => `https://${slug}-julkaisu.triplancloud.fi/ktwebscr/epj_tek_tweb.htm`,
+    confirmPattern: 'tweb',
   },
 ]
 

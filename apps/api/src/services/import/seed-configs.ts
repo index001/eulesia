@@ -65,10 +65,12 @@ interface SeedResult {
 // ============================================
 
 async function probeUrl(url: string, confirmPattern?: string): Promise<boolean> {
-  // Tweb: baseUrl is the DLL directory, need to probe the actual meeting page
+  // Tweb: baseUrl is a directory, need to probe the actual meeting page
   let probeTarget = url
   if (url.endsWith('/ktwebbin') || url.endsWith('/ktwebbin/')) {
     probeTarget = url.replace(/\/?$/, '/dbisa.dll/ktwebscr/pk_tek_tweb.htm')
+  } else if (url.endsWith('/ktwebscr') || url.endsWith('/ktwebscr/')) {
+    probeTarget = url.replace(/\/?$/, '/pk_kokl_tweb.htm')
   }
 
   try {
@@ -354,12 +356,22 @@ async function seedCountryMunicipalities(
       }
     }
 
-    // Normalize Tweb URLs: store the DLL directory, not full meeting page URL
-    // (tweb template appends /dbisa.dll/... paths to {baseUrl})
+    // Normalize Tweb URLs: store the directory, not full meeting page URL
     let baseUrl = match.url
     if (match.system === 'tweb') {
-      const twebMatch = baseUrl.match(/^(https?:\/\/[^/]+\/[^/]+)\//)
+      // Old Tweb: baseUrl = https://xxx.tweb.fi/ktwebbin (template appends /dbisa.dll/...)
+      const twebMatch = baseUrl.match(/^(https?:\/\/[^/]+\/ktwebbin)\b/)
       if (twebMatch) baseUrl = twebMatch[1]
+    } else if (match.system === 'tweb-new') {
+      // New Tweb: baseUrl = https://xxx/ktwebscr (template appends /pk_kokl_tweb.htm etc.)
+      const twebMatch = baseUrl.match(/^(https?:\/\/[^/]+\/ktwebscr)\b/)
+      if (twebMatch) {
+        baseUrl = twebMatch[1]
+      } else {
+        // TriPlanCloud: https://xxx-julkaisu.triplancloud.fi/ktwebscr/epj_tek_tweb.htm → .../ktwebscr
+        const triplanMatch = baseUrl.match(/^(https?:\/\/[^/]+)\/ktwebscr\//)
+        if (triplanMatch) baseUrl = `${triplanMatch[1]}/ktwebscr`
+      }
     }
 
     // Create the config

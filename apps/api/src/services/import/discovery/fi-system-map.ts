@@ -24,7 +24,7 @@
  * - Other:    ~15 municipalities (CaseM, own solutions, small Åland)
  */
 
-export type FiSystemType = 'cloudnc' | 'dynasty' | 'tweb' | 'helsinki-paatokset' | 'none'
+export type FiSystemType = 'cloudnc' | 'dynasty' | 'tweb' | 'tweb-new' | 'helsinki-paatokset' | 'none'
 
 export interface FiSystemInfo {
   system: FiSystemType
@@ -48,7 +48,7 @@ export const FI_SYSTEM_MAP: Record<string, FiSystemInfo> = {
   // Uusimaa
   helsinki: { system: 'helsinki-paatokset', urlOverride: 'https://paatokset.hel.fi/fi/paattajat/kaupunginvaltuusto/asiakirjat', notes: 'Custom Drupal/Ahjo system. Multi-body: valtuusto, hallitus, lautakunnat.' },
   espoo: { system: 'dynasty', urlOverride: 'https://espoo.oncloudos.com/cgi/DREQUEST.PHP?page=meeting_frames', notes: 'OnCloudOS, not CloudNC' },
-  vantaa: { system: 'dynasty', urlOverride: 'https://vantaa.oncloudos.com/cgi/DREQUEST.PHP?page=meeting_frames', notes: 'OnCloudOS, not CloudNC' },
+  vantaa: { system: 'tweb-new', urlOverride: 'https://paatokset.vantaa.fi/ktwebscr', notes: 'Custom domain Tweb (ktwebscr)' },
   kauniainen: { system: 'cloudnc' },
   kerava: { system: 'cloudnc' },
   kirkkonummi: { system: 'cloudnc' },
@@ -60,7 +60,7 @@ export const FI_SYSTEM_MAP: Record<string, FiSystemInfo> = {
   pornainen: { system: 'cloudnc' },
 
   // Varsinais-Suomi
-  turku: { system: 'cloudnc' },
+  turku: { system: 'none', notes: 'Custom SPA (paatokset.turku.fi), not supported yet' },
   kaarina: { system: 'cloudnc' },
   raisio: { system: 'cloudnc' },
   naantali: { system: 'cloudnc' },
@@ -90,19 +90,19 @@ export const FI_SYSTEM_MAP: Record<string, FiSystemInfo> = {
   orimattila: { system: 'cloudnc' },
 
   // Kymenlaakso
-  kouvola: { system: 'cloudnc' },
-  kotka: { system: 'cloudnc' },
+  kouvola: { system: 'dynasty', urlOverride: 'https://ep10.kouvola.fi/cgi/DREQUEST.PHP?page=meeting_frames', notes: 'Custom domain ep10' },
+  kotka: { system: 'none', notes: 'CaseM (paatosjulkaisu.kotka.fi), not supported yet' },
 
   // Etelä-Karjala
-  lappeenranta: { system: 'cloudnc' },
-  imatra: { system: 'cloudnc' },
+  lappeenranta: { system: 'none', notes: 'M-Files (mfiles.lappeenranta.fi), not supported yet' },
+  imatra: { system: 'none', notes: 'M-Files (mfiles.imatra.fi), not supported yet' },
 
   // Pohjois-Savo
   kuopio: { system: 'cloudnc' },
   siilinjarvi: { system: 'cloudnc' },
 
   // Pohjois-Karjala
-  joensuu: { system: 'cloudnc' },
+  joensuu: { system: 'dynasty', urlOverride: 'https://dynastyjulkaisu.pohjoiskarjala.net/joensuu/cgi/DREQUEST.PHP?page=meeting_frames', notes: 'Regional Dynasty hosting' },
   kontiolahti: { system: 'cloudnc' },
 
   // Keski-Suomi
@@ -111,13 +111,13 @@ export const FI_SYSTEM_MAP: Record<string, FiSystemInfo> = {
   muurame: { system: 'cloudnc' },
 
   // Pohjanmaa
-  vaasa: { system: 'cloudnc' },
+  vaasa: { system: 'tweb-new', urlOverride: 'https://tweb.vaasa.fi/ktwebscr', notes: 'Custom domain Tweb (ktwebscr)' },
 
   // Keski-Pohjanmaa
   kokkola: { system: 'cloudnc' },
 
   // Pohjois-Pohjanmaa
-  oulu: { system: 'cloudnc' },
+  oulu: { system: 'tweb-new', urlOverride: 'https://asiakirjat.ouka.fi/ktwebscr', notes: 'Custom domain Tweb (ouka.fi)' },
   kempele: { system: 'cloudnc' },
   liminka: { system: 'cloudnc' },
 
@@ -321,7 +321,7 @@ export const FI_SYSTEM_MAP: Record<string, FiSystemInfo> = {
   luhanka: { system: 'dynasty' },
 
   // Etelä-Pohjanmaa
-  seinajoki: { system: 'dynasty' },
+  seinajoki: { system: 'tweb-new', urlOverride: 'https://listat.seinajoki.fi/ktwebscr', notes: 'Custom domain Tweb (ktwebscr)' },
   kauhava: { system: 'dynasty' },
   lapua: { system: 'dynasty' },
   kurikka: { system: 'dynasty' },
@@ -485,6 +485,9 @@ export function buildFiUrl(slug: string, system: FiSystemType): string {
     case 'tweb':
       // Return the DLL directory (not full URL) — tweb template appends /dbisa.dll/... paths
       return `https://${slug}.tweb.fi/ktwebbin`
+    case 'tweb-new':
+      // Return the ktwebscr directory — tweb-new template appends /pk_kokl_tweb.htm etc.
+      return `https://${slug}.tweb.fi/ktwebscr`
     case 'helsinki-paatokset':
       return `https://paatokset.hel.fi/fi/paattajat/kaupunginvaltuusto/asiakirjat`
     case 'none':

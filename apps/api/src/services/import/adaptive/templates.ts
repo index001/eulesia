@@ -109,6 +109,36 @@ export const twebTemplate: FetcherConfig = {
 }
 
 // ============================================
+// FINLAND: Tweb "new" (ktwebscr variant, no dbisa.dll)
+// ============================================
+// Newer Tweb instances use /ktwebscr/ directly instead of /ktwebbin/dbisa.dll/
+// Meeting list is at /ktwebscr/pk_kokl_tweb.htm (GET returns results directly)
+// Content is at /ktwebscr/fileshow?doctype=3&docid=X (PDF)
+
+export const twebNewTemplate: FetcherConfig = {
+  meetingList: {
+    url: '{baseUrl}/pk_kokl_tweb.htm',
+    method: 'GET',
+    meetingSelector: {
+      // Matches: href="/ktwebscr/pk_asil_tweb.htm?bid=NNNN">DD.MM.YYYY HH:MM
+      pattern: 'href="([^"]*pk_asil_tweb\\.htm\\?bid=(\\d+)[^"]*)"[^>]*>(\\d{1,2}\\.\\d{1,2}\\.\\d{4}[^<]*)',
+      groups: { url: 1, id: 2, title: 3 },
+    },
+    dateFormat: 'DD.MM.YYYY',
+    protocolIndicators: [],
+    maxMeetings: 10,
+  },
+  contentExtraction: {
+    strategy: 'html',
+    html: {
+      // Items on the meeting page: fileshow?doctype=7&docid=NNNNNN">Title
+      itemPattern: 'fileshow\\?doctype=7&(?:amp;)?docid=(\\d+)[^"]*"[^>]*>([^<]*)',
+      itemUrlTemplate: '{baseUrl}/fileshow?doctype=3&docid={itemId}',
+    },
+  },
+}
+
+// ============================================
 // FINLAND: Helsinki (Ahjo/Drupal)
 // ============================================
 // Helsinki uses a custom Drupal-based system "Päätökset" (paatokset.hel.fi).
@@ -634,6 +664,7 @@ export const TEMPLATES: Record<string, FetcherConfig> = {
   cloudnc: cloudncTemplate,
   dynasty: dynastyTemplate,
   tweb: twebTemplate,
+  'tweb-new': twebNewTemplate,
   'helsinki-paatokset': helsinkiPaatoksetTemplate,
 
   // Germany
