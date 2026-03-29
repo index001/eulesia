@@ -6,7 +6,7 @@
 
 Eulesia is an open-source civic platform that combines the social features people expect from modern social media — feeds, messaging, communities — with civic identity and institutional participation. No algorithms, no ads, no attention economy.
 
-> *"The value proposition is not dopamine but efficacy: meaningful participation in decisions that matter."*
+> _"The value proposition is not dopamine but efficacy: meaningful participation in decisions that matter."_
 
 ## What is Eulesia?
 
@@ -15,6 +15,7 @@ Commercial social media offers **agency without citizenship**: social functional
 ### Core Features
 
 **Agora** — Public civic discussion with scope-based threads:
+
 - **Local** — municipal issues anchored to administrative areas
 - **National** — government decisions, legislation, ministry announcements
 - **European** — EU legislation, Commission decisions, Parliament resolutions
@@ -29,76 +30,116 @@ AI-powered import of municipal meeting minutes, ministry press releases, and EU 
 
 ### Design Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **Verified Identity** | One-person-one-account via EUDI Wallet integration |
-| **Institutional Anchoring** | Discussion spaces tied to administrative entities |
-| **Anti-Attention Design** | No engagement metrics, trending, viral amplification, or algorithmic curation |
-| **Privacy by Default** | GDPR compliance embedded architecturally |
-| **Public Governance** | Operated under democratic accountability |
+| Principle                   | Description                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| **Verified Identity**       | One-person-one-account via EUDI Wallet integration                            |
+| **Institutional Anchoring** | Discussion spaces tied to administrative entities                             |
+| **Anti-Attention Design**   | No engagement metrics, trending, viral amplification, or algorithmic curation |
+| **Privacy by Default**      | GDPR compliance embedded architecturally                                      |
+| **Public Governance**       | Operated under democratic accountability                                      |
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
-| API | Node.js, Express, Drizzle ORM |
-| Database | PostgreSQL |
-| Search | Meilisearch (typo-tolerant, federated) |
-| Real-time | Socket.io (session-authenticated) |
-| AI | Mistral Large (EU-hosted, GDPR-compliant) |
-| Deployment | Docker Compose, Traefik reverse proxy |
+| Layer      | Technology                                             |
+| ---------- | ------------------------------------------------------ |
+| Frontend   | React 19, TypeScript, Vite, Tailwind CSS               |
+| API        | Node.js, Express, Drizzle ORM                          |
+| Database   | PostgreSQL                                             |
+| Search     | Meilisearch (typo-tolerant, federated)                 |
+| Real-time  | Socket.io (session-authenticated)                      |
+| AI         | Mistral Large (EU-hosted, GDPR-compliant)              |
+| Deployment | NixOS module, nginx, Traefik, nixos-rebuild, deploy-rs |
 
 ## Automated Content Import
 
 Eulesia imports and summarizes official documents using [Mistral AI](https://mistral.ai):
 
-| Source | Scope | Schedule |
-|--------|-------|----------|
-| Municipal meeting minutes (CloudNC, Tweb, Dynasty) | Local | 06:00, 18:00 |
-| Valtioneuvosto, Finlex | National | 08:00, 14:00, 20:00 |
-| European Commission, EUR-Lex, European Parliament | European | 10:00, 16:00 |
+| Source                                             | Scope    | Schedule            |
+| -------------------------------------------------- | -------- | ------------------- |
+| Municipal meeting minutes (CloudNC, Tweb, Dynasty) | Local    | 06:00, 18:00        |
+| Valtioneuvosto, Finlex                             | National | 08:00, 14:00, 20:00 |
+| European Commission, EUR-Lex, European Parliament  | European | 10:00, 16:00        |
 
 AI-generated summaries are transparent (marked as "Eulesia summary — Generated with Mistral AI") and link to original sources.
 
 ## Development
 
 ### Prerequisites
-- Node.js 20+
-- PostgreSQL 15+
-- Meilisearch (optional, for search)
+
+- Nix with flakes enabled
 
 ### Setup
 
 ```bash
-# Install dependencies
-npm install
-cd apps/api && npm install
+# Enter the development environment
+nix develop
 
-# Configure environment
-cp apps/api/.env.example apps/api/.env
-# Edit .env with your database and API settings
+# See the primary commands
+just
 
-# Run database migrations
-cd apps/api && npm run db:push
-
-# Start development servers
-cd apps/api && npm run dev   # API (port 3001)
-npm run dev                  # Frontend (port 5173)
+# Start PostgreSQL, Meilisearch, API, and frontend together
+just dev
 ```
 
-### Building
+Optional local secrets can be sourced from untracked files:
+
+- `.env.local`
+- `.env.development.local`
+- `apps/api/.env.local`
+- `apps/api/.env.development.local`
+
+Managed runtime secrets should live as per-secret encrypted files under:
+
+- `secrets/test/`
+- `secrets/prod/`
+
+The repo now uses one `*.enc` file per secret, with structured payloads kept as typed files such as `firebase-service-account.json.enc`. See [Secrets](./docs/secrets.md).
+
+### Common Commands
+
 ```bash
-npm run build                   # Frontend
-cd apps/api && npm run build    # API
+just lint        # Nix lint + frontend lint/typecheck + API lint/typecheck
+just test        # Frontend and API test suites
+just build       # Build frontend + API bundle outputs
+just db-migrate  # Apply schema changes locally
+just db-reset    # Recreate the local PostgreSQL cluster and reapply schema
+just vm-run      # Start the local MicroVM on localhost
+just vm-deploy   # Hot-deploy the current system into the running VM
 ```
+
+### Nix Outputs
+
+```bash
+nix build .#frontend
+nix build .#api
+nix build .#nixosConfigurations.eulesia-vm.config.microvm.runner.qemu
+nix build .#nixosConfigurations.eulesia-test.config.system.build.toplevel
+nix run .#rebuild-test
+nix run .#ci-check
+```
+
+### Local VM
+
+`just vm-run` starts the NixOS MicroVM used for local deployment validation and exposes the full service surface on `localhost`:
+
+- `http://localhost:18080` for the app and proxied API
+- `ssh root@localhost -p 2223`
+- `http://localhost:17701/health` for Meilisearch
+
+PostgreSQL is not exposed on the host by default.
+
+Those three localhost ports must be free before the VM can start.
+
+`just vm-deploy` pushes the current NixOS system into the running VM over SSH and bootstraps `/var/lib/sops-nix/key.txt` from `$HOME/.local/share/eulesia/vm-sops-age.key`.
+
+The Docker Compose files remain in the repo as a legacy fallback during migration, but Nix is the primary development and deployment path.
 
 ## Authentication
 
-| Method | Status |
-|--------|--------|
+| Method                 | Status     |
+| ---------------------- | ---------- |
 | Invite Code + Password | Production |
-| EUDI Wallet (PID) | Planned |
+| EUDI Wallet (PID)      | Planned    |
 
 ## Documentation
 
@@ -108,6 +149,7 @@ cd apps/api && npm run build    # API
 - [API Reference](./docs/api-reference.md) — API endpoints
 - [Database Schema](./docs/database-schema.md) — Data models
 - [Deployment](./docs/deployment.md) — Production deployment
+- [Secrets](./docs/secrets.md) — Runtime secret inventory and generation
 
 ## Academic Reference
 

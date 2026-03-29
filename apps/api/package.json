@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "check": "npm run lint && npm run typecheck",
+    "lint": "eslint src",
     "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -25,7 +28,6 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@criipto/verify-express": "^1.0.4",
     "argon2": "^0.40.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -36,7 +38,7 @@
     "express-session": "^1.19.0",
     "firebase-admin": "^13.6.1",
     "helmet": "^7.1.0",
-    "jose": "^4.15.9",
+    "jose": "^6.1.2",
     "marked": "^14.0.0",
     "meilisearch": "^0.37.0",
     "multer": "^2.0.2",
