@@ -264,11 +264,16 @@ if (ftnEnabled) {
         .where(lt(ftnPendingRegistrations.expiresAt, new Date()))
         .catch(() => {}); // Non-critical
 
-      // Redirect to registration form with FTN token and name
+      // Normalize FTN names only if ALL UPPER CASE (e.g. Nordea)
+      const normalizeName = (s: string) =>
+        s === s.toUpperCase()
+          ? s.toLowerCase().replace(/(?:^|\s|-)\S/g, (c) => c.toUpperCase())
+          : s;
       const params = new URLSearchParams({
         ftn: ftnToken,
-        firstName: claims.given_name,
-        lastName: claims.family_name,
+        firstName: normalizeName(claims.given_name),
+        lastName: normalizeName(claims.family_name),
+        ...(inviteCode ? { invite: inviteCode } : {}),
       });
       res.redirect(`${env.APP_URL}/register?${params.toString()}`);
     }),
@@ -434,21 +439,39 @@ router.post(
           throw new AppError(400, "Username already exists");
         }
 
+        // Normalize FTN names only if ALL UPPER CASE (e.g. Nordea)
+        const normalizeName = (s: string) =>
+          s === s.toUpperCase()
+            ? s.toLowerCase().replace(/(?:^|\s|-)\S/g, (c) => c.toUpperCase())
+            : s;
+
+        const ftnDisplayName = ftnClaims
+          ? `${normalizeName(ftnClaims.givenName.split(" ")[0])} ${normalizeName(ftnClaims.familyName)}`
+          : null;
+        const ftnVerifiedName = ftnClaims
+          ? `${normalizeName(ftnClaims.givenName)} ${normalizeName(ftnClaims.familyName)}`
+          : null;
+
         // Create user — with FTN strong auth data if available
         const [created] = await tx
           .insert(users)
           .values({
             username: username.toLowerCase(),
             passwordHash,
-            name,
-            inviteCodesRemaining: 0,
-            identityProvider: "ftn",
-            identityVerified: true,
-            identityLevel: "substantial",
-            verifiedName: `${ftnClaims.givenName} ${ftnClaims.familyName}`,
-            rpSubject: ftnClaims.sub,
-            identityIssuer: "idura_ftn",
-            identityVerifiedAt: new Date(),
+            name: ftnDisplayName ?? name,
+            invitedBy: invitedByUserId,
+            inviteCodesRemaining: 5,
+            identityProvider: ftnClaims ? "ftn" : "invite",
+            identityVerified: !!ftnClaims,
+            identityLevel: ftnClaims ? "substantial" : "basic",
+            ...(ftnClaims
+              ? {
+                  verifiedName: ftnVerifiedName,
+                  rpSubject: ftnClaims.sub,
+                  identityIssuer: "idura_ftn",
+                  identityVerifiedAt: new Date(),
+                }
+              : {}),
           })
           .returning();
 
@@ -716,6 +739,7 @@ router.get(
         id: user.id,
         email: user.email,
         name: user.name,
+        verifiedName: user.verifiedName,
         avatarUrl: user.avatarUrl,
         role: user.role,
         institutionType: user.institutionType,
