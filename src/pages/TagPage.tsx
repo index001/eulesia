@@ -6,7 +6,8 @@ import { SEOHead } from "../components/SEOHead";
 import { ThreadCard } from "../components/agora/ThreadCard";
 import { FollowButton } from "../components/common";
 import { useTagPage, useVoteThread } from "../hooks/useApi";
-import type { Thread as ApiThread, UserSummary } from "../lib/api";
+import type { Thread as ApiThread } from "../lib/api";
+import { transformAuthor } from "../utils/transforms";
 
 function transformThread(thread: ApiThread) {
   return {
@@ -16,7 +17,7 @@ function transformThread(thread: ApiThread) {
     municipalityId: thread.municipality?.id,
     municipalityName: thread.municipality?.name,
     tags: thread.tags,
-    authorId: thread.author.id,
+    authorId: thread.authorId ?? thread.author.id ?? "",
     content: thread.content,
     contentHtml: thread.contentHtml,
     createdAt: thread.createdAt,
@@ -28,28 +29,6 @@ function transformThread(thread: ApiThread) {
     source: thread.source,
     sourceUrl: thread.sourceUrl,
     aiGenerated: thread.aiGenerated,
-  };
-}
-
-function transformAuthor(author: UserSummary) {
-  return {
-    id: author.id,
-    name: author.name,
-    role: author.role,
-    verified: author.identityVerified ?? false,
-    avatarUrl: author.avatarUrl,
-    avatarInitials: author.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase(),
-    institutionType: author.institutionType as
-      | "municipality"
-      | "agency"
-      | "ministry"
-      | undefined,
-    institutionName: author.institutionName,
   };
 }
 

@@ -38,9 +38,8 @@ export function AdminUserDetailPage() {
   const [sanctionReason, setSanctionReason] = useState("");
   const [sanctionExpiry, setSanctionExpiry] = useState("");
   const [pendingRole, setPendingRole] = useState<
-    "citizen" | "institution" | "admin" | null
+    "citizen" | "institution" | null
   >(null);
-  const [adminConfirmText, setAdminConfirmText] = useState("");
 
   if (isLoading || !user) {
     return (
@@ -52,23 +51,20 @@ export function AdminUserDetailPage() {
     );
   }
 
-  const handleRoleChange = (newRole: "citizen" | "institution" | "admin") => {
+  const isSopsManagedAdmin = user.isManagedAccount === true;
+
+  const handleRoleChange = (newRole: "citizen" | "institution") => {
     if (!id || newRole === user?.role) return;
-    // Always show confirmation for role changes
     setPendingRole(newRole);
-    setAdminConfirmText("");
   };
 
   const confirmRoleChange = () => {
     if (!id || !pendingRole) return;
-    // Admin role requires typing ADMIN to confirm
-    if (pendingRole === "admin" && adminConfirmText !== "ADMIN") return;
     changeRoleMutation.mutate(
       { id, role: pendingRole },
       {
         onSuccess: () => {
           setPendingRole(null);
-          setAdminConfirmText("");
         },
       },
     );
@@ -166,7 +162,9 @@ export function AdminUserDetailPage() {
                   id &&
                   toggleVerificationMutation.mutate({ id, verified: false })
                 }
-                disabled={toggleVerificationMutation.isPending}
+                disabled={
+                  toggleVerificationMutation.isPending || isSopsManagedAdmin
+                }
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
               >
                 {toggleVerificationMutation.isPending ? (
@@ -184,7 +182,9 @@ export function AdminUserDetailPage() {
                   id &&
                   toggleVerificationMutation.mutate({ id, verified: true })
                 }
-                disabled={toggleVerificationMutation.isPending}
+                disabled={
+                  toggleVerificationMutation.isPending || isSopsManagedAdmin
+                }
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm border border-green-300 dark:border-green-700 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50"
               >
                 {toggleVerificationMutation.isPending ? (
@@ -197,6 +197,11 @@ export function AdminUserDetailPage() {
                 )}
               </button>
             )}
+            {isSopsManagedAdmin && (
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                {t("userDetail.verificationManagedBySops")}
+              </p>
+            )}
           </div>
 
           {/* Role change */}
@@ -207,13 +212,20 @@ export function AdminUserDetailPage() {
             <select
               value={user.role}
               onChange={(e) => handleRoleChange(e.target.value as any)}
-              disabled={changeRoleMutation.isPending}
+              disabled={changeRoleMutation.isPending || isSopsManagedAdmin}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-gray-100"
             >
               <option value="citizen">{t("users.citizen")}</option>
               <option value="institution">{t("users.institution")}</option>
-              <option value="admin">{t("users.admin")}</option>
+              <option value="admin" disabled>
+                {t("users.admin")}
+              </option>
             </select>
+            {isSopsManagedAdmin && (
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                {t("userDetail.roleManagedBySops")}
+              </p>
+            )}
           </div>
         </div>
 
@@ -386,48 +398,22 @@ export function AdminUserDetailPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 mb-4">
-              {pendingRole === "admin" ? (
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
-                </div>
-              ) : (
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-blue-600" />
-                </div>
-              )}
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <Shield className="w-5 h-5 text-blue-600" />
+              </div>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                  {pendingRole === "admin"
-                    ? t("userDetail.confirmAdminTitle")
-                    : t("userDetail.confirmRoleTitle")}
+                  {t("userDetail.confirmRoleTitle")}
                 </h3>
               </div>
             </div>
 
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {pendingRole === "admin"
-                ? t("userDetail.confirmAdminDesc", { name: user.name })
-                : t("userDetail.confirmRoleDesc", {
-                    name: user.name,
-                    role: t(`users.${pendingRole}`),
-                  })}
+              {t("userDetail.confirmRoleDesc", {
+                name: user.name,
+                role: t(`users.${pendingRole}`),
+              })}
             </p>
-
-            {pendingRole === "admin" && (
-              <div className="mb-4">
-                <p className="text-sm font-medium text-red-700 mb-2">
-                  {t("userDetail.confirmAdminWarning")}
-                </p>
-                <input
-                  type="text"
-                  value={adminConfirmText}
-                  onChange={(e) => setAdminConfirmText(e.target.value)}
-                  placeholder={t("userDetail.confirmAdminPlaceholder")}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm dark:bg-gray-900 dark:text-gray-100"
-                  autoFocus
-                />
-              </div>
-            )}
 
             <div className="flex gap-2 justify-end">
               <button
@@ -438,15 +424,8 @@ export function AdminUserDetailPage() {
               </button>
               <button
                 onClick={confirmRoleChange}
-                disabled={
-                  changeRoleMutation.isPending ||
-                  (pendingRole === "admin" && adminConfirmText !== "ADMIN")
-                }
-                className={`px-4 py-2 text-sm text-white rounded-lg disabled:opacity-50 ${
-                  pendingRole === "admin"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                disabled={changeRoleMutation.isPending}
+                className="px-4 py-2 text-sm text-white rounded-lg disabled:opacity-50 bg-blue-600 hover:bg-blue-700"
               >
                 {changeRoleMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

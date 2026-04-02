@@ -106,7 +106,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
           },
         );
         // Clear typing for the user who sent the message
-        clearTypingUser("room", data.roomId, data.message.author?.id);
+        clearTypingUser(
+          "room",
+          data.roomId,
+          data.message.authorId ?? data.message.author?.id,
+        );
       },
     );
 
@@ -337,7 +341,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   function clearTypingUser(
     type: "room" | "dm",
     channelId: string,
-    userId?: string,
+    userId?: string | null,
   ) {
     if (!userId) return;
     const timeouts = type === "room" ? roomTypingTimeouts : dmTypingTimeouts;

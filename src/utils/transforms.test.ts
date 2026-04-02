@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { transformAuthor, getAvatarInitials } from "./transforms";
-import type { UserSummary } from "../lib/api";
+import {
+  transformAuthor,
+  transformComment,
+  getAvatarInitials,
+} from "./transforms";
+import type { Comment, UserSummary } from "../lib/api";
 
 describe("getAvatarInitials", () => {
   it("returns first two initials uppercased", () => {
@@ -41,6 +45,7 @@ describe("transformAuthor", () => {
     expect(result.name).toBe("Maria Virtanen");
     expect(result.role).toBe("citizen");
     expect(result.verified).toBe(true);
+    expect(result.canViewProfile).toBe(true);
     expect(result.avatarInitials).toBe("MV");
     expect(result.avatarUrl).toBe("https://example.com/avatar.jpg");
   });
@@ -67,5 +72,50 @@ describe("transformAuthor", () => {
     expect(result.institutionType).toBe("municipality");
     expect(result.institutionName).toBe("Helsingin kaupunki");
     expect(result.avatarInitials).toBe("CO");
+  });
+
+  it("handles a managed operator author with null id", () => {
+    const result = transformAuthor({
+      id: null,
+      name: "Eulesia Operator",
+      role: "citizen",
+      identityVerified: false,
+      avatarUrl: undefined,
+      canViewProfile: false,
+      institutionType: undefined,
+      institutionName: undefined,
+    } as unknown as UserSummary);
+
+    expect(result.id).toBeNull();
+    expect(result.canViewProfile).toBe(false);
+    expect(result.name).toBe("Eulesia Operator");
+    expect(result.avatarInitials).toBe("EO");
+  });
+
+  it("preserves an explicit non-linkable profile flag", () => {
+    const result = transformAuthor({
+      ...mockAuthor,
+      canViewProfile: false,
+    });
+
+    expect(result.canViewProfile).toBe(false);
+  });
+});
+
+describe("transformComment", () => {
+  it("prefers the top-level authorId when the public author summary is scrubbed", () => {
+    const result = transformComment({
+      id: "comment-1",
+      authorId: "user-1",
+      content: "Managed operator comment",
+      author: {
+        id: null,
+        name: "Eulesia Operator",
+        role: "citizen",
+      },
+      createdAt: "2026-04-02T00:00:00.000Z",
+    } as Comment);
+
+    expect(result.authorId).toBe("user-1");
   });
 });

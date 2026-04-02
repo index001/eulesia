@@ -6,10 +6,11 @@ export type InstitutionType = "municipality" | "agency" | "ministry";
 export type Scope = "local" | "national" | "european";
 
 export interface User {
-  id: string;
+  id: string | null;
   name: string;
   role: UserRole;
   verified: boolean;
+  canViewProfile?: boolean;
   municipality?: string;
   avatarUrl?: string;
   avatarInitials: string;

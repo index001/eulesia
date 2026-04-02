@@ -17,6 +17,10 @@ import {
   getAlgorithmDocumentation,
 } from "../services/trending.js";
 import type { AuthenticatedRequest } from "../types/index.js";
+import {
+  getPublicUserId,
+  sanitizePublicUserSummary,
+} from "../utils/operatorAccounts.js";
 
 const router = Router();
 
@@ -72,6 +76,7 @@ router.get(
           institutionType: users.institutionType,
           institutionName: users.institutionName,
           identityVerified: users.identityVerified,
+          managedBy: users.managedBy,
         },
         municipality: municipalities,
       })
@@ -153,8 +158,9 @@ router.get(
 
         return {
           ...full.thread,
+          authorId: getPublicUserId(full.author),
           tags: tagsByThread[scored.id] || [],
-          author: full.author,
+          author: sanitizePublicUserSummary(full.author),
           municipality: full.municipality,
           userVote: userVotes[scored.id] || 0,
           sourceInstitutionName: full.thread.sourceInstitutionId

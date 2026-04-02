@@ -21,6 +21,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { io } from "../index.js";
 import { notify } from "../services/notify.js";
 import type { AuthenticatedRequest } from "../types/index.js";
+import {
+  formatUserSummaryForResponse as formatUserSummary,
+  getPublicUserId,
+  isSopsManagedOperatorAccount,
+} from "../utils/operatorAccounts.js";
 
 const router = Router();
 
@@ -45,17 +50,6 @@ const sendMessageSchema = z.object({
 const inviteSchema = z.object({
   userId: z.string().uuid(),
 });
-
-// Helper to format user summary
-function formatUserSummary(user: typeof users.$inferSelect) {
-  return {
-    id: user.id,
-    name: user.name,
-    avatarUrl: user.avatarUrl,
-    role: user.role,
-    institutionType: user.institutionType,
-  };
-}
 
 // ============================================================
 // INVITATIONS — must be before /:userId catch-all
@@ -239,6 +233,7 @@ router.get(
 
     const { room, owner } = roomData;
     const isOwner = currentUserId === owner.id;
+    const shouldSanitizeUserSummaries = room.visibility === "public";
 
     // Check access for private rooms
     if (room.visibility === "private" && !isOwner) {
@@ -320,15 +315,27 @@ router.get(
       success: true,
       data: {
         ...room,
-        owner: formatUserSummary(owner),
-        members: members.map(formatUserSummary),
+        owner: formatUserSummary(owner, {
+          publicView: shouldSanitizeUserSummaries,
+          preserveIdForUserId: currentUserId,
+        }),
+        members: members.map((member) =>
+          formatUserSummary(member, {
+            publicView: shouldSanitizeUserSummaries,
+            preserveIdForUserId: currentUserId,
+          }),
+        ),
         messages: messagesData
           .map(({ message, author }) => {
             if (message.isHidden) {
               return {
                 id: message.id,
                 roomId: message.roomId,
-                authorId: message.authorId,
+                authorId: shouldSanitizeUserSummaries
+                  ? getPublicUserId(author, {
+                      preserveIdForUserId: currentUserId,
+                    })
+                  : message.authorId,
                 content: "",
                 contentHtml: null,
                 createdAt: message.createdAt,
@@ -339,7 +346,15 @@ router.get(
             }
             return {
               ...message,
-              author: formatUserSummary(author),
+              authorId: shouldSanitizeUserSummaries
+                ? getPublicUserId(author, {
+                    preserveIdForUserId: currentUserId,
+                  })
+                : message.authorId,
+              author: formatUserSummary(author, {
+                publicView: shouldSanitizeUserSummaries,
+                preserveIdForUserId: currentUserId,
+              }),
               reactions: reactionsMap[message.id] || [],
             };
           })
@@ -493,20 +508,42 @@ router.post(
       .where(eq(users.id, userId))
       .limit(1);
 
-    const messageData = {
+    const publicView = room.visibility === "public";
+
+    const broadcastMessageData = {
       ...message,
-      author: formatUserSummary(author),
+      authorId: publicView ? getPublicUserId(author) : message.authorId,
+      author: formatUserSummary(author, {
+        publicView,
+      }),
+    };
+
+    const responseMessageData = {
+      ...message,
+      authorId: publicView
+        ? getPublicUserId(author, {
+            preserveIdForUserId: userId,
+          })
+        : message.authorId,
+      author: formatUserSummary(author, {
+        publicView,
+        preserveIdForUserId: userId,
+      }),
     };
 
     // Broadcast to room via Socket.IO
-    io.to(`room:${roomId}`).emit("new_room_message", {
+    io.to(`room:${roomId}`).except(`user:${userId}`).emit("new_room_message", {
       roomId,
-      message: messageData,
+      message: broadcastMessageData,
+    });
+    io.to(`user:${userId}`).emit("new_room_message", {
+      roomId,
+      message: responseMessageData,
     });
 
     res.status(201).json({
       success: true,
-      data: messageData,
+      data: responseMessageData,
     });
   }),
 );
@@ -532,6 +569,16 @@ router.patch(
 
     if (!message) {
       throw new AppError(404, "Message not found");
+    }
+
+    const [room] = await db
+      .select({ visibility: rooms.visibility })
+      .from(rooms)
+      .where(eq(rooms.id, roomId))
+      .limit(1);
+
+    if (!room) {
+      throw new AppError(404, "Room not found");
     }
 
     if (message.authorId !== userId && req.user!.role !== "admin") {
@@ -567,14 +614,28 @@ router.patch(
       .where(eq(users.id, userId))
       .limit(1);
 
-    io.to(`room:${roomId}`).emit("room_message_edited", {
+    const publicView = room.visibility === "public";
+    const editEventBase = {
       roomId,
       messageId,
       content: updated.content,
       contentHtml: updated.contentHtml,
       editedBy: userId,
       editedAt: updated.editedAt,
-      author: formatUserSummary(author),
+    };
+
+    io.to(`room:${roomId}`)
+      .except(`user:${userId}`)
+      .emit("room_message_edited", {
+        ...editEventBase,
+        author: formatUserSummary(author, { publicView }),
+      });
+    io.to(`user:${userId}`).emit("room_message_edited", {
+      ...editEventBase,
+      author: formatUserSummary(author, {
+        publicView,
+        preserveIdForUserId: userId,
+      }),
     });
 
     res.json({ success: true, data: updated });
@@ -928,8 +989,13 @@ router.get(
       throw new AppError(404, "User not found");
     }
 
-    // Get rooms (public ones, or all if viewing own home)
     const isOwnHome = currentUserId === userId;
+
+    if (isSopsManagedOperatorAccount(homeOwner) && !isOwnHome) {
+      throw new AppError(404, "User not found");
+    }
+
+    // Get rooms (public ones, or all if viewing own home)
 
     let roomsQuery = db
       .select({
@@ -1013,7 +1079,7 @@ router.get(
     res.json({
       success: true,
       data: {
-        owner: formatUserSummary(homeOwner),
+        owner: formatUserSummary(homeOwner, { publicView: !isOwnHome }),
         rooms: accessibleRooms,
         recentActivity: {
           threads: recentThreads,

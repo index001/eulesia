@@ -109,6 +109,16 @@ class ApiClient {
     });
   }
 
+  async changePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ changed: boolean }> {
+    return this.request("/users/me/password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
   async exportData(): Promise<unknown> {
     return this.request("/users/me/data");
   }
@@ -881,7 +891,7 @@ class ApiClient {
 
   async changeUserRole(
     id: string,
-    role: "citizen" | "institution" | "admin",
+    role: "citizen" | "institution",
   ): Promise<{ id: string; role: string }> {
     return this.request(`/admin/users/${id}/role`, {
       method: "PATCH",
@@ -1271,7 +1281,7 @@ class ApiClient {
 // Types
 export interface User {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
   verifiedName?: string;
   avatarUrl?: string;
@@ -1307,6 +1317,7 @@ export interface Thread {
   scope: "local" | "national" | "european";
   tags: string[];
   author: UserSummary;
+  authorId?: string | null;
   municipality?: Municipality;
   institutionalContext?: InstitutionalContext;
   replyCount: number;
@@ -1388,6 +1399,7 @@ export interface Comment {
   content: string;
   contentHtml?: string;
   author: UserSummary | null;
+  authorId?: string | null;
   parentId?: string | null;
   score?: number;
   depth?: number;
@@ -1399,9 +1411,10 @@ export interface Comment {
 }
 
 export interface UserSummary {
-  id: string;
+  id: string | null;
   name: string;
   avatarUrl?: string;
+  canViewProfile?: boolean;
   role: "citizen" | "institution" | "admin";
   institutionType?: string;
   institutionName?: string;
@@ -1435,9 +1448,10 @@ export interface Club {
 }
 
 export interface ClubMember {
-  id: string;
+  id: string | null;
   name: string;
   avatarUrl?: string;
+  canViewProfile?: boolean;
   role: string;
 }
 
@@ -1485,6 +1499,7 @@ export interface ClubThread {
   content: string;
   contentHtml?: string;
   author: UserSummary;
+  authorId?: string | null;
   isPinned: boolean;
   isLocked: boolean;
   replyCount: number;
@@ -1533,6 +1548,7 @@ export interface RoomMessage {
   content: string;
   contentHtml?: string;
   author: UserSummary | null;
+  authorId?: string | null;
   editedAt?: string | null;
   editedBy?: string | null;
   isHidden?: boolean;
@@ -1991,11 +2007,12 @@ export interface AdminDashboard {
 
 export interface AdminUser {
   id: string;
-  email: string;
+  email: string | null;
   username: string;
   name: string;
   avatarUrl?: string;
   role: "citizen" | "institution" | "admin";
+  managedBy?: string | null;
   institutionType?: string;
   institutionName?: string;
   identityVerified: boolean;

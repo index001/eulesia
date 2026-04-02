@@ -6,6 +6,7 @@ export function transformAuthor(author: UserSummary) {
     name: author.name,
     role: author.role,
     verified: author.identityVerified ?? false,
+    canViewProfile: author.canViewProfile ?? Boolean(author.id),
     avatarUrl: author.avatarUrl,
     avatarInitials: author.name
       .split(" ")
@@ -26,7 +27,7 @@ export function transformComment(comment: ApiComment) {
   return {
     id: comment.id,
     threadId: "",
-    authorId: comment.author?.id ?? "",
+    authorId: comment.authorId ?? comment.author?.id ?? "",
     parentId: comment.parentId,
     content: comment.content,
     contentHtml: comment.contentHtml,
